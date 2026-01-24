@@ -44,10 +44,16 @@ export interface PrayerSunnah {
   isha: SunnahItem[];
 }
 
-const STORAGE_KEY = 'daily-prayers';
+export interface PrayerHistory {
+  [date: string]: {
+    prayers: DailyPrayers;
+    sunnah: PrayerSunnah;
+  };
+}
+
+const HISTORY_KEY = 'prayer-history';
 const STREAKS_KEY = 'prayer-streaks';
-const SUNNAH_KEY = 'prayer-sunnah';
-const DATE_KEY = 'prayer-date';
+const QADHA_KEY = 'qadha-prayer-counts';
 
 const defaultPrayerEntry: PrayerEntry = { status: 'pending' };
 
@@ -97,7 +103,7 @@ const createDefaultSunnah = (): PrayerSunnah => ({
     { id: 'maghrib-kursi', name: 'Āyat al-Kursī', arabicName: 'آية الكرسي', completed: false },
   ],
   isha: [
-    { id: 'isha-siwak', name: 'Siwāk', arabicName: 'السواك', completed: false },
+    { id: 'isha-siwak', name: 'Siwāk', arabicName: 'السواک', completed: false },
     { id: 'isha-adhan', name: 'Answer Adhān', arabicName: 'إجابة الأذان', completed: false },
     { id: 'isha-sunnah', name: '2 Rak\'at Sunnah', arabicName: 'ركعتان بعدية', completed: false },
     { id: 'isha-witr', name: 'Witr prayer', arabicName: 'صلاة الوتر', completed: false },
@@ -106,22 +112,17 @@ const createDefaultSunnah = (): PrayerSunnah => ({
   ],
 });
 
-const getTodayString = () => new Date().toISOString().split('T')[0];
+const getDateString = (date: Date) => date.toISOString().split('T')[0];
 
-export function usePrayerTracking() {
-  const [prayers, setPrayers] = useState<DailyPrayers>(() => {
-    const storedDate = localStorage.getItem(DATE_KEY);
-    const today = getTodayString();
-    
-    if (storedDate !== today) {
-      localStorage.setItem(DATE_KEY, today);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultDailyPrayers));
-      localStorage.setItem(SUNNAH_KEY, JSON.stringify(createDefaultSunnah()));
-      return defaultDailyPrayers;
-    }
-    
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : defaultDailyPrayers;
+export function usePrayerTracking(selectedDate?: Date) {
+  const today = new Date();
+  const currentDate = selectedDate || today;
+  const dateKey = getDateString(currentDate);
+  const isToday = dateKey === getDateString(today);
+
+  const [history, setHistory] = useState<PrayerHistory>(() => {
+    const stored = localStorage.getItem(HISTORY_KEY);
+    return stored ? JSON.parse(stored) : {};
   });
 
   const [streaks, setStreaks] = useState<PrayerStreaks>(() => {
@@ -129,69 +130,99 @@ export function usePrayerTracking() {
     return stored ? JSON.parse(stored) : defaultStreaks;
   });
 
-  const [sunnah, setSunnah] = useState<PrayerSunnah>(() => {
-    const storedDate = localStorage.getItem(DATE_KEY);
-    const today = getTodayString();
-    
-    if (storedDate !== today) {
-      return createDefaultSunnah();
-    }
-    
-    const stored = localStorage.getItem(SUNNAH_KEY);
-    return stored ? JSON.parse(stored) : createDefaultSunnah();
-  });
+  // Get or create prayers for the selected date
+  const prayers = history[dateKey]?.prayers || defaultDailyPrayers;
+  const sunnah = history[dateKey]?.sunnah || createDefaultSunnah();
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(prayers));
-  }, [prayers]);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  }, [history]);
 
   useEffect(() => {
     localStorage.setItem(STREAKS_KEY, JSON.stringify(streaks));
   }, [streaks]);
 
-  useEffect(() => {
-    localStorage.setItem(SUNNAH_KEY, JSON.stringify(sunnah));
-  }, [sunnah]);
+  // Helper to update Qadha counts
+  const updateQadhaCount = useCallback((prayer: keyof DailyPrayers, delta: number) => {
+    const stored = localStorage.getItem(QADHA_KEY);
+    const qadhaCounts = stored ? JSON.parse(stored) : { fajr: 0, dhuhr: 0, asr: 0, maghrib: 0, isha: 0 };
+    qadhaCounts[prayer] = Math.max(0, qadhaCounts[prayer] + delta);
+    localStorage.setItem(QADHA_KEY, JSON.stringify(qadhaCounts));
+    // Dispatch event to notify useQadhaPrayers hook
+    window.dispatchEvent(new Event('qadha-updated'));
+  }, []);
 
   const markPrayer = useCallback((prayer: keyof DailyPrayers, status: PrayerStatus) => {
-    setPrayers(prev => ({
-      ...prev,
-      [prayer]: { status, timestamp: Date.now() }
-    }));
+    const previousStatus = history[dateKey]?.prayers?.[prayer]?.status || 'pending';
+    
+    setHistory(prev => {
+      const existingDay = prev[dateKey] || { prayers: { ...defaultDailyPrayers }, sunnah: createDefaultSunnah() };
+      return {
+        ...prev,
+        [dateKey]: {
+          ...existingDay,
+          prayers: {
+            ...existingDay.prayers,
+            [prayer]: { status, timestamp: Date.now() }
+          }
+        }
+      };
+    });
 
-    if (status === 'on-time') {
-      setStreaks(prev => {
-        const current = prev[prayer].current + 1;
-        const multiplier = Math.floor(current / 50) + 1;
-        return {
+    // Handle Qadha auto-add/remove
+    if (status === 'missed' && previousStatus !== 'missed') {
+      // Add to Qadha when marked as missed
+      updateQadhaCount(prayer, 1);
+    } else if (previousStatus === 'missed' && status !== 'missed') {
+      // Remove from Qadha if changing from missed to something else
+      updateQadhaCount(prayer, -1);
+    }
+
+    // Update streaks only for today's prayers
+    if (isToday) {
+      if (status === 'on-time') {
+        setStreaks(prev => {
+          const current = prev[prayer].current + 1;
+          const multiplier = Math.floor(current / 50) + 1;
+          return {
+            ...prev,
+            [prayer]: {
+              current,
+              best: Math.max(current, prev[prayer].best),
+              multiplier,
+            }
+          };
+        });
+      } else if (status === 'missed') {
+        setStreaks(prev => ({
           ...prev,
           [prayer]: {
-            current,
-            best: Math.max(current, prev[prayer].best),
-            multiplier,
+            ...prev[prayer],
+            current: 0,
+            multiplier: 1,
           }
-        };
-      });
-    } else if (status === 'missed') {
-      setStreaks(prev => ({
-        ...prev,
-        [prayer]: {
-          ...prev[prayer],
-          current: 0,
-          multiplier: 1,
-        }
-      }));
+        }));
+      }
     }
-  }, []);
+  }, [dateKey, history, isToday, updateQadhaCount]);
 
   const toggleSunnah = useCallback((prayer: keyof PrayerSunnah, sunnahId: string) => {
-    setSunnah(prev => ({
-      ...prev,
-      [prayer]: prev[prayer].map(item =>
-        item.id === sunnahId ? { ...item, completed: !item.completed } : item
-      )
-    }));
-  }, []);
+    setHistory(prev => {
+      const existingDay = prev[dateKey] || { prayers: { ...defaultDailyPrayers }, sunnah: createDefaultSunnah() };
+      return {
+        ...prev,
+        [dateKey]: {
+          ...existingDay,
+          sunnah: {
+            ...existingDay.sunnah,
+            [prayer]: existingDay.sunnah[prayer].map(item =>
+              item.id === sunnahId ? { ...item, completed: !item.completed } : item
+            )
+          }
+        }
+      };
+    });
+  }, [dateKey]);
 
   const getPoints = useCallback((prayer: keyof DailyPrayers) => {
     const status = prayers[prayer].status;
@@ -216,6 +247,8 @@ export function usePrayerTracking() {
     prayers,
     streaks,
     sunnah,
+    selectedDate: currentDate,
+    isToday,
     markPrayer,
     toggleSunnah,
     getPoints,

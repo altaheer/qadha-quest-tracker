@@ -30,6 +30,19 @@ export function useQadhaPrayers() {
     return stored ? parseInt(stored, 10) : 5;
   });
 
+  // Listen for updates from usePrayerTracking
+  useEffect(() => {
+    const handleQadhaUpdate = () => {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        setCounts(JSON.parse(stored));
+      }
+    };
+
+    window.addEventListener('qadha-updated', handleQadhaUpdate);
+    return () => window.removeEventListener('qadha-updated', handleQadhaUpdate);
+  }, []);
+
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(counts));
   }, [counts]);
