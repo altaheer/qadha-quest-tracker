@@ -63,6 +63,7 @@ export default {
           DEFAULT: "hsl(var(--cream))",
           dark: "hsl(var(--cream-dark))",
         },
+        flame: "hsl(var(--flame))",
       },
       borderRadius: {
         lg: "var(--radius)",

@@ -43,6 +43,7 @@
     --gold-light: 43 60% 85%;
     --cream: 40 30% 97%;
     --cream-dark: 40 25% 92%;
+    --flame: 25 95% 53%;
     
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(158 50% 20%), hsl(158 45% 30%));
