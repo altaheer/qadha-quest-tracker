@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { Minus, Plus, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
 interface PrayerCardProps {
@@ -9,6 +11,7 @@ interface PrayerCardProps {
   onIncrement: () => void;
   onDecrement: () => void;
   onReset: () => void;
+  onSetCount?: (count: number) => void;
   delay?: number;
 }
 
@@ -19,8 +22,40 @@ export function PrayerCard({
   onIncrement,
   onDecrement,
   onReset,
+  onSetCount,
   delay = 0,
 }: PrayerCardProps) {
+  const [inputValue, setInputValue] = useState(count.toString());
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Only allow numbers
+    if (value === '' || /^\d+$/.test(value)) {
+      setInputValue(value);
+    }
+  };
+
+  const handleInputBlur = () => {
+    const numValue = parseInt(inputValue, 10);
+    if (!isNaN(numValue) && numValue >= 0 && onSetCount) {
+      onSetCount(numValue);
+    } else {
+      setInputValue(count.toString());
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleInputBlur();
+      (e.target as HTMLInputElement).blur();
+    }
+  };
+
+  // Sync input value when count changes from +/- buttons
+  if (count.toString() !== inputValue && document.activeElement?.tagName !== 'INPUT') {
+    setInputValue(count.toString());
+  }
+
   return (
     <div
       className={cn(
@@ -46,7 +81,7 @@ export function PrayerCard({
         </Button>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <Button
           variant="counter"
           size="counter"
@@ -58,13 +93,17 @@ export function PrayerCard({
         </Button>
 
         <div className="flex-1 text-center">
-          <span
-            key={count}
-            className="font-display text-4xl font-bold text-primary inline-block animate-count-up"
-          >
-            {count}
-          </span>
-          <p className="text-xs text-muted-foreground mt-1 font-body">prayers</p>
+          <Input
+            type="text"
+            inputMode="numeric"
+            value={inputValue}
+            onChange={handleInputChange}
+            onBlur={handleInputBlur}
+            onKeyDown={handleKeyDown}
+            className="text-center font-display text-3xl font-bold text-primary h-14 border-none bg-transparent focus-visible:ring-1 focus-visible:ring-primary/30"
+            aria-label={`${name} prayer count`}
+          />
+          <p className="text-xs text-muted-foreground mt-1 font-body">böner</p>
         </div>
 
         <Button

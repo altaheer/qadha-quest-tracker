@@ -46,6 +46,10 @@ export function useQadhaPrayers() {
     setCounts(prev => ({ ...prev, [prayer]: Math.max(0, prev[prayer] - 1) }));
   }, []);
 
+  const setCount = useCallback((prayer: keyof PrayerCounts, count: number) => {
+    setCounts(prev => ({ ...prev, [prayer]: Math.max(0, count) }));
+  }, []);
+
   const reset = useCallback((prayer: keyof PrayerCounts) => {
     setCounts(prev => ({ ...prev, [prayer]: 0 }));
   }, []);
@@ -67,6 +71,7 @@ export function useQadhaPrayers() {
     setDailyGoal,
     increment,
     decrement,
+    setCount,
     reset,
     resetAll,
     totalPrayers,

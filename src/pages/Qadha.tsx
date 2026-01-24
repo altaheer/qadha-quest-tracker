@@ -20,6 +20,7 @@ export default function Qadha() {
     setDailyGoal,
     increment,
     decrement,
+    setCount,
     reset,
     resetAll,
     totalPrayers,
@@ -58,6 +59,7 @@ export default function Qadha() {
             onIncrement={() => increment(prayer.key)}
             onDecrement={() => decrement(prayer.key)}
             onReset={() => reset(prayer.key)}
+            onSetCount={(count) => setCount(prayer.key, count)}
             delay={index * 50}
           />
         ))}
