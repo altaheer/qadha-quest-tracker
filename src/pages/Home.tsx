@@ -2,11 +2,15 @@ import { Moon, Flame, RotateCcw, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { usePrayerTracking } from '@/hooks/usePrayerTracking';
 import { useQadhaPrayers } from '@/hooks/useQadhaPrayers';
+import { useHabitsTracking } from '@/hooks/useHabitsTracking';
 import { DailyStats } from '@/components/DailyStats';
 
 export default function Home() {
-  const { getTotalPoints, getCompletedCount } = usePrayerTracking();
+  const { getTotalPoints: getPrayerPoints, getCompletedCount } = usePrayerTracking();
   const { totalPrayers: qadhaPrayers, calculateDaysToComplete } = useQadhaPrayers();
+  const { getTotalPoints: getHabitPoints, getCompletedCount: getHabitCompletedCount, getActiveCount } = useHabitsTracking();
+
+  const totalPoints = getPrayerPoints() + getHabitPoints();
 
   return (
     <div className="container max-w-lg mx-auto px-4 py-6">
@@ -25,9 +29,11 @@ export default function Home() {
 
       {/* Daily Stats */}
       <DailyStats
-        totalPoints={getTotalPoints()}
+        totalPoints={totalPoints}
         completedPrayers={getCompletedCount()}
         totalPrayers={5}
+        completedHabits={getHabitCompletedCount()}
+        totalHabits={getActiveCount()}
       />
 
       {/* Quick Actions */}
