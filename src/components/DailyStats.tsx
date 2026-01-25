@@ -1,20 +1,37 @@
-import { Trophy, Target, Flame } from 'lucide-react';
+import { Trophy, Target, Flame, BookOpen } from 'lucide-react';
 
 interface DailyStatsProps {
   totalPoints: number;
   completedPrayers: number;
   totalPrayers: number;
+  completedHabits?: number;
+  totalHabits?: number;
 }
 
-export function DailyStats({ totalPoints, completedPrayers, totalPrayers }: DailyStatsProps) {
-  const percentage = Math.round((completedPrayers / totalPrayers) * 100);
+export function DailyStats({ 
+  totalPoints, 
+  completedPrayers, 
+  totalPrayers,
+  completedHabits = 0,
+  totalHabits = 0,
+}: DailyStatsProps) {
+  const prayerPercentage = Math.round((completedPrayers / totalPrayers) * 100);
+  const totalCompleted = completedPrayers + completedHabits;
+  const totalItems = totalPrayers + totalHabits;
+  const overallPercentage = totalItems > 0 ? Math.round((totalCompleted / totalItems) * 100) : 0;
 
   return (
-    <div className="grid grid-cols-3 gap-3 mb-6">
+    <div className="grid grid-cols-2 gap-3 mb-6">
       <div className="gradient-card rounded-xl p-4 text-center shadow-card border border-border/50">
         <Trophy className="h-5 w-5 text-accent mx-auto mb-2" />
         <p className="font-display text-2xl font-bold text-foreground">{totalPoints}</p>
         <p className="text-xs text-muted-foreground">Poäng idag</p>
+      </div>
+      
+      <div className="gradient-card rounded-xl p-4 text-center shadow-card border border-border/50">
+        <Flame className="h-5 w-5 text-accent mx-auto mb-2" />
+        <p className="font-display text-2xl font-bold text-foreground">{overallPercentage}%</p>
+        <p className="text-xs text-muted-foreground">Fullföljt</p>
       </div>
       
       <div className="gradient-card rounded-xl p-4 text-center shadow-card border border-border/50">
@@ -24,11 +41,13 @@ export function DailyStats({ totalPoints, completedPrayers, totalPrayers }: Dail
         </p>
         <p className="text-xs text-muted-foreground">Böner klara</p>
       </div>
-      
+
       <div className="gradient-card rounded-xl p-4 text-center shadow-card border border-border/50">
-        <Flame className="h-5 w-5 text-accent mx-auto mb-2" />
-        <p className="font-display text-2xl font-bold text-foreground">{percentage}%</p>
-        <p className="text-xs text-muted-foreground">Fullföljt</p>
+        <BookOpen className="h-5 w-5 text-primary mx-auto mb-2" />
+        <p className="font-display text-2xl font-bold text-foreground">
+          {completedHabits}/{totalHabits}
+        </p>
+        <p className="text-xs text-muted-foreground">Vanor klara</p>
       </div>
     </div>
   );
