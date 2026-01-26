@@ -1,5 +1,6 @@
 import { Sun, Moon as MoonIcon, Bed, Utensils, Settings2, Pause, Play } from 'lucide-react';
 import { useHabitsTracking, habitCategories } from '@/hooks/useHabitsTracking';
+import { TimeBoundSection } from '@/components/TimeBoundSection';
 
 type HabitLevel = 'easy' | 'medium' | 'hard' | 'sahabah' | 'custom';
 
@@ -85,8 +86,8 @@ export default function Habits() {
         </div>
       </div>
 
-      {/* Habit Categories */}
-      <div className="space-y-4">
+      {/* Regular Habit Categories */}
+      <div className="space-y-4 mb-6">
         {habitCategories.map((category) => {
           const IconComponent = iconMap[category.icon] || Sun;
           const activeHabits = category.habits.filter(h => !pausedHabits.has(h.id));
@@ -197,6 +198,9 @@ export default function Habits() {
           );
         })}
       </div>
+
+      {/* Time-Bound Section */}
+      <TimeBoundSection />
     </div>
   );
 }
