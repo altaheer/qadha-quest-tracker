@@ -23,7 +23,7 @@ const mainItems = [
 
 const secondaryItems = [
   { title: 'Vanor', url: '/habits', icon: BookOpen },
-  { title: 'Statistik', url: '/stats', icon: BarChart3 },
+  { title: 'Insikter', url: '/insights', icon: BarChart3 },
   { title: 'Kalender', url: '/calendar', icon: Calendar },
 ];
 
