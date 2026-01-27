@@ -1,4 +1,4 @@
-import { Home, Moon, Calendar, BarChart3, Settings, BookOpen, RotateCcw } from 'lucide-react';
+import { Home, Moon, Calendar, BarChart3, Settings, BookOpen, RotateCcw, Sparkles } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
 import {
@@ -43,7 +43,7 @@ export function AppSidebar() {
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center shadow-soft">
-            <Moon className="h-5 w-5 text-primary-foreground" />
+            <Sparkles className="h-4 w-4 text-primary-foreground" />
           </div>
           {!collapsed && (
             <div className="animate-fade-in">
