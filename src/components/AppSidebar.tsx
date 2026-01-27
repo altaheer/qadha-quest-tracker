@@ -42,8 +42,8 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-border/50">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center shadow-soft">
-            <Sparkles className="h-4 w-4 text-primary-foreground" />
+          <div className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center shadow-soft">
+            <Sparkles className="h-5 w-5 text-primary-foreground" />
           </div>
           {!collapsed && (
             <div className="animate-fade-in">
