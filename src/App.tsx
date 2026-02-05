@@ -10,6 +10,7 @@ import Qadha from "./pages/Qadha";
 import Habits from "./pages/Habits";
 import Insights from "./pages/Insights";
 import Calendar from "./pages/Calendar";
+ import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/habits" element={<Habits />} />
             <Route path="/insights" element={<Insights />} />
             <Route path="/calendar" element={<Calendar />} />
+             <Route path="/settings" element={<Settings />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
