@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
-export type PrayerStatus = 'pending' | 'on-time' | 'late' | 'missed';
+export type PrayerStatus = 'pending' | 'on-time' | 'jamaah' | 'late' | 'missed';
 
 export interface PrayerEntry {
   status: PrayerStatus;
@@ -180,7 +180,7 @@ export function usePrayerTracking(selectedDate?: Date) {
 
     // Update streaks only for today's prayers
     if (isToday) {
-      if (status === 'on-time') {
+      if (status === 'on-time' || status === 'jamaah') {
         setStreaks(prev => {
           const current = prev[prayer].current + 1;
           const multiplier = Math.floor(current / 50) + 1;
@@ -228,6 +228,7 @@ export function usePrayerTracking(selectedDate?: Date) {
     const status = prayers[prayer].status;
     const multiplier = streaks[prayer].multiplier;
     
+    if (status === 'jamaah') return 27 * multiplier;
     if (status === 'on-time') return 10 * multiplier;
     if (status === 'late') return 6 * multiplier;
     return 0;

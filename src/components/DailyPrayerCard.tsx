@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, Clock, X, ChevronDown, ChevronUp, Flame } from 'lucide-react';
+import { Check, Clock, X, ChevronDown, ChevronUp, Flame, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { PrayerStatus, SunnahItem, PrayerStreak } from '@/hooks/usePrayerTracking';
@@ -34,6 +34,12 @@ const statusConfig = {
     borderClass: 'border-primary/30',
     label: 'I tid',
     icon: Check,
+  },
+  jamaah: {
+    bgClass: 'bg-primary/20',
+    borderClass: 'border-primary/50',
+    label: 'Jamaah',
+    icon: Users,
   },
   late: {
     bgClass: 'bg-accent/10',
@@ -113,8 +119,20 @@ export function DailyPrayerCard({
             status === 'on-time' && 'bg-primary hover:bg-primary/90'
           )}
         >
-          <Check className="h-4 w-4" />
+          <Check className="h-3.5 w-3.5" />
           I tid
+        </Button>
+        <Button
+          variant={status === 'jamaah' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => onMarkStatus('jamaah')}
+          className={cn(
+            'flex-1 gap-1.5',
+            status === 'jamaah' && 'bg-primary hover:bg-primary/90'
+          )}
+        >
+          <Users className="h-3.5 w-3.5" />
+          Jamaah
         </Button>
         <Button
           variant={status === 'late' ? 'gold' : 'outline'}
@@ -122,7 +140,7 @@ export function DailyPrayerCard({
           onClick={() => onMarkStatus('late')}
           className="flex-1 gap-1.5"
         >
-          <Clock className="h-4 w-4" />
+          <Clock className="h-3.5 w-3.5" />
           Sent
         </Button>
         <Button
@@ -134,7 +152,7 @@ export function DailyPrayerCard({
             status === 'missed' && 'bg-muted-foreground/20 text-muted-foreground'
           )}
         >
-          <X className="h-4 w-4" />
+          <X className="h-3.5 w-3.5" />
           Missad
         </Button>
       </div>
