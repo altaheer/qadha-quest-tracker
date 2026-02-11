@@ -2,8 +2,11 @@ import { useState } from 'react';
 import { DailyPrayerCard } from '@/components/DailyPrayerCard';
 import { DailyStats } from '@/components/DailyStats';
 import { DateNavigator } from '@/components/DateNavigator';
-import { usePrayerTracking, DailyPrayers, PrayerSunnah } from '@/hooks/usePrayerTracking';
-import { AlertCircle } from 'lucide-react';
+import { NafilahSection } from '@/components/NafilahSection';
+import { usePrayerTracking, DailyPrayers, PrayerSunnah, getComboMultiplier, getComboLabel } from '@/hooks/usePrayerTracking';
+import { useNafilahTracking } from '@/hooks/useNafilahTracking';
+import { AlertCircle, Zap } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const prayerInfo: { key: keyof DailyPrayers; name: string; arabicName: string }[] = [
   { key: 'fajr', name: 'Fajr', arabicName: 'الفجر' },
@@ -20,6 +23,8 @@ export default function Prayers() {
     prayers,
     streaks,
     sunnah,
+    combo,
+    comboMultiplier,
     isToday,
     markPrayer,
     toggleSunnah,
@@ -27,6 +32,15 @@ export default function Prayers() {
     getTotalPoints,
     getCompletedCount,
   } = usePrayerTracking(selectedDate);
+
+  const {
+    nafilahPrayers,
+    toggleNafilah,
+    getTotalNafilahPoints,
+  } = useNafilahTracking(selectedDate);
+
+  const comboLabel = getComboLabel(combo);
+  const totalPoints = getTotalPoints() + getTotalNafilahPoints();
 
   return (
     <div className="container max-w-lg mx-auto px-4 py-6">
@@ -59,8 +73,24 @@ export default function Prayers() {
         </div>
       )}
 
+      {/* Combo indicator */}
+      {combo >= 10 && (
+        <div className="flex items-center justify-between p-3 rounded-xl bg-accent/10 border border-accent/30 mb-4 animate-fade-in">
+          <div className="flex items-center gap-2">
+            <Zap className="h-5 w-5 text-accent" />
+            <div>
+              <p className="text-sm font-bold text-foreground">{comboLabel}</p>
+              <p className="text-xs text-muted-foreground">{combo} böner i rad</p>
+            </div>
+          </div>
+          <div className="text-sm font-bold text-accent bg-accent/20 px-2.5 py-1 rounded-lg">
+            {comboMultiplier.toFixed(1)}x
+          </div>
+        </div>
+      )}
+
       <DailyStats
-        totalPoints={getTotalPoints()}
+        totalPoints={totalPoints}
         completedPrayers={getCompletedCount()}
         totalPrayers={5}
       />
@@ -81,6 +111,11 @@ export default function Prayers() {
           />
         ))}
       </div>
+
+      <NafilahSection
+        prayers={nafilahPrayers}
+        onToggle={toggleNafilah}
+      />
     </div>
   );
 }

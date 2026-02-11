@@ -93,11 +93,6 @@ export function DailyPrayerCard({
             <div className="flex items-center gap-1 text-accent">
               <Flame className="h-4 w-4" />
               <span className="text-sm font-medium">{streak.current}</span>
-              {streak.multiplier > 1 && (
-                <span className="text-xs bg-accent/20 px-1.5 rounded-full">
-                  {streak.multiplier}x
-                </span>
-              )}
             </div>
           )}
           {points > 0 && (
