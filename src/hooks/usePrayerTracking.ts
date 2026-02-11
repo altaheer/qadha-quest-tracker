@@ -18,7 +18,6 @@ export interface DailyPrayers {
 export interface PrayerStreak {
   current: number;
   best: number;
-  multiplier: number;
 }
 
 export interface PrayerStreaks {
@@ -54,6 +53,7 @@ export interface PrayerHistory {
 const HISTORY_KEY = 'prayer-history';
 const STREAKS_KEY = 'prayer-streaks';
 const QADHA_KEY = 'qadha-prayer-counts';
+const COMBO_KEY = 'prayer-combo';
 
 const defaultPrayerEntry: PrayerEntry = { status: 'pending' };
 
@@ -65,7 +65,7 @@ const defaultDailyPrayers: DailyPrayers = {
   isha: { ...defaultPrayerEntry },
 };
 
-const defaultStreak: PrayerStreak = { current: 0, best: 0, multiplier: 1 };
+const defaultStreak: PrayerStreak = { current: 0, best: 0 };
 
 const defaultStreaks: PrayerStreaks = {
   fajr: { ...defaultStreak },
@@ -114,6 +114,22 @@ const createDefaultSunnah = (): PrayerSunnah => ({
 
 const getDateString = (date: Date) => date.toISOString().split('T')[0];
 
+// Combo multiplier: +0.1x per 10 consecutive on-time/jamaah prayers
+export function getComboMultiplier(combo: number): number {
+  return 1 + Math.floor(combo / 10) * 0.1;
+}
+
+export function getComboLabel(combo: number): string | null {
+  if (combo < 10) return null;
+  if (combo >= 200) return '🔥🔥🔥 LEGENDARY';
+  if (combo >= 150) return '🔥🔥 EPIC';
+  if (combo >= 100) return '🔥 MASTER';
+  if (combo >= 50) return '⚡ EXCELLENT';
+  if (combo >= 30) return '💪 GREAT';
+  if (combo >= 10) return '✨ COMBO';
+  return null;
+}
+
 export function usePrayerTracking(selectedDate?: Date) {
   const today = new Date();
   const currentDate = selectedDate || today;
@@ -130,7 +146,11 @@ export function usePrayerTracking(selectedDate?: Date) {
     return stored ? JSON.parse(stored) : defaultStreaks;
   });
 
-  // Get or create prayers for the selected date
+  const [combo, setCombo] = useState<number>(() => {
+    const stored = localStorage.getItem(COMBO_KEY);
+    return stored ? JSON.parse(stored) : 0;
+  });
+
   const prayers = history[dateKey]?.prayers || defaultDailyPrayers;
   const sunnah = history[dateKey]?.sunnah || createDefaultSunnah();
 
@@ -142,19 +162,24 @@ export function usePrayerTracking(selectedDate?: Date) {
     localStorage.setItem(STREAKS_KEY, JSON.stringify(streaks));
   }, [streaks]);
 
-  // Helper to update Qadha counts
+  useEffect(() => {
+    localStorage.setItem(COMBO_KEY, JSON.stringify(combo));
+  }, [combo]);
+
   const updateQadhaCount = useCallback((prayer: keyof DailyPrayers, delta: number) => {
     const stored = localStorage.getItem(QADHA_KEY);
     const qadhaCounts = stored ? JSON.parse(stored) : { fajr: 0, dhuhr: 0, asr: 0, maghrib: 0, isha: 0 };
     qadhaCounts[prayer] = Math.max(0, qadhaCounts[prayer] + delta);
     localStorage.setItem(QADHA_KEY, JSON.stringify(qadhaCounts));
-    // Dispatch event to notify useQadhaPrayers hook
     window.dispatchEvent(new Event('qadha-updated'));
   }, []);
 
   const markPrayer = useCallback((prayer: keyof DailyPrayers, status: PrayerStatus) => {
     const previousStatus = history[dateKey]?.prayers?.[prayer]?.status || 'pending';
     
+    // Toggle: if clicking same status, revert to pending
+    const newStatus: PrayerStatus = previousStatus === status ? 'pending' : status;
+
     setHistory(prev => {
       const existingDay = prev[dateKey] || { prayers: { ...defaultDailyPrayers }, sunnah: createDefaultSunnah() };
       return {
@@ -163,43 +188,61 @@ export function usePrayerTracking(selectedDate?: Date) {
           ...existingDay,
           prayers: {
             ...existingDay.prayers,
-            [prayer]: { status, timestamp: Date.now() }
+            [prayer]: { status: newStatus, timestamp: Date.now() }
           }
         }
       };
     });
 
-    // Handle Qadha auto-add/remove
-    if (status === 'missed' && previousStatus !== 'missed') {
-      // Add to Qadha when marked as missed
+    // Handle Qadha
+    if (newStatus === 'missed' && previousStatus !== 'missed') {
       updateQadhaCount(prayer, 1);
-    } else if (previousStatus === 'missed' && status !== 'missed') {
-      // Remove from Qadha if changing from missed to something else
+    } else if (previousStatus === 'missed' && newStatus !== 'missed') {
       updateQadhaCount(prayer, -1);
     }
 
-    // Update streaks only for today's prayers
+    // Update combo
+    const wasGood = previousStatus === 'on-time' || previousStatus === 'jamaah';
+    const isGood = newStatus === 'on-time' || newStatus === 'jamaah';
+    
+    if (isGood && !wasGood) {
+      setCombo(prev => prev + 1);
+    } else if (wasGood && !isGood) {
+      if (newStatus === 'missed') {
+        setCombo(0); // Miss breaks the combo entirely
+      } else {
+        setCombo(prev => Math.max(0, prev - 1));
+      }
+    }
+
+    // Update per-prayer streaks only for today
     if (isToday) {
-      if (status === 'on-time' || status === 'jamaah') {
+      if ((newStatus === 'on-time' || newStatus === 'jamaah') && !wasGood) {
         setStreaks(prev => {
           const current = prev[prayer].current + 1;
-          const multiplier = Math.floor(current / 50) + 1;
           return {
             ...prev,
             [prayer]: {
               current,
               best: Math.max(current, prev[prayer].best),
-              multiplier,
             }
           };
         });
-      } else if (status === 'missed') {
+      } else if (newStatus === 'missed') {
         setStreaks(prev => ({
           ...prev,
           [prayer]: {
             ...prev[prayer],
             current: 0,
-            multiplier: 1,
+          }
+        }));
+      } else if (wasGood && newStatus === 'pending') {
+        // Reverting a good prayer
+        setStreaks(prev => ({
+          ...prev,
+          [prayer]: {
+            ...prev[prayer],
+            current: Math.max(0, prev[prayer].current - 1),
           }
         }));
       }
@@ -224,15 +267,18 @@ export function usePrayerTracking(selectedDate?: Date) {
     });
   }, [dateKey]);
 
+  const comboMultiplier = getComboMultiplier(combo);
+
   const getPoints = useCallback((prayer: keyof DailyPrayers) => {
     const status = prayers[prayer].status;
-    const multiplier = streaks[prayer].multiplier;
     
-    if (status === 'jamaah') return 27 * multiplier;
-    if (status === 'on-time') return 10 * multiplier;
-    if (status === 'late') return 6 * multiplier;
-    return 0;
-  }, [prayers, streaks]);
+    let base = 0;
+    if (status === 'jamaah') base = 27;
+    else if (status === 'on-time') base = 10;
+    else if (status === 'late') base = 6;
+    
+    return Math.round(base * comboMultiplier);
+  }, [prayers, comboMultiplier]);
 
   const getTotalPoints = useCallback(() => {
     const prayerKeys: (keyof DailyPrayers)[] = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
@@ -248,6 +294,8 @@ export function usePrayerTracking(selectedDate?: Date) {
     prayers,
     streaks,
     sunnah,
+    combo,
+    comboMultiplier,
     selectedDate: currentDate,
     isToday,
     markPrayer,
