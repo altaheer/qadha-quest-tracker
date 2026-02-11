@@ -100,7 +100,7 @@ export function PrayerCard({
             onChange={handleInputChange}
             onBlur={handleInputBlur}
             onKeyDown={handleKeyDown}
-            className="text-center font-display text-3xl font-bold text-primary h-14 border-none bg-transparent focus-visible:ring-1 focus-visible:ring-primary/30"
+            className="text-center font-display text-7xl font-bold text-primary h-24 border-none bg-transparent focus-visible:ring-1 focus-visible:ring-primary/30"
             aria-label={`${name} prayer count`}
           />
           <p className="text-xs text-muted-foreground mt-1 font-body">böner</p>
