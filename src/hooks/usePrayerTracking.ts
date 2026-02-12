@@ -130,6 +130,39 @@ export function getComboLabel(combo: number): string | null {
   return null;
 }
 
+// Recalculate combo from full history: count consecutive good prayers
+// going backwards chronologically from today
+function recalcComboFromHistory(hist: PrayerHistory): number {
+  const prayerKeys: (keyof DailyPrayers)[] = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+  const today = new Date();
+  
+  // Collect all dates that have data, sorted newest first
+  const dates = Object.keys(hist).sort().reverse();
+  
+  let combo = 0;
+  let broken = false;
+  
+  for (const date of dates) {
+    if (broken) break;
+    const day = hist[date]?.prayers;
+    if (!day) continue;
+    
+    for (const p of prayerKeys) {
+      const status = day[p]?.status;
+      if (!status || status === 'pending') continue; // skip untracked
+      if (status === 'on-time' || status === 'jamaah') {
+        combo++;
+      } else {
+        // late or missed breaks the combo
+        broken = true;
+        break;
+      }
+    }
+  }
+  
+  return combo;
+}
+
 export function usePrayerTracking(selectedDate?: Date) {
   const today = new Date();
   const currentDate = selectedDate || today;
@@ -146,10 +179,7 @@ export function usePrayerTracking(selectedDate?: Date) {
     return stored ? JSON.parse(stored) : defaultStreaks;
   });
 
-  const [combo, setCombo] = useState<number>(() => {
-    const stored = localStorage.getItem(COMBO_KEY);
-    return stored ? JSON.parse(stored) : 0;
-  });
+  const combo = recalcComboFromHistory(history);
 
   const prayers = history[dateKey]?.prayers || defaultDailyPrayers;
   const sunnah = history[dateKey]?.sunnah || createDefaultSunnah();
@@ -161,10 +191,6 @@ export function usePrayerTracking(selectedDate?: Date) {
   useEffect(() => {
     localStorage.setItem(STREAKS_KEY, JSON.stringify(streaks));
   }, [streaks]);
-
-  useEffect(() => {
-    localStorage.setItem(COMBO_KEY, JSON.stringify(combo));
-  }, [combo]);
 
   const updateQadhaCount = useCallback((prayer: keyof DailyPrayers, delta: number) => {
     const stored = localStorage.getItem(QADHA_KEY);
@@ -201,19 +227,8 @@ export function usePrayerTracking(selectedDate?: Date) {
       updateQadhaCount(prayer, -1);
     }
 
-    // Update combo
+    // Combo is now derived from history automatically
     const wasGood = previousStatus === 'on-time' || previousStatus === 'jamaah';
-    const isGood = newStatus === 'on-time' || newStatus === 'jamaah';
-    
-    if (isGood && !wasGood) {
-      setCombo(prev => prev + 1);
-    } else if (wasGood && !isGood) {
-      if (newStatus === 'missed') {
-        setCombo(0); // Miss breaks the combo entirely
-      } else {
-        setCombo(prev => Math.max(0, prev - 1));
-      }
-    }
 
     // Update per-prayer streaks only for today
     if (isToday) {

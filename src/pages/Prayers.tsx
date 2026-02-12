@@ -104,6 +104,7 @@ export default function Prayers() {
             status={prayers[prayer.key].status}
             streak={streaks[prayer.key]}
             points={getPoints(prayer.key)}
+            comboMultiplier={comboMultiplier}
             sunnahItems={sunnah[prayer.key as keyof PrayerSunnah]}
             onMarkStatus={(status) => markPrayer(prayer.key, status)}
             onToggleSunnah={(sunnahId) => toggleSunnah(prayer.key as keyof PrayerSunnah, sunnahId)}

@@ -16,6 +16,7 @@ interface DailyPrayerCardProps {
   status: PrayerStatus;
   streak: PrayerStreak;
   points: number;
+  comboMultiplier: number;
   sunnahItems: SunnahItem[];
   onMarkStatus: (status: PrayerStatus) => void;
   onToggleSunnah: (sunnahId: string) => void;
@@ -61,6 +62,7 @@ export function DailyPrayerCard({
   status,
   streak,
   points,
+  comboMultiplier,
   sunnahItems,
   onMarkStatus,
   onToggleSunnah,
@@ -96,8 +98,15 @@ export function DailyPrayerCard({
             </div>
           )}
           {points > 0 && (
-            <div className="bg-primary/10 text-primary text-sm font-semibold px-2 py-1 rounded-lg">
-              +{points}p
+            <div className="flex flex-col items-end">
+              <div className="bg-primary/10 text-primary text-sm font-semibold px-2 py-1 rounded-lg">
+                +{points}p
+              </div>
+              {comboMultiplier > 1 && (
+                <span className="text-[10px] text-muted-foreground mt-0.5">
+                  {status === 'jamaah' ? '27' : status === 'on-time' ? '10' : '6'} × {comboMultiplier.toFixed(1)}x
+                </span>
+              )}
             </div>
           )}
         </div>
