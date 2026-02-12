@@ -131,33 +131,36 @@ export function getComboLabel(combo: number): string | null {
 }
 
 // Recalculate combo from full history: count consecutive good prayers
-// going backwards chronologically from today
+// going backwards chronologically from today.
+// We iterate day by day (newest first), and within each day isha→fajr (reverse prayer order).
+// Only on-time/jamaah count. Late/missed/pending all break the combo.
 function recalcComboFromHistory(hist: PrayerHistory): number {
-  const prayerKeys: (keyof DailyPrayers)[] = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
-  const today = new Date();
+  const prayerKeys: (keyof DailyPrayers)[] = ['isha', 'maghrib', 'asr', 'dhuhr', 'fajr'];
   
-  // Collect all dates that have data, sorted newest first
+  // All dates sorted newest first
   const dates = Object.keys(hist).sort().reverse();
   
   let combo = 0;
-  let broken = false;
   
   for (const date of dates) {
-    if (broken) break;
     const day = hist[date]?.prayers;
-    if (!day) continue;
+    if (!day) break; // no data = break
     
+    let dayHasAnyData = false;
     for (const p of prayerKeys) {
       const status = day[p]?.status;
-      if (!status || status === 'pending') continue; // skip untracked
+      if (!status || status === 'pending') continue; // skip untracked within a day
+      dayHasAnyData = true;
       if (status === 'on-time' || status === 'jamaah') {
         combo++;
       } else {
         // late or missed breaks the combo
-        broken = true;
-        break;
+        return combo;
       }
     }
+    
+    // If a day exists in history but has zero tracked prayers, stop
+    if (!dayHasAnyData) break;
   }
   
   return combo;
