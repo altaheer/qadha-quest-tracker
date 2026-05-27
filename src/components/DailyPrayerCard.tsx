@@ -160,7 +160,7 @@ export function DailyPrayerCard({
         <Button
           variant={status === 'on-time' ? 'default' : 'outline'}
           size="sm"
-          onClick={() => onMarkStatus('on-time')}
+          onClick={() => handleMark('on-time')}
           className={cn(
             'flex-1 gap-1.5',
             status === 'on-time' && 'bg-primary hover:bg-primary/90'
@@ -172,7 +172,7 @@ export function DailyPrayerCard({
         <Button
           variant={status === 'jamaah' ? 'default' : 'outline'}
           size="sm"
-          onClick={() => onMarkStatus('jamaah')}
+          onClick={() => handleMark('jamaah')}
           className={cn(
             'flex-1 gap-1.5',
             status === 'jamaah' && 'bg-primary hover:bg-primary/90'
@@ -184,7 +184,7 @@ export function DailyPrayerCard({
         <Button
           variant={status === 'late' ? 'gold' : 'outline'}
           size="sm"
-          onClick={() => onMarkStatus('late')}
+          onClick={() => handleMark('late')}
           className="flex-1 gap-1.5"
         >
           <Clock className="h-3.5 w-3.5" />
@@ -193,7 +193,7 @@ export function DailyPrayerCard({
         <Button
           variant={status === 'missed' ? 'secondary' : 'outline'}
           size="sm"
-          onClick={() => onMarkStatus('missed')}
+          onClick={() => handleMark('missed')}
           className={cn(
             'flex-1 gap-1.5',
             status === 'missed' && 'bg-muted-foreground/20 text-muted-foreground'
@@ -229,7 +229,7 @@ export function DailyPrayerCard({
             >
               <Checkbox
                 checked={item.completed}
-                onCheckedChange={() => onToggleSunnah(item.id)}
+                onCheckedChange={() => handleSunnah(item.id)}
               />
               <div className="flex-1 flex items-center justify-between">
                 <span className={cn(
