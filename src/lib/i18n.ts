@@ -210,5 +210,15 @@ export function useTranslation() {
     [lang]
   );
 
-  return { t, lang, setLanguage, isRTL: lang === 'ar' };
+  const dict = translations[lang];
+  const tHabit = useCallback(
+    (id: string) => dict.habitNames[id] || id,
+    [dict]
+  );
+  const tHabitCategory = useCallback(
+    (id: string) => dict.habitCategoryNames[id] || id,
+    [dict]
+  );
+
+  return { t, lang, setLanguage, isRTL: lang === 'ar', tHabit, tHabitCategory };
 }

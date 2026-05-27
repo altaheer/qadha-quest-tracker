@@ -47,7 +47,7 @@ function InfoButton({ id }: { id: string }) {
 }
 
 export default function Habits() {
-  const { t } = useTranslation();
+  const { t, tHabit, tHabitCategory } = useTranslation();
   const { showArabic } = useUserPrefs();
   const {
     completedHabits,
@@ -136,7 +136,7 @@ export default function Habits() {
                     <IconComponent className="h-5 w-5 text-primary" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-display font-semibold text-foreground">{category.name}</h3>
+                    <h3 className="font-display font-semibold text-foreground">{tHabitCategory(category.id)}</h3>
                     <p className="text-xs text-muted-foreground">
                       {activeHabits.length} {t('habits.active')} • {pausedHabitsInCategory.length} {t('habits.paused').toLowerCase()}
                     </p>
@@ -166,7 +166,7 @@ export default function Habits() {
                         </div>
                         <div className="flex-1">
                           <span className={`text-sm ${completedHabits.has(habit.id) ? 'text-primary font-medium' : 'text-foreground'}`}>
-                            {habit.name}
+                            {tHabit(habit.id)}
                           </span>
                           {showArabic && habit.arabicName && (
                             <span className="text-xs text-muted-foreground block">{habit.arabicName}</span>
@@ -195,7 +195,7 @@ export default function Habits() {
                           <div className="flex-1 flex items-center gap-3">
                             <div className="w-5 h-5 rounded-full border-2 border-dashed border-muted-foreground/30" />
                             <div className="flex-1">
-                              <span className="text-sm text-muted-foreground line-through">{habit.name}</span>
+                              <span className="text-sm text-muted-foreground line-through">{tHabit(habit.id)}</span>
                             </div>
                             <span className="text-xs text-muted-foreground">+{habit.points}p</span>
                           </div>

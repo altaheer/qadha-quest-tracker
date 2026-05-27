@@ -22,8 +22,8 @@ export function DateHeader() {
   });
 
   return (
-    <div className="flex items-center gap-3 text-sm">
-      <Calendar className="h-4 w-4 text-primary" />
+    <div className="flex items-center justify-center gap-3 text-sm text-center">
+      <Calendar className="h-4 w-4 text-primary shrink-0" />
       <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3">
         <span className="text-foreground capitalize">{gregorianFormatted}</span>
         {hijriDate && (
