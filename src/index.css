@@ -135,4 +135,30 @@
   .shadow-elevated {
     box-shadow: var(--shadow-elevated);
   }
+
+  /* Premium micro-interactions */
+  .card-lift {
+    @apply transition-all duration-200 ease-out;
+  }
+  .card-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-elevated);
+  }
+
+  .press-scale {
+    @apply transition-transform duration-150 ease-out active:scale-[0.96];
+  }
+
+  .glow-primary {
+    box-shadow: 0 0 0 4px hsl(var(--primary) / 0.12), 0 8px 24px -8px hsl(var(--primary) / 0.35);
+  }
 }
+
+/* Global button press feel — keep it subtle */
+button:not(:disabled) {
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+button:not(:disabled):active {
+  transform: scale(0.96);
+}
+
