@@ -79,9 +79,30 @@ export default function Prayers() {
     prevCompletedRef.current = completedCount;
   }, [completedCount, isToday]);
 
+  // Swipe gestures: left = next day, right = previous day
+  const swipe = useSwipe({
+    onSwipeLeft: () => {
+      const next = addDays(selectedDate, 1);
+      if (!isFuture(next) || isTodayFn(next)) {
+        haptics.light();
+        setSelectedDate(next);
+      }
+    },
+    onSwipeRight: () => {
+      haptics.light();
+      setSelectedDate((d) => addDays(d, -1));
+    },
+  });
+
   return (
-    <div className="container max-w-lg mx-auto px-4 py-6">
+    <div
+      className="container max-w-lg mx-auto px-4 py-6"
+      onTouchStart={swipe.onTouchStart}
+      onTouchEnd={swipe.onTouchEnd}
+    >
       <CompletionCelebration show={celebrate} onDismiss={() => setCelebrate(false)} />
+      <JumpToTodayButton show={!isToday} onClick={() => setSelectedDate(new Date())} />
+
 
       <div className="mb-6">
         <h2 className="font-display text-2xl font-bold text-foreground mb-1">
