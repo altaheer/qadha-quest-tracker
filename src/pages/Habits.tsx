@@ -4,6 +4,7 @@ import { useHabitsTracking, habitCategories, levelHabits } from '@/hooks/useHabi
 import { TimeBoundSection } from '@/components/TimeBoundSection';
 import { haptics } from '@/lib/haptics';
 import { useTranslation } from '@/lib/i18n';
+import { useUserPrefs } from '@/hooks/useUserPrefs';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
@@ -47,6 +48,7 @@ function InfoButton({ id }: { id: string }) {
 
 export default function Habits() {
   const { t } = useTranslation();
+  const { showArabic } = useUserPrefs();
   const {
     completedHabits,
     pausedHabits,
@@ -166,7 +168,7 @@ export default function Habits() {
                           <span className={`text-sm ${completedHabits.has(habit.id) ? 'text-primary font-medium' : 'text-foreground'}`}>
                             {habit.name}
                           </span>
-                          {habit.arabicName && (
+                          {showArabic && habit.arabicName && (
                             <span className="text-xs text-muted-foreground block">{habit.arabicName}</span>
                           )}
                         </div>

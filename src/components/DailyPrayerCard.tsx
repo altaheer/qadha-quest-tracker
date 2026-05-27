@@ -138,7 +138,7 @@ export function DailyPrayerCard({
       </div>
 
       {/* Status Buttons */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3 [&>button]:min-h-11">
         <Button
           variant={status === 'on-time' ? 'default' : 'outline'}
           size="sm"
@@ -215,16 +215,18 @@ export function DailyPrayerCard({
                   onCheckedChange={() => handleSunnah(item.id)}
                   className="h-5 w-5"
                 />
-                <div className="flex-1 flex items-center justify-between">
+                <div className="flex-1 flex items-center justify-between gap-2">
                   <span className={cn(
                     'text-sm',
                     item.completed && 'text-muted-foreground line-through'
                   )}>
                     {item.name}
                   </span>
-                  <span className="text-xs text-muted-foreground" dir="rtl">
-                    {item.arabicName}
-                  </span>
+                  {showArabic && (
+                    <span className="text-xs text-muted-foreground" dir="rtl">
+                      {item.arabicName}
+                    </span>
+                  )}
                 </div>
               </label>
               <Popover>
