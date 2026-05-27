@@ -86,6 +86,19 @@ export const habitCategories: HabitCategory[] = [
       { id: 'smile', name: 'Le mot andra', arabicName: 'التبسم', points: 2, category: 'daily' },
     ],
   },
+  {
+    id: 'sahabah',
+    name: 'Sahabah-nivå',
+    icon: 'Star',
+    habits: [
+      { id: 'tahajjud-prep', name: 'Intention för Tahajjud', arabicName: 'نية قيام الليل', points: 10, category: 'sahabah' },
+      { id: 'quran-daily', name: 'Daglig Quran-läsning (min 1 sida)', arabicName: 'قراءة القرآن يوميًا', points: 8, category: 'sahabah' },
+      { id: 'istighfar-100', name: '100x Istighfar', arabicName: 'مئة استغفار', points: 5, category: 'sahabah' },
+      { id: 'salawat-100', name: '100x Salawat på Profeten ﷺ', arabicName: 'مئة صلاة على النبي', points: 5, category: 'sahabah' },
+      { id: 'sadaqah-daily', name: 'Daglig sadaqah', arabicName: 'صدقة يومية', points: 8, category: 'sahabah' },
+      { id: 'dua-parents', name: 'Du\'a för föräldrar', arabicName: 'دعاء للوالدين', points: 3, category: 'sahabah' },
+    ],
+  },
 ];
 
 // Get all habit IDs
