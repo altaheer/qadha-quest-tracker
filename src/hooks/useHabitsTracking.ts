@@ -17,9 +17,19 @@ const PAUSED_KEY = 'habits-paused';
 const LEVEL_KEY = 'habits-level';
 
 // Define which habits are active per level
+const sahabahExtras = [
+  'tahajjud-prep', 'quran-daily', 'istighfar-100', 'salawat-100', 'sadaqah-daily', 'dua-parents'
+];
+
+const hardHabits = [
+  'morning-adhkar', 'evening-adhkar', 'wake-dua', 'wake-siwak',
+  'sleep-dua', 'sleep-kursi', 'sleep-3quls', 'sleep-wudu', 'sleep-mulk', 'sleep-baqarah', 'sleep-right',
+  'duha', 'bismillah', 'right-hand', 'smile'
+];
+
 const levelHabits: Record<HabitLevel, string[]> = {
   easy: [
-    'morning-adhkar', 'evening-adhkar', 'wake-dua', 
+    'morning-adhkar', 'evening-adhkar', 'wake-dua',
     'sleep-dua', 'sleep-kursi', 'sleep-3quls'
   ],
   medium: [
@@ -27,16 +37,8 @@ const levelHabits: Record<HabitLevel, string[]> = {
     'sleep-dua', 'sleep-kursi', 'sleep-3quls', 'sleep-wudu', 'sleep-mulk',
     'duha', 'bismillah'
   ],
-  hard: [
-    'morning-adhkar', 'evening-adhkar', 'wake-dua', 'wake-siwak',
-    'sleep-dua', 'sleep-kursi', 'sleep-3quls', 'sleep-wudu', 'sleep-mulk', 'sleep-baqarah', 'sleep-right',
-    'duha', 'bismillah', 'right-hand', 'smile'
-  ],
-  sahabah: [
-    'morning-adhkar', 'evening-adhkar', 'wake-dua', 'wake-siwak',
-    'sleep-dua', 'sleep-kursi', 'sleep-3quls', 'sleep-wudu', 'sleep-mulk', 'sleep-baqarah', 'sleep-right',
-    'duha', 'bismillah', 'right-hand', 'smile'
-  ],
+  hard: hardHabits,
+  sahabah: [...hardHabits, ...sahabahExtras],
   custom: [], // All habits available, user controls individually
 };
 
