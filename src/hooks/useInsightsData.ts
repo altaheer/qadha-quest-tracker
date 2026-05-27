@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { getDateString } from '@/lib/date';
-import type { DailyPrayers, PrayerHistory, HabitsHistory, PrayerCounts as QadhaCounts } from '@/types';
+import type { DailyPrayers, PrayerHistory, HabitsHistory, PrayerCounts as QadhaCounts, PrayerStatus } from '@/types';
 
 interface QadhaHistory {
   date: string;
