@@ -14,29 +14,29 @@ import {
   SidebarFooter,
   useSidebar,
 } from '@/components/ui/sidebar';
-
-const mainItems = [
-  { title: 'Hem', url: '/', icon: Home },
-  { title: 'Böner', url: '/prayers', icon: Moon },
-  { title: 'Qadha', url: '/qadha', icon: RotateCcw },
-];
-
-const secondaryItems = [
-  { title: 'Vanor', url: '/habits', icon: BookOpen },
-  { title: 'Insikter', url: '/insights', icon: BarChart3 },
-  { title: 'Kalender', url: '/calendar', icon: Calendar },
-];
-
-const settingsItems = [
-  { title: 'Inställningar', url: '/settings', icon: Settings },
-];
+import { useTranslation } from '@/lib/i18n';
 
 export function AppSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
   const collapsed = state === 'collapsed';
+  const { t } = useTranslation();
 
   const isActive = (path: string) => location.pathname === path;
+
+  const mainItems = [
+    { titleKey: 'nav.home' as const, url: '/', icon: Home },
+    { titleKey: 'nav.prayers' as const, url: '/prayers', icon: Moon },
+    { titleKey: 'nav.qadha' as const, url: '/qadha', icon: RotateCcw },
+  ];
+  const secondaryItems = [
+    { titleKey: 'nav.habits' as const, url: '/habits', icon: BookOpen },
+    { titleKey: 'nav.insights' as const, url: '/insights', icon: BarChart3 },
+    { titleKey: 'nav.calendar' as const, url: '/calendar', icon: Calendar },
+  ];
+  const settingsItems = [
+    { titleKey: 'nav.settings' as const, url: '/settings', icon: Settings },
+  ];
 
   return (
     <Sidebar collapsible="icon" className="border-r border-border/50">
@@ -48,7 +48,6 @@ export function AppSidebar() {
           {!collapsed && (
             <div className="animate-fade-in">
               <h2 className="font-display text-lg font-semibold text-foreground">Ibadah</h2>
-              <p className="text-xs text-muted-foreground">Bönespårare</p>
             </div>
           )}
         </div>
@@ -56,24 +55,14 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="text-muted-foreground/70">Huvudmeny</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {mainItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive(item.url)}
-                    tooltip={item.title}
-                  >
-                    <NavLink
-                      to={item.url}
-                      end
-                      className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors"
-                      activeClassName="bg-primary/10 text-primary font-medium"
-                    >
+                <SidebarMenuItem key={item.url}>
+                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={t(item.titleKey)}>
+                    <NavLink to={item.url} end className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors" activeClassName="bg-primary/10 text-primary font-medium">
                       <item.icon className="h-5 w-5" />
-                      <span>{item.title}</span>
+                      <span>{t(item.titleKey)}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -83,24 +72,14 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-muted-foreground/70">Spårning</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {secondaryItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive(item.url)}
-                    tooltip={item.title}
-                  >
-                    <NavLink
-                      to={item.url}
-                      end
-                      className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors"
-                      activeClassName="bg-primary/10 text-primary font-medium"
-                    >
+                <SidebarMenuItem key={item.url}>
+                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={t(item.titleKey)}>
+                    <NavLink to={item.url} end className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors" activeClassName="bg-primary/10 text-primary font-medium">
                       <item.icon className="h-5 w-5" />
-                      <span>{item.title}</span>
+                      <span>{t(item.titleKey)}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -113,20 +92,11 @@ export function AppSidebar() {
       <SidebarFooter>
         <SidebarMenu>
           {settingsItems.map((item) => (
-            <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton
-                asChild
-                isActive={isActive(item.url)}
-                tooltip={item.title}
-              >
-                <NavLink
-                  to={item.url}
-                  end
-                  className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors"
-                  activeClassName="bg-primary/10 text-primary font-medium"
-                >
+            <SidebarMenuItem key={item.url}>
+              <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={t(item.titleKey)}>
+                <NavLink to={item.url} end className="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors" activeClassName="bg-primary/10 text-primary font-medium">
                   <item.icon className="h-5 w-5" />
-                  <span>{item.title}</span>
+                  <span>{t(item.titleKey)}</span>
                 </NavLink>
               </SidebarMenuButton>
             </SidebarMenuItem>

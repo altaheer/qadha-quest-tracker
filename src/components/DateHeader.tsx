@@ -1,11 +1,20 @@
 import { Calendar } from 'lucide-react';
 import { useHijriDate } from '@/hooks/useHijriDate';
+import { useTranslation } from '@/lib/i18n';
+
+const localeMap: Record<string, string> = {
+  en: 'en-US',
+  sv: 'sv-SE',
+  tr: 'tr-TR',
+  ar: 'ar-EG',
+};
 
 export function DateHeader() {
   const hijriDate = useHijriDate();
+  const { lang } = useTranslation();
   const today = new Date();
-  
-  const gregorianFormatted = today.toLocaleDateString('sv-SE', {
+
+  const gregorianFormatted = today.toLocaleDateString(localeMap[lang] || 'en-US', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',

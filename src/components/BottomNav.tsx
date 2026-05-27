@@ -3,24 +3,26 @@ import { Home, Moon, RotateCcw, BarChart3, MoreHorizontal, BookOpen, Calendar as
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
-
-const tabs = [
-  { title: 'Hem', url: '/', icon: Home },
-  { title: 'Böner', url: '/prayers', icon: Moon },
-  { title: 'Qadha', url: '/qadha', icon: RotateCcw },
-  { title: 'Vanor', url: '/habits', icon: BookOpen },
-];
-
-const moreItems = [
-  { title: 'Insikter', url: '/insights', icon: BarChart3 },
-  { title: 'Kalender', url: '/calendar', icon: CalendarIcon },
-  { title: 'Inställningar', url: '/settings', icon: Settings },
-];
+import { useTranslation } from '@/lib/i18n';
 
 export function BottomNav() {
+  const { t } = useTranslation();
   const [moreOpen, setMoreOpen] = useState(false);
   const { pathname } = useLocation();
   const navigate = useNavigate();
+
+  const tabs = [
+    { titleKey: 'nav.home' as const, url: '/', icon: Home },
+    { titleKey: 'nav.prayers' as const, url: '/prayers', icon: Moon },
+    { titleKey: 'nav.qadha' as const, url: '/qadha', icon: RotateCcw },
+    { titleKey: 'nav.habits' as const, url: '/habits', icon: BookOpen },
+  ];
+
+  const moreItems = [
+    { titleKey: 'nav.insights' as const, url: '/insights', icon: BarChart3 },
+    { titleKey: 'nav.calendar' as const, url: '/calendar', icon: CalendarIcon },
+    { titleKey: 'nav.settings' as const, url: '/settings', icon: Settings },
+  ];
 
   const moreActive = moreItems.some(i => i.url === pathname);
 
@@ -28,7 +30,7 @@ export function BottomNav() {
     <>
       <nav
         className="fixed bottom-0 inset-x-0 z-50 md:hidden bg-background/95 backdrop-blur-md border-t border-border/60 pb-safe"
-        aria-label="Huvudnavigering"
+        aria-label={t('nav.more')}
       >
         <ul className="flex items-stretch justify-around">
           {tabs.map((tab) => (
@@ -44,7 +46,7 @@ export function BottomNav() {
                 }
               >
                 <tab.icon className="h-5 w-5" />
-                <span>{tab.title}</span>
+                <span>{t(tab.titleKey)}</span>
               </NavLink>
             </li>
           ))}
@@ -57,7 +59,7 @@ export function BottomNav() {
               )}
             >
               <MoreHorizontal className="h-5 w-5" />
-              <span>Mer</span>
+              <span>{t('nav.more')}</span>
             </button>
           </li>
         </ul>
@@ -66,7 +68,7 @@ export function BottomNav() {
       <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
         <SheetContent side="bottom" className="rounded-t-2xl pb-safe">
           <SheetHeader>
-            <SheetTitle className="text-left">Mer</SheetTitle>
+            <SheetTitle className="text-left">{t('nav.more')}</SheetTitle>
           </SheetHeader>
           <ul className="mt-4 space-y-1">
             {moreItems.map((item) => (
@@ -81,7 +83,7 @@ export function BottomNav() {
                   <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                     <item.icon className="h-5 w-5 text-primary" />
                   </div>
-                  <span className="font-medium">{item.title}</span>
+                  <span className="font-medium">{t(item.titleKey)}</span>
                 </button>
               </li>
             ))}
