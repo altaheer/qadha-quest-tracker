@@ -1,36 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
+import { getDateString } from '@/lib/date';
+import type {
+  Habit,
+  HabitCategory,
+  HabitState,
+  DailyHabits,
+  HabitsHistory,
+  HabitLevel,
+} from '@/types';
 
-export interface Habit {
-  id: string;
-  name: string;
-  arabicName?: string;
-  points: number;
-  category: string;
-}
-
-export interface HabitCategory {
-  id: string;
-  name: string;
-  icon: string;
-  habits: Habit[];
-}
-
-export interface HabitState {
-  completed: boolean;
-  paused: boolean;
-}
-
-export interface DailyHabits {
-  [habitId: string]: HabitState;
-}
-
-export interface HabitsHistory {
-  [date: string]: {
-    [habitId: string]: boolean; // just completion state per date
-  };
-}
-
-type HabitLevel = 'easy' | 'medium' | 'hard' | 'sahabah' | 'custom';
+// Re-export for backward compatibility
+export type { Habit, HabitCategory, HabitState, DailyHabits, HabitsHistory, HabitLevel };
 
 const HABITS_KEY = 'habits-tracking';
 const PAUSED_KEY = 'habits-paused';
