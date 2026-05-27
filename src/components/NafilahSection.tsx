@@ -2,6 +2,7 @@ import { Moon, Sun, Sunrise, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
 import { NafilahPrayer, NafilahDifficulty } from '@/hooks/useNafilahTracking';
+import { haptics } from '@/lib/haptics';
 
 interface NafilahSectionProps {
   prayers: NafilahPrayer[];
@@ -60,7 +61,7 @@ export function NafilahSection({ prayers, onToggle }: NafilahSectionProps) {
                   >
                     <Checkbox
                       checked={prayer.completed}
-                      onCheckedChange={() => onToggle(prayer.id)}
+                      onCheckedChange={() => { haptics.light(); onToggle(prayer.id); }}
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">

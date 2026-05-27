@@ -1,12 +1,17 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { DailyPrayerCard } from '@/components/DailyPrayerCard';
 import { DailyStats } from '@/components/DailyStats';
 import { DateNavigator } from '@/components/DateNavigator';
 import { NafilahSection } from '@/components/NafilahSection';
+import { CompletionCelebration } from '@/components/CompletionCelebration';
 import { usePrayerTracking, DailyPrayers, PrayerSunnah, getComboMultiplier, getComboLabel } from '@/hooks/usePrayerTracking';
 import { useNafilahTracking } from '@/hooks/useNafilahTracking';
+import { haptics } from '@/lib/haptics';
 import { AlertCircle, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+const COMBO_THRESHOLDS = [10, 30, 50, 100];
 
 const prayerInfo: { key: keyof DailyPrayers; name: string; arabicName: string }[] = [
   { key: 'fajr', name: 'Fajr', arabicName: 'الفجر' },
@@ -41,9 +46,40 @@ export default function Prayers() {
 
   const comboLabel = getComboLabel(combo);
   const totalPoints = getTotalPoints() + getTotalNafilahPoints();
+  const completedCount = getCompletedCount();
+
+  // Detect combo threshold crossings for color flash
+  const prevComboRef = useRef(combo);
+  const [comboFlash, setComboFlash] = useState(false);
+  useEffect(() => {
+    const prev = prevComboRef.current;
+    if (combo > prev) {
+      const crossed = COMBO_THRESHOLDS.some(t => prev < t && combo >= t);
+      if (crossed) {
+        setComboFlash(true);
+        const id = window.setTimeout(() => setComboFlash(false), 900);
+        return () => window.clearTimeout(id);
+      }
+    }
+    prevComboRef.current = combo;
+  }, [combo]);
+
+  // Daily completion celebration
+  const [celebrate, setCelebrate] = useState(false);
+  const prevCompletedRef = useRef(completedCount);
+  useEffect(() => {
+    const prev = prevCompletedRef.current;
+    if (isToday && prev < 5 && completedCount === 5) {
+      haptics.strong();
+      setCelebrate(true);
+    }
+    prevCompletedRef.current = completedCount;
+  }, [completedCount, isToday]);
 
   return (
     <div className="container max-w-lg mx-auto px-4 py-6">
+      <CompletionCelebration show={celebrate} onDismiss={() => setCelebrate(false)} />
+
       <div className="mb-6">
         <h2 className="font-display text-2xl font-bold text-foreground mb-1">
           {isToday ? 'Dagens böner' : 'Böner'}
@@ -74,20 +110,47 @@ export default function Prayers() {
       )}
 
       {/* Combo indicator */}
-      {combo >= 10 && (
-        <div className="flex items-center justify-between p-3 rounded-xl bg-accent/10 border border-accent/30 mb-4 animate-fade-in">
-          <div className="flex items-center gap-2">
-            <Zap className="h-5 w-5 text-accent" />
-            <div>
-              <p className="text-sm font-bold text-foreground">{comboLabel}</p>
-              <p className="text-xs text-muted-foreground">{combo} böner i rad</p>
+      <AnimatePresence>
+        {combo >= 10 && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{
+              opacity: 1,
+              y: 0,
+              scale: comboFlash ? [1, 1.04, 1] : 1,
+            }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.3 }}
+            className={cn(
+              'flex items-center justify-between p-3 rounded-xl border mb-4 transition-colors duration-500',
+              comboFlash
+                ? 'bg-primary/15 border-primary/50'
+                : 'bg-accent/10 border-accent/30'
+            )}
+          >
+            <div className="flex items-center gap-2">
+              <Zap className={cn('h-5 w-5', comboFlash ? 'text-primary' : 'text-accent')} />
+              <div>
+                <p className="text-sm font-bold text-foreground">{comboLabel}</p>
+                <p className="text-xs text-muted-foreground">{combo} böner i rad</p>
+              </div>
             </div>
-          </div>
-          <div className="text-sm font-bold text-accent bg-accent/20 px-2.5 py-1 rounded-lg">
-            {comboMultiplier.toFixed(1)}x
-          </div>
-        </div>
-      )}
+            <motion.div
+              key={combo}
+              initial={{ scale: 0.8, opacity: 0.6 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', stiffness: 320, damping: 18 }}
+              className={cn(
+                'text-sm font-bold px-2.5 py-1 rounded-lg',
+                comboFlash ? 'bg-primary/25 text-primary' : 'bg-accent/20 text-accent'
+              )}
+            >
+              {comboMultiplier.toFixed(1)}x
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
 
       <DailyStats
         totalPoints={totalPoints}

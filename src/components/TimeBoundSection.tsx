@@ -1,5 +1,6 @@
 import { Calendar, Clock, Pause, Play, Star } from 'lucide-react';
 import { useTimeBoundHabits } from '@/hooks/useTimeBoundHabits';
+import { haptics } from '@/lib/haptics';
 
 interface TimeBoundSectionProps {
   selectedDate?: Date;
@@ -61,7 +62,7 @@ export function TimeBoundSection({ selectedDate }: TimeBoundSectionProps) {
                 }`}
               >
                 <button
-                  onClick={() => toggleEvent(event.id)}
+                  onClick={() => { haptics.light(); toggleEvent(event.id); }}
                   className="flex-1 flex items-center gap-3 text-left"
                 >
                   <div

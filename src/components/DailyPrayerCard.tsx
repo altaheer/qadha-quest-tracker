@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Check, Clock, X, ChevronDown, ChevronUp, Flame, Users } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { PrayerStatus, SunnahItem, PrayerStreak } from '@/hooks/usePrayerTracking';
 import { Checkbox } from '@/components/ui/checkbox';
+import { haptics } from '@/lib/haptics';
 import {
   Collapsible,
   CollapsibleContent,
@@ -72,18 +74,59 @@ export function DailyPrayerCard({
   const config = statusConfig[status];
   const completedSunnah = sunnahItems.filter(s => s.completed).length;
 
+  const StatusIcon = config.icon;
+  const isGood = status === 'on-time' || status === 'jamaah';
+
+  const handleMark = (next: PrayerStatus) => {
+    haptics.medium();
+    onMarkStatus(next);
+  };
+
+  const handleSunnah = (id: string) => {
+    haptics.light();
+    onToggleSunnah(id);
+  };
+
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{
+        opacity: 1,
+        y: 0,
+        scale: isGood ? [1, 1.015, 1] : 1,
+      }}
+      transition={{
+        opacity: { duration: 0.3, delay: delay / 1000 },
+        y: { duration: 0.3, delay: delay / 1000 },
+        scale: { duration: 0.45, ease: 'easeOut' },
+      }}
       className={cn(
-        'rounded-2xl p-4 shadow-card border transition-all duration-300 animate-fade-in',
+        'rounded-2xl p-4 shadow-card border card-lift',
         config.bgClass,
-        config.borderClass
+        config.borderClass,
+        isGood && 'glow-primary'
       )}
-      style={{ animationDelay: `${delay}ms` }}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
+          <AnimatePresence mode="wait">
+            {StatusIcon && (
+              <motion.div
+                key={status}
+                initial={{ opacity: 0, y: 6, scale: 0.8 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -4, scale: 0.8 }}
+                transition={{ duration: 0.25, ease: 'easeOut' }}
+                className={cn(
+                  'p-1.5 rounded-full',
+                  isGood ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'
+                )}
+              >
+                <StatusIcon className="h-4 w-4" />
+              </motion.div>
+            )}
+          </AnimatePresence>
           <div>
             <h3 className="font-display text-lg font-semibold text-foreground">{name}</h3>
             <p className="text-muted-foreground text-sm" dir="rtl">{arabicName}</p>
@@ -117,7 +160,7 @@ export function DailyPrayerCard({
         <Button
           variant={status === 'on-time' ? 'default' : 'outline'}
           size="sm"
-          onClick={() => onMarkStatus('on-time')}
+          onClick={() => handleMark('on-time')}
           className={cn(
             'flex-1 gap-1.5',
             status === 'on-time' && 'bg-primary hover:bg-primary/90'
@@ -129,7 +172,7 @@ export function DailyPrayerCard({
         <Button
           variant={status === 'jamaah' ? 'default' : 'outline'}
           size="sm"
-          onClick={() => onMarkStatus('jamaah')}
+          onClick={() => handleMark('jamaah')}
           className={cn(
             'flex-1 gap-1.5',
             status === 'jamaah' && 'bg-primary hover:bg-primary/90'
@@ -141,7 +184,7 @@ export function DailyPrayerCard({
         <Button
           variant={status === 'late' ? 'gold' : 'outline'}
           size="sm"
-          onClick={() => onMarkStatus('late')}
+          onClick={() => handleMark('late')}
           className="flex-1 gap-1.5"
         >
           <Clock className="h-3.5 w-3.5" />
@@ -150,7 +193,7 @@ export function DailyPrayerCard({
         <Button
           variant={status === 'missed' ? 'secondary' : 'outline'}
           size="sm"
-          onClick={() => onMarkStatus('missed')}
+          onClick={() => handleMark('missed')}
           className={cn(
             'flex-1 gap-1.5',
             status === 'missed' && 'bg-muted-foreground/20 text-muted-foreground'
@@ -186,7 +229,7 @@ export function DailyPrayerCard({
             >
               <Checkbox
                 checked={item.completed}
-                onCheckedChange={() => onToggleSunnah(item.id)}
+                onCheckedChange={() => handleSunnah(item.id)}
               />
               <div className="flex-1 flex items-center justify-between">
                 <span className={cn(
@@ -203,6 +246,6 @@ export function DailyPrayerCard({
           ))}
         </CollapsibleContent>
       </Collapsible>
-    </div>
+    </motion.div>
   );
 }
