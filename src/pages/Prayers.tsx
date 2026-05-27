@@ -75,6 +75,11 @@ export default function Prayers() {
     }
     prevCompletedRef.current = completedCount;
   }, [completedCount, isToday]);
+
+  return (
+    <div className="container max-w-lg mx-auto px-4 py-6">
+      <CompletionCelebration show={celebrate} onDismiss={() => setCelebrate(false)} />
+
       <div className="mb-6">
         <h2 className="font-display text-2xl font-bold text-foreground mb-1">
           {isToday ? 'Dagens böner' : 'Böner'}
