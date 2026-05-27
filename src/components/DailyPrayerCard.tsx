@@ -46,8 +46,9 @@ export function DailyPrayerCard({
   onToggleSunnah,
   delay = 0,
 }: DailyPrayerCardProps) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
-  const config = statusConfig[status];
+  const config = statusBg[status];
   const completedSunnah = sunnahItems.filter(s => s.completed).length;
 
   const StatusIcon = config.icon;
@@ -78,8 +79,8 @@ export function DailyPrayerCard({
       }}
       className={cn(
         'rounded-2xl p-4 shadow-card border card-lift',
-        config.bgClass,
-        config.borderClass,
+        config.bg,
+        config.border,
         isGood && 'glow-primary'
       )}
     >
@@ -143,7 +144,7 @@ export function DailyPrayerCard({
           )}
         >
           <Check className="h-3.5 w-3.5" />
-          I tid
+          {t('status.onTime')}
         </Button>
         <Button
           variant={status === 'jamaah' ? 'default' : 'outline'}
@@ -155,7 +156,7 @@ export function DailyPrayerCard({
           )}
         >
           <Users className="h-3.5 w-3.5" />
-          Jamaah
+          {t('status.jamaah')}
         </Button>
         <Button
           variant={status === 'late' ? 'gold' : 'outline'}
@@ -164,7 +165,7 @@ export function DailyPrayerCard({
           className="flex-1 gap-1.5"
         >
           <Clock className="h-3.5 w-3.5" />
-          Sent
+          {t('status.late')}
         </Button>
         <Button
           variant={status === 'missed' ? 'secondary' : 'outline'}
@@ -176,7 +177,7 @@ export function DailyPrayerCard({
           )}
         >
           <X className="h-3.5 w-3.5" />
-          Missad
+          {t('status.missed')}
         </Button>
       </div>
 
