@@ -1,44 +1,10 @@
 import { useMemo } from 'react';
-
-type PrayerStatus = 'pending' | 'on-time' | 'late' | 'missed';
-
-interface PrayerEntry {
-  status: PrayerStatus;
-  timestamp?: number;
-}
-
-interface DailyPrayers {
-  fajr: PrayerEntry;
-  dhuhr: PrayerEntry;
-  asr: PrayerEntry;
-  maghrib: PrayerEntry;
-  isha: PrayerEntry;
-}
-
-interface PrayerHistory {
-  [date: string]: {
-    prayers: DailyPrayers;
-    sunnah: any;
-  };
-}
-
-interface HabitsHistory {
-  [date: string]: {
-    [habitId: string]: boolean;
-  };
-}
+import { getDateString } from '@/lib/date';
+import type { DailyPrayers, PrayerHistory, HabitsHistory, PrayerCounts as QadhaCounts } from '@/types';
 
 interface QadhaHistory {
   date: string;
   total: number;
-}
-
-interface QadhaCounts {
-  fajr: number;
-  dhuhr: number;
-  asr: number;
-  maghrib: number;
-  isha: number;
 }
 
 const PRAYER_HISTORY_KEY = 'prayer-history';
@@ -46,7 +12,6 @@ const HABITS_KEY = 'habits-tracking';
 const QADHA_KEY = 'qadha-prayer-counts';
 const QADHA_HISTORY_KEY = 'qadha-history';
 
-const getDateString = (date: Date) => date.toISOString().split('T')[0];
 
 const getPrayerNames = (): (keyof DailyPrayers)[] => ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
 
