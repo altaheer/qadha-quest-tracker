@@ -246,6 +246,6 @@ export function DailyPrayerCard({
           ))}
         </CollapsibleContent>
       </Collapsible>
-    </div>
+    </motion.div>
   );
 }
