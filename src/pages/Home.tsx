@@ -101,6 +101,8 @@ export default function Home() {
           <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
         </Link>
       </div>
+
+      <QuickActionsFAB />
     </div>
   );
 }
