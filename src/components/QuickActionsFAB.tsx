@@ -30,7 +30,7 @@ export function QuickActionsFAB() {
       label: 'Markera Fajr',
       icon: Moon,
       onClick: () => {
-        markPrayer('fajr', 'on_time');
+        markPrayer('fajr', 'on-time');
         haptics.medium();
         setOpen(false);
       },
