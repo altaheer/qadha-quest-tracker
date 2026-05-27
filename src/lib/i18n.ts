@@ -9,6 +9,8 @@ export type Translations = {
   status: { pending: string; onTime: string; jamaah: string; late: string; missed: string };
   qadha: { title: string; subtitle: string; dailyGoal: string; daysToComplete: string; totalRemaining: string; empty: string; resetAll: string; timeEstimate: string; perDay: string; total: string; daysNeeded: string; duration: string; completion: string };
   habits: { title: string; subtitle: string; level: string; easy: string; medium: string; hard: string; sahabah: string; custom: string; morning: string; evening: string; sleep: string; daily: string; paused: string; selectLevel: string; pointsToday: string; completed: string; active: string; pauseHint: string; activateHint: string; timeBound: string };
+  habitCategoryNames: Record<string, string>;
+  habitNames: Record<string, string>;
   insights: { title: string; subtitle: string; streak: string; bestDay: string; quran: string; weekly: string; punctuality: string; heatmap: string; balance: string; burndown: string; wheel: string; empty: string; heatmapTip: string };
   calendar: { title: string; gregorian: string; hijri: string; today: string };
   settings: { title: string; subtitle: string; language: string; notifications: string; backup: string; restore: string; darkMode: string; appearance: string; appearanceDesc: string; theme: string; showArabic: string; showArabicDesc: string; dataMgmt: string; dataMgmtDesc: string; dataInfo: string; dataInfoDesc: string; export: string; import: string; resetOnboarding: string; resetOnboardingDone: string };
@@ -25,6 +27,17 @@ const en: Translations = {
   status: { pending: 'Pending', onTime: 'On Time', jamaah: 'Jamaah', late: 'Late', missed: 'Missed' },
   qadha: { title: 'Qadha Prayers', subtitle: 'Track your missed prayers', dailyGoal: 'Daily Goal', daysToComplete: 'Days to complete', totalRemaining: 'Total remaining', empty: 'You have no Qadha prayers to make up, mashaAllah!', resetAll: 'Reset all counters', timeEstimate: 'Time Estimate', perDay: 'Prayers per day', total: 'Total Qadha', daysNeeded: 'Days Needed', duration: 'Estimated Duration', completion: 'Expected Completion' },
   habits: { title: 'Daily Habits', subtitle: 'Tap the pause icon to grey out habits you don\'t want to track', level: 'Level', easy: 'Easy', medium: 'Medium', hard: 'Hard', sahabah: 'Sahabah', custom: 'Custom', morning: 'Morning', evening: 'Evening', sleep: 'Sleep', daily: 'Daily', paused: 'Paused', selectLevel: 'Select level (template)', pointsToday: 'Points today', completed: 'Completed', active: 'active', pauseHint: 'Pause this habit', activateHint: 'Activate this habit', timeBound: 'Time-bound deeds' },
+  habitCategoryNames: { morning: 'Morning routine', evening: 'Evening routine', sleep: 'Before sleep', daily: 'During the day', sahabah: 'Sahabah level' },
+  habitNames: {
+    'morning-adhkar': 'Morning adhkār', 'wake-dua': 'Waking duʿāʾ', 'wake-siwak': 'Siwāk on waking',
+    'evening-adhkar': 'Evening adhkār',
+    'sleep-wudu': 'Wudu before sleep', 'sleep-kursi': 'Āyat al-Kursī', 'sleep-mulk': 'Sūrah Al-Mulk',
+    'sleep-3quls': '3 Quls', 'sleep-baqarah': 'Last 2 verses of Al-Baqarah', 'sleep-dua': 'Sleep duʿāʾ', 'sleep-right': 'Sleep on right side',
+    'duha': 'Duha prayer', 'bismillah': 'Bismillah before eating', 'right-hand': 'Eat with right hand', 'smile': 'Smile at others',
+    'tahajjud-prep': 'Intention for Tahajjud', 'quran-daily': 'Daily Quran reading (min 1 page)',
+    'istighfar-100': '100x Istighfar', 'salawat-100': '100x Salawat on the Prophet ﷺ',
+    'sadaqah-daily': 'Daily sadaqah', 'dua-parents': 'Duʿāʾ for parents',
+  },
   insights: { title: 'Insights', subtitle: 'Your spiritual progress', streak: 'Current Streak', bestDay: 'Best Day', quran: 'Quran Pages', weekly: 'Weekly Overview', punctuality: 'Punctuality per Prayer', heatmap: 'Iman Heatmap', balance: 'Prayer Balance', burndown: 'Qadha Burndown', wheel: 'Spiritual Wheel', empty: 'Log prayers for a few days to see your statistics', heatmapTip: 'Darker green = more points that day. Each square is one day.' },
   calendar: { title: 'Calendar', gregorian: 'Gregorian', hijri: 'Hijri', today: 'Today' },
   settings: { title: 'Settings', subtitle: 'Manage your app and data', language: 'Language', notifications: 'Notifications', backup: 'Backup Data', restore: 'Restore Data', darkMode: 'Dark Mode', appearance: 'Appearance', appearanceDesc: 'Theme and display options', theme: 'Theme', showArabic: 'Show Arabic names', showArabicDesc: 'Display Arabic transliteration under prayers and habits', dataMgmt: 'Data management', dataMgmtDesc: 'Export and import your data', dataInfo: 'Your data', dataInfoDesc: 'Information about data storage', export: 'Export data', import: 'Import data', resetOnboarding: 'Reset onboarding', resetOnboardingDone: 'Onboarding reset – reload the app' },
@@ -41,6 +54,17 @@ const sv: Translations = {
   status: { pending: 'Väntar', onTime: 'I tid', jamaah: 'Jamaah', late: 'Sent', missed: 'Missad' },
   qadha: { title: 'Qadha böner', subtitle: 'Håll koll på dina missade böner', dailyGoal: 'Dagligt mål', daysToComplete: 'Dagar kvar', totalRemaining: 'Totalt kvar', empty: 'Du har inga Qadha-böner att ta igen, mashaAllah!', resetAll: 'Återställ alla räknare', timeEstimate: 'Tidsuppskattning', perDay: 'Böner per dag', total: 'Totalt Qadha', daysNeeded: 'Dagar behövs', duration: 'Uppskattad tid', completion: 'Förväntad klar' },
   habits: { title: 'Dagliga vanor', subtitle: 'Tryck på paus-ikonen för att gråa ut vanor du inte vill spåra just nu', level: 'Nivå', easy: 'Easy', medium: 'Medium', hard: 'Hard', sahabah: 'Sahabah', custom: 'Custom', morning: 'Morgon', evening: 'Kväll', sleep: 'Sömn', daily: 'Dagligt', paused: 'Pausad', selectLevel: 'Välj nivå (mall)', pointsToday: 'Dagens poäng', completed: 'Avklarade', active: 'aktiva', pauseHint: 'Pausa denna vana', activateHint: 'Aktivera denna vana', timeBound: 'Tidsbundna gärningar' },
+  habitCategoryNames: { morning: 'Morgonrutiner', evening: 'Kvällsrutiner', sleep: 'Innan sömn', daily: 'Under dagen', sahabah: 'Sahabah-nivå' },
+  habitNames: {
+    'morning-adhkar': 'Morgon-adhkār', 'wake-dua': 'Vakna-duʿāʾ', 'wake-siwak': 'Siwāk vid uppvaknande',
+    'evening-adhkar': 'Kvälls-adhkār',
+    'sleep-wudu': 'Wudu före sömn', 'sleep-kursi': 'Āyat al-Kursī', 'sleep-mulk': 'Sūrah Al-Mulk',
+    'sleep-3quls': '3 Quls', 'sleep-baqarah': 'Sista 2 verserna Al-Baqarah', 'sleep-dua': 'Sova-duʿāʾ', 'sleep-right': 'Sova på höger sida',
+    'duha': 'Duha-bön', 'bismillah': 'Bismillah före mat', 'right-hand': 'Äta med höger hand', 'smile': 'Le mot andra',
+    'tahajjud-prep': 'Intention för Tahajjud', 'quran-daily': 'Daglig Quran-läsning (min 1 sida)',
+    'istighfar-100': '100x Istighfar', 'salawat-100': '100x Salawat på Profeten ﷺ',
+    'sadaqah-daily': 'Daglig sadaqah', 'dua-parents': 'Duʿāʾ för föräldrar',
+  },
   insights: { title: 'Insikter', subtitle: 'Din spirituella utveckling', streak: 'Nuvarande streak', bestDay: 'Bästa dag', quran: 'Quran-sidor', weekly: 'Veckokollen', punctuality: 'Punktlighet per bön', heatmap: 'Iman-heatmap', balance: 'Böne-balansen', burndown: 'Qadha Burn-down', wheel: 'Spirituellt hjul', empty: 'Logga böner i några dagar för att se din statistik', heatmapTip: 'Mörkare grönt = fler poäng den dagen. Varje ruta är en dag.' },
   calendar: { title: 'Kalender', gregorian: 'Gregoriansk', hijri: 'Hijri', today: 'Idag' },
   settings: { title: 'Inställningar', subtitle: 'Hantera din app och data', language: 'Språk', notifications: 'Aviseringar', backup: 'Säkerhetskopiera', restore: 'Återställ', darkMode: 'Mörkt läge', appearance: 'Utseende', appearanceDesc: 'Tema och visningsalternativ', theme: 'Tema', showArabic: 'Visa arabiska namn', showArabicDesc: 'Visa arabisk translitterering under böner och vanor', dataMgmt: 'Datahantering', dataMgmtDesc: 'Exportera och importera din data', dataInfo: 'Din data', dataInfoDesc: 'Information om datalagring', export: 'Exportera data', import: 'Importera data', resetOnboarding: 'Återställ onboarding', resetOnboardingDone: 'Onboarding återställd – ladda om appen' },
@@ -52,17 +76,28 @@ const sv: Translations = {
 
 const tr: Translations = {
   nav: { home: 'Ana Sayfa', prayers: 'Namazlar', qadha: 'Kaza', habits: 'Alışkanlıklar', insights: 'İstatistikler', calendar: 'Takvim', settings: 'Ayarlar', more: 'Daha Fazla' },
-  prayers: { title: 'Günün Namazları', subtitle: 'Farz ve sünnet namazlarını işaretle', backfillMode: 'Geriye dönük mod', backfillDesc: '"Kaçırıldı" işaretlenen namazlar otomatik olarak Kaza\'ya eklenir.', combo: 'Kombo', comboLabel: 'arka arkaya namaz', multiplier: 'Çarpan', streak: 'Seri', bestStreak: 'En iyi', empty: 'Güne Fecr ile başla ☀️', jumpToToday: 'Bugüne dön', previous: 'Önceki gün', next: 'Sonraki gün', today: 'Bugün', tapForToday: 'Bugüne gitmek için dokun' },
-  prayerNames: { fajr: 'Fecr', dhuhr: 'Öğle', asr: 'İkindi', maghrib: 'Akşam', isha: 'Yatsı' },
+  prayers: { title: 'Günün Namazları', subtitle: 'Farz ve sünnet namazlarını işaretle', backfillMode: 'Geriye dönük mod', backfillDesc: '"Kaçırıldı" işaretlenen namazlar otomatik olarak Kaza\'ya eklenir.', combo: 'Kombo', comboLabel: 'arka arkaya namaz', multiplier: 'Çarpan', streak: 'Seri', bestStreak: 'En iyi', empty: 'Güne Sabah namazıyla başla ☀️', jumpToToday: 'Bugüne dön', previous: 'Önceki gün', next: 'Sonraki gün', today: 'Bugün', tapForToday: 'Bugüne gitmek için dokun' },
+  prayerNames: { fajr: 'Sabah', dhuhr: 'Öğle', asr: 'İkindi', maghrib: 'Akşam', isha: 'Yatsı' },
   status: { pending: 'Bekliyor', onTime: 'Vaktinde', jamaah: 'Cemaat', late: 'Geç', missed: 'Kaçırıldı' },
   qadha: { title: 'Kaza Namazları', subtitle: 'Kaçırdığın namazları takip et', dailyGoal: 'Günlük Hedef', daysToComplete: 'Tamamlama süresi (gün)', totalRemaining: 'Toplam kalan', empty: 'Kaza edecek namazın yok, maşaAllah!', resetAll: 'Tüm sayaçları sıfırla', timeEstimate: 'Süre Tahmini', perDay: 'Günde namaz', total: 'Toplam Kaza', daysNeeded: 'Gerekli gün', duration: 'Tahmini süre', completion: 'Beklenen bitiş' },
   habits: { title: 'Günlük Alışkanlıklar', subtitle: 'Takip etmek istemediğin alışkanlıkları duraklat simgesiyle gri yapabilirsin', level: 'Seviye', easy: 'Kolay', medium: 'Orta', hard: 'Zor', sahabah: 'Sahabe', custom: 'Özel', morning: 'Sabah', evening: 'Akşam', sleep: 'Uyku', daily: 'Günlük', paused: 'Duraklatıldı', selectLevel: 'Seviye seç (şablon)', pointsToday: 'Bugünkü puan', completed: 'Tamamlanan', active: 'aktif', pauseHint: 'Bu alışkanlığı duraklat', activateHint: 'Bu alışkanlığı etkinleştir', timeBound: 'Zamana bağlı ameller' },
+  habitCategoryNames: { morning: 'Sabah rutini', evening: 'Akşam rutini', sleep: 'Uyumadan önce', daily: 'Gün içinde', sahabah: 'Sahabe seviyesi' },
+  habitNames: {
+    'morning-adhkar': 'Sabah zikirleri', 'wake-dua': 'Uyanma duası', 'wake-siwak': 'Uyanınca misvak',
+    'evening-adhkar': 'Akşam zikirleri',
+    'sleep-wudu': 'Uyumadan önce abdest', 'sleep-kursi': 'Âyetü\'l-Kürsî', 'sleep-mulk': 'Mülk Sûresi',
+    'sleep-3quls': '3 Kul (Muavvizat)', 'sleep-baqarah': 'Bakara\'nın son 2 ayeti', 'sleep-dua': 'Uyku duası', 'sleep-right': 'Sağ tarafa yatarak uyumak',
+    'duha': 'Kuşluk namazı', 'bismillah': 'Yemekten önce Bismillah', 'right-hand': 'Sağ elle yemek', 'smile': 'Başkalarına gülümsemek',
+    'tahajjud-prep': 'Teheccüd niyeti', 'quran-daily': 'Günlük Kuran okuma (en az 1 sayfa)',
+    'istighfar-100': '100x İstiğfar', 'salawat-100': 'Peygamber\'e ﷺ 100x salavat',
+    'sadaqah-daily': 'Günlük sadaka', 'dua-parents': 'Anne-baba için dua',
+  },
   insights: { title: 'İstatistikler', subtitle: 'Manevi gelişimin', streak: 'Mevcut seri', bestDay: 'En iyi gün', quran: 'Kuran sayfası', weekly: 'Haftalık genel', punctuality: 'Namaza göre dakiklik', heatmap: 'İman ısı haritası', balance: 'Namaz dengesi', burndown: 'Kaza azalması', wheel: 'Manevi çark', empty: 'İstatistiklerini görmek için birkaç gün namaz kaydı tut', heatmapTip: 'Daha koyu yeşil = o gün daha çok puan. Her kare bir gündür.' },
   calendar: { title: 'Takvim', gregorian: 'Miladi', hijri: 'Hicri', today: 'Bugün' },
   settings: { title: 'Ayarlar', subtitle: 'Uygulamanı ve verini yönet', language: 'Dil', notifications: 'Bildirimler', backup: 'Yedekle', restore: 'Geri yükle', darkMode: 'Koyu mod', appearance: 'Görünüm', appearanceDesc: 'Tema ve görüntü seçenekleri', theme: 'Tema', showArabic: 'Arapça isimleri göster', showArabicDesc: 'Namaz ve alışkanlıkların altında Arapça çeviriyi göster', dataMgmt: 'Veri yönetimi', dataMgmtDesc: 'Verini dışa ve içe aktar', dataInfo: 'Verin', dataInfoDesc: 'Veri depolama hakkında bilgi', export: 'Veriyi dışa aktar', import: 'Veriyi içe aktar', resetOnboarding: 'Tanıtımı sıfırla', resetOnboardingDone: 'Tanıtım sıfırlandı – uygulamayı yeniden yükle' },
   common: { save: 'Kaydet', cancel: 'İptal', done: 'Tamam', skip: 'Atla', next: 'İleri', back: 'Geri', close: 'Kapat', loading: 'Yükleniyor...', getStarted: 'Başla' },
   onboarding: { step1Title: 'Qadha Companion\'a hoş geldin', step1Desc: 'Namazlarını, alışkanlıklarını ve manevi gelişimini takip et', step2Title: 'Kaza\'nı belirle', step2Desc: 'Kaç tane kaçırılmış namazın var?', step3Title: 'Seviyeni seç', step3Desc: 'Kolay, Orta, Zor veya Sahabe modunu seç', dontKnow: 'Henüz bilmiyorum', step: 'Adım' },
-  fab: { markFajr: 'Fecri işaretle', addQadha: 'Kaza ekle', logHabit: 'Alışkanlık kaydet', quickActions: 'Hızlı işlemler' },
+  fab: { markFajr: 'Sabah namazını işaretle', addQadha: 'Kaza ekle', logHabit: 'Alışkanlık kaydet', quickActions: 'Hızlı işlemler' },
   combo: { onFire: 'Ateş gibi!', firstTimeTitle: 'Kombo başladı!', firstTimeDesc: 'Vaktinde ya da cemaatle arka arkaya kıl, kombo büyüsün, bonus puan kazan.' },
 };
 
@@ -73,6 +108,17 @@ const ar: Translations = {
   status: { pending: 'قيد الانتظار', onTime: 'في الوقت', jamaah: 'جماعة', late: 'متأخر', missed: 'فائت' },
   qadha: { title: 'صلوات القضاء', subtitle: 'تابع صلواتك الفائتة', dailyGoal: 'الهدف اليومي', daysToComplete: 'أيام للإكمال', totalRemaining: 'المجموع المتبقي', empty: 'ليس لديك صلوات قضاء، ما شاء الله!', resetAll: 'إعادة ضبط جميع العدّادات', timeEstimate: 'تقدير الوقت', perDay: 'صلوات في اليوم', total: 'مجموع القضاء', daysNeeded: 'الأيام المطلوبة', duration: 'المدة المقدّرة', completion: 'الإنجاز المتوقع' },
   habits: { title: 'العادات اليومية', subtitle: 'اضغط على أيقونة الإيقاف لتعطيل العادات التي لا تريد متابعتها', level: 'المستوى', easy: 'سهل', medium: 'متوسط', hard: 'صعب', sahabah: 'الصحابة', custom: 'مخصّص', morning: 'الصباح', evening: 'المساء', sleep: 'النوم', daily: 'يومي', paused: 'متوقف', selectLevel: 'اختر المستوى (قالب)', pointsToday: 'نقاط اليوم', completed: 'المنجَز', active: 'نشطة', pauseHint: 'إيقاف هذه العادة', activateHint: 'تفعيل هذه العادة', timeBound: 'أعمال موقوتة' },
+  habitCategoryNames: { morning: 'روتين الصباح', evening: 'روتين المساء', sleep: 'قبل النوم', daily: 'خلال اليوم', sahabah: 'مستوى الصحابة' },
+  habitNames: {
+    'morning-adhkar': 'أذكار الصباح', 'wake-dua': 'دعاء الاستيقاظ', 'wake-siwak': 'السواك عند الاستيقاظ',
+    'evening-adhkar': 'أذكار المساء',
+    'sleep-wudu': 'الوضوء قبل النوم', 'sleep-kursi': 'آية الكرسي', 'sleep-mulk': 'سورة الملك',
+    'sleep-3quls': 'المعوذات الثلاث', 'sleep-baqarah': 'آخر آيتين من البقرة', 'sleep-dua': 'دعاء النوم', 'sleep-right': 'النوم على الشق الأيمن',
+    'duha': 'صلاة الضحى', 'bismillah': 'البسملة قبل الأكل', 'right-hand': 'الأكل باليمين', 'smile': 'التبسم في وجه الآخرين',
+    'tahajjud-prep': 'نية قيام الليل', 'quran-daily': 'قراءة القرآن يومياً (صفحة على الأقل)',
+    'istighfar-100': '100 استغفار', 'salawat-100': '100 صلاة على النبي ﷺ',
+    'sadaqah-daily': 'صدقة يومية', 'dua-parents': 'الدعاء للوالدين',
+  },
   insights: { title: 'الإحصاءات', subtitle: 'تقدّمك الروحي', streak: 'السلسلة الحالية', bestDay: 'أفضل يوم', quran: 'صفحات القرآن', weekly: 'النظرة الأسبوعية', punctuality: 'الالتزام بالأوقات لكل صلاة', heatmap: 'خريطة الإيمان', balance: 'توازن الصلوات', burndown: 'تناقص القضاء', wheel: 'العجلة الروحية', empty: 'سجّل صلواتك لبضعة أيام لرؤية الإحصاءات', heatmapTip: 'الأخضر الأغمق = نقاط أكثر في ذلك اليوم. كل مربع يمثّل يوماً.' },
   calendar: { title: 'التقويم', gregorian: 'ميلادي', hijri: 'هجري', today: 'اليوم' },
   settings: { title: 'الإعدادات', subtitle: 'إدارة التطبيق والبيانات', language: 'اللغة', notifications: 'الإشعارات', backup: 'نسخ احتياطي', restore: 'استعادة', darkMode: 'الوضع الداكن', appearance: 'المظهر', appearanceDesc: 'إعدادات السمة والعرض', theme: 'السمة', showArabic: 'إظهار الأسماء العربية', showArabicDesc: 'عرض الأسماء العربية تحت الصلوات والعادات', dataMgmt: 'إدارة البيانات', dataMgmtDesc: 'تصدير واستيراد بياناتك', dataInfo: 'بياناتك', dataInfoDesc: 'معلومات عن تخزين البيانات', export: 'تصدير البيانات', import: 'استيراد البيانات', resetOnboarding: 'إعادة تشغيل التعريف', resetOnboardingDone: 'تم إعادة ضبط التعريف – أعد تحميل التطبيق' },
@@ -164,5 +210,15 @@ export function useTranslation() {
     [lang]
   );
 
-  return { t, lang, setLanguage, isRTL: lang === 'ar' };
+  const dict = translations[lang];
+  const tHabit = useCallback(
+    (id: string) => dict.habitNames[id] || id,
+    [dict]
+  );
+  const tHabitCategory = useCallback(
+    (id: string) => dict.habitCategoryNames[id] || id,
+    [dict]
+  );
+
+  return { t, lang, setLanguage, isRTL: lang === 'ar', tHabit, tHabitCategory };
 }
