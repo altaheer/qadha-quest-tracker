@@ -1,54 +1,27 @@
 import { useState, useEffect, useCallback } from 'react';
+import { getDateString } from '@/lib/date';
+import type {
+  PrayerStatus,
+  PrayerEntry,
+  DailyPrayers,
+  PrayerStreak,
+  PrayerStreaks,
+  SunnahItem,
+  PrayerSunnah,
+  PrayerHistory,
+} from '@/types';
 
-export type PrayerStatus = 'pending' | 'on-time' | 'jamaah' | 'late' | 'missed';
-
-export interface PrayerEntry {
-  status: PrayerStatus;
-  timestamp?: number;
-}
-
-export interface DailyPrayers {
-  fajr: PrayerEntry;
-  dhuhr: PrayerEntry;
-  asr: PrayerEntry;
-  maghrib: PrayerEntry;
-  isha: PrayerEntry;
-}
-
-export interface PrayerStreak {
-  current: number;
-  best: number;
-}
-
-export interface PrayerStreaks {
-  fajr: PrayerStreak;
-  dhuhr: PrayerStreak;
-  asr: PrayerStreak;
-  maghrib: PrayerStreak;
-  isha: PrayerStreak;
-}
-
-export interface SunnahItem {
-  id: string;
-  name: string;
-  arabicName: string;
-  completed: boolean;
-}
-
-export interface PrayerSunnah {
-  fajr: SunnahItem[];
-  dhuhr: SunnahItem[];
-  asr: SunnahItem[];
-  maghrib: SunnahItem[];
-  isha: SunnahItem[];
-}
-
-export interface PrayerHistory {
-  [date: string]: {
-    prayers: DailyPrayers;
-    sunnah: PrayerSunnah;
-  };
-}
+// Re-export for backward compatibility with existing consumers
+export type {
+  PrayerStatus,
+  PrayerEntry,
+  DailyPrayers,
+  PrayerStreak,
+  PrayerStreaks,
+  SunnahItem,
+  PrayerSunnah,
+  PrayerHistory,
+};
 
 const HISTORY_KEY = 'prayer-history';
 const STREAKS_KEY = 'prayer-streaks';
@@ -111,8 +84,6 @@ const createDefaultSunnah = (): PrayerSunnah => ({
     { id: 'isha-kursi', name: 'Āyat al-Kursī', arabicName: 'آية الكرسي', completed: false },
   ],
 });
-
-const getDateString = (date: Date) => date.toISOString().split('T')[0];
 
 // Combo multiplier: +0.1x per 10 consecutive on-time/jamaah prayers
 export function getComboMultiplier(combo: number): number {
