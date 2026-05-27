@@ -1,7 +1,7 @@
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { format, addDays, isToday, isFuture } from 'date-fns';
-import { sv, enUS, tr, arSA } from 'date-fns/locale';
+import { sv, enUS, tr, arSA, type Locale } from 'date-fns/locale';
 import { useTranslation } from '@/lib/i18n';
 
 interface DateNavigatorProps {
