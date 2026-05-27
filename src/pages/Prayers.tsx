@@ -110,20 +110,47 @@ export default function Prayers() {
       )}
 
       {/* Combo indicator */}
-      {combo >= 10 && (
-        <div className="flex items-center justify-between p-3 rounded-xl bg-accent/10 border border-accent/30 mb-4 animate-fade-in">
-          <div className="flex items-center gap-2">
-            <Zap className="h-5 w-5 text-accent" />
-            <div>
-              <p className="text-sm font-bold text-foreground">{comboLabel}</p>
-              <p className="text-xs text-muted-foreground">{combo} böner i rad</p>
+      <AnimatePresence>
+        {combo >= 10 && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{
+              opacity: 1,
+              y: 0,
+              scale: comboFlash ? [1, 1.04, 1] : 1,
+            }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.3 }}
+            className={cn(
+              'flex items-center justify-between p-3 rounded-xl border mb-4 transition-colors duration-500',
+              comboFlash
+                ? 'bg-primary/15 border-primary/50'
+                : 'bg-accent/10 border-accent/30'
+            )}
+          >
+            <div className="flex items-center gap-2">
+              <Zap className={cn('h-5 w-5', comboFlash ? 'text-primary' : 'text-accent')} />
+              <div>
+                <p className="text-sm font-bold text-foreground">{comboLabel}</p>
+                <p className="text-xs text-muted-foreground">{combo} böner i rad</p>
+              </div>
             </div>
-          </div>
-          <div className="text-sm font-bold text-accent bg-accent/20 px-2.5 py-1 rounded-lg">
-            {comboMultiplier.toFixed(1)}x
-          </div>
-        </div>
-      )}
+            <motion.div
+              key={combo}
+              initial={{ scale: 0.8, opacity: 0.6 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', stiffness: 320, damping: 18 }}
+              className={cn(
+                'text-sm font-bold px-2.5 py-1 rounded-lg',
+                comboFlash ? 'bg-primary/25 text-primary' : 'bg-accent/20 text-accent'
+              )}
+            >
+              {comboMultiplier.toFixed(1)}x
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
 
       <DailyStats
         totalPoints={totalPoints}
