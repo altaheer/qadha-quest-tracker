@@ -1,4 +1,4 @@
-type PrayerStatus = 'pending' | 'on-time' | 'late' | 'missed';
+import type { PrayerStatus } from '@/types';
 
 interface PrayerPunctualityProps {
   data: Record<string, { history: PrayerStatus[]; onTimePercent: number }>;
