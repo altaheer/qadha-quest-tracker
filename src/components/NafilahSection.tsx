@@ -61,7 +61,7 @@ export function NafilahSection({ prayers, onToggle }: NafilahSectionProps) {
                   >
                     <Checkbox
                       checked={prayer.completed}
-                      onCheckedChange={() => onToggle(prayer.id)}
+                      onCheckedChange={() => { haptics.light(); onToggle(prayer.id); }}
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
