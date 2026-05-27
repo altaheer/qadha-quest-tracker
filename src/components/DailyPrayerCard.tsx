@@ -221,15 +221,16 @@ export function DailyPrayerCard({
             )}
           </button>
         </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-2 pt-2">
+        <CollapsibleContent className="space-y-3 pt-3">
           {sunnahItems.map((item) => (
             <label
               key={item.id}
-              className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+              className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors tap-target"
             >
               <Checkbox
                 checked={item.completed}
                 onCheckedChange={() => handleSunnah(item.id)}
+                className="h-5 w-5"
               />
               <div className="flex-1 flex items-center justify-between">
                 <span className={cn(
