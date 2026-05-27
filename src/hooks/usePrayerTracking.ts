@@ -58,13 +58,14 @@ const createDefaultSunnah = (): PrayerSunnah => ({
   dhuhr: [
     { id: 'dhuhr-siwak', name: 'Siwāk', arabicName: 'السواك', completed: false },
     { id: 'dhuhr-adhan', name: 'Answer Adhān', arabicName: 'إجابة الأذان', completed: false },
-    { id: 'dhuhr-sunnah-before', name: '4 Rak\'at before', arabicName: 'أربع ركعات قبلية', completed: false },
-    { id: 'dhuhr-sunnah-after', name: '2 Rak\'at after', arabicName: 'ركعتان بعدية', completed: false },
+    { id: 'dhuhr-sunnah-before', name: '2-4 Rak\'at before', arabicName: 'ركعات قبلية', completed: false },
+    { id: 'dhuhr-sunnah-after', name: '2-4 Rak\'at after', arabicName: 'ركعات بعدية', completed: false },
     { id: 'dhuhr-dua', name: 'Du\'ā\' after prayer', arabicName: 'الدعاء بعد الصلاة', completed: false },
   ],
   asr: [
     { id: 'asr-siwak', name: 'Siwāk', arabicName: 'السواك', completed: false },
     { id: 'asr-adhan', name: 'Answer Adhān', arabicName: 'إجابة الأذان', completed: false },
+    { id: 'asr-sunnah-before', name: '4 Rak\'at before Asr', arabicName: 'أربع ركعات قبل العصر', completed: false },
     { id: 'asr-dua', name: 'Du\'ā\' after prayer', arabicName: 'الدعاء بعد الصلاة', completed: false },
     { id: 'asr-kursi', name: 'Āyat al-Kursī', arabicName: 'آية الكرسي', completed: false },
   ],

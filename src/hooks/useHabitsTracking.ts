@@ -17,9 +17,19 @@ const PAUSED_KEY = 'habits-paused';
 const LEVEL_KEY = 'habits-level';
 
 // Define which habits are active per level
-const levelHabits: Record<HabitLevel, string[]> = {
+const sahabahExtras = [
+  'tahajjud-prep', 'quran-daily', 'istighfar-100', 'salawat-100', 'sadaqah-daily', 'dua-parents'
+];
+
+const hardHabits = [
+  'morning-adhkar', 'evening-adhkar', 'wake-dua', 'wake-siwak',
+  'sleep-dua', 'sleep-kursi', 'sleep-3quls', 'sleep-wudu', 'sleep-mulk', 'sleep-baqarah', 'sleep-right',
+  'duha', 'bismillah', 'right-hand', 'smile'
+];
+
+export const levelHabits: Record<HabitLevel, string[]> = {
   easy: [
-    'morning-adhkar', 'evening-adhkar', 'wake-dua', 
+    'morning-adhkar', 'evening-adhkar', 'wake-dua',
     'sleep-dua', 'sleep-kursi', 'sleep-3quls'
   ],
   medium: [
@@ -27,16 +37,8 @@ const levelHabits: Record<HabitLevel, string[]> = {
     'sleep-dua', 'sleep-kursi', 'sleep-3quls', 'sleep-wudu', 'sleep-mulk',
     'duha', 'bismillah'
   ],
-  hard: [
-    'morning-adhkar', 'evening-adhkar', 'wake-dua', 'wake-siwak',
-    'sleep-dua', 'sleep-kursi', 'sleep-3quls', 'sleep-wudu', 'sleep-mulk', 'sleep-baqarah', 'sleep-right',
-    'duha', 'bismillah', 'right-hand', 'smile'
-  ],
-  sahabah: [
-    'morning-adhkar', 'evening-adhkar', 'wake-dua', 'wake-siwak',
-    'sleep-dua', 'sleep-kursi', 'sleep-3quls', 'sleep-wudu', 'sleep-mulk', 'sleep-baqarah', 'sleep-right',
-    'duha', 'bismillah', 'right-hand', 'smile'
-  ],
+  hard: hardHabits,
+  sahabah: [...hardHabits, ...sahabahExtras],
   custom: [], // All habits available, user controls individually
 };
 
@@ -82,6 +84,19 @@ export const habitCategories: HabitCategory[] = [
       { id: 'bismillah', name: 'Bismillah före mat', arabicName: 'البسملة', points: 2, category: 'daily' },
       { id: 'right-hand', name: 'Äta med höger hand', arabicName: 'الأكل باليمين', points: 2, category: 'daily' },
       { id: 'smile', name: 'Le mot andra', arabicName: 'التبسم', points: 2, category: 'daily' },
+    ],
+  },
+  {
+    id: 'sahabah',
+    name: 'Sahabah-nivå',
+    icon: 'Star',
+    habits: [
+      { id: 'tahajjud-prep', name: 'Intention för Tahajjud', arabicName: 'نية قيام الليل', points: 10, category: 'sahabah' },
+      { id: 'quran-daily', name: 'Daglig Quran-läsning (min 1 sida)', arabicName: 'قراءة القرآن يوميًا', points: 8, category: 'sahabah' },
+      { id: 'istighfar-100', name: '100x Istighfar', arabicName: 'مئة استغفار', points: 5, category: 'sahabah' },
+      { id: 'salawat-100', name: '100x Salawat på Profeten ﷺ', arabicName: 'مئة صلاة على النبي', points: 5, category: 'sahabah' },
+      { id: 'sadaqah-daily', name: 'Daglig sadaqah', arabicName: 'صدقة يومية', points: 8, category: 'sahabah' },
+      { id: 'dua-parents', name: 'Du\'a för föräldrar', arabicName: 'دعاء للوالدين', points: 3, category: 'sahabah' },
     ],
   },
 ];
