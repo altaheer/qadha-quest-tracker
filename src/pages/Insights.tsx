@@ -1,4 +1,3 @@
-import { Flame, Star, BookOpen, TrendingDown } from 'lucide-react';
 import { useInsightsData } from '@/hooks/useInsightsData';
 import { HighlightCards } from '@/components/insights/HighlightCards';
 import { WeeklyChart } from '@/components/insights/WeeklyChart';
@@ -7,82 +6,65 @@ import { ImanHeatmap } from '@/components/insights/ImanHeatmap';
 import { PrayerBalanceChart } from '@/components/insights/PrayerBalanceChart';
 import { QadhaBurndown } from '@/components/insights/QadhaBurndown';
 import { SpiritualWheel } from '@/components/insights/SpiritualWheel';
+import { OneTimeTooltip } from '@/components/OneTimeTooltip';
+import { useTranslation } from '@/lib/i18n';
 
 export default function Insights() {
   const data = useInsightsData();
+  const { t } = useTranslation();
+
+  const hasData = data.currentStreak > 0 || data.weeklyData.some((d: any) => (d.points ?? d.value ?? 0) > 0);
 
   return (
     <div className="container max-w-lg mx-auto px-4 py-6 space-y-6">
-      {/* Page Header */}
       <div className="text-center mb-6">
-        <h1 className="font-display text-2xl font-bold text-foreground mb-1">
-          Insikter
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Din spirituella utveckling
-        </p>
+        <h1 className="font-display text-2xl font-bold text-foreground mb-1">{t('insights.title')}</h1>
+        <p className="text-sm text-muted-foreground">{t('insights.subtitle')}</p>
       </div>
 
-      {/* 1. Highlight Cards */}
-      <HighlightCards
-        streak={data.currentStreak}
-        bestDay={data.bestDay}
-        quranPages={0}
-      />
+      {!hasData && (
+        <div className="rounded-2xl border border-border bg-card p-6 text-center">
+          <p className="text-sm text-muted-foreground">{t('insights.empty')}</p>
+        </div>
+      )}
 
-      {/* 2. Weekly Overview */}
+      <HighlightCards streak={data.currentStreak} bestDay={data.bestDay} quranPages={0} />
+
       <section>
-        <h2 className="font-display text-lg font-semibold text-foreground mb-3">
-          Veckokollen
-        </h2>
+        <h2 className="font-display text-lg font-semibold text-foreground mb-3">{t('insights.weekly')}</h2>
         <WeeklyChart data={data.weeklyData} />
       </section>
 
-      {/* 3. Prayer Punctuality */}
       <section>
-        <h2 className="font-display text-lg font-semibold text-foreground mb-3">
-          Punktlighet per bön
-        </h2>
-        <PrayerPunctuality 
-          data={data.prayerPunctuality}
-          getPrayerDisplayName={data.getPrayerDisplayName}
-        />
+        <h2 className="font-display text-lg font-semibold text-foreground mb-3">{t('insights.punctuality')}</h2>
+        <PrayerPunctuality data={data.prayerPunctuality} getPrayerDisplayName={data.getPrayerDisplayName} />
       </section>
 
-      {/* 4. Iman Heatmap */}
       <section>
-        <h2 className="font-display text-lg font-semibold text-foreground mb-3">
-          Iman-heatmap
-        </h2>
+        <h2 className="font-display text-lg font-semibold text-foreground mb-3">{t('insights.heatmap')}</h2>
+        <OneTimeTooltip
+          id="heatmap-intro"
+          show={true}
+          title={t('insights.heatmap')}
+          description={t('insights.heatmapTip')}
+        />
         <ImanHeatmap data={data.yearlyHeatmap} />
       </section>
 
-      {/* 5. Prayer Balance */}
       <section>
-        <h2 className="font-display text-lg font-semibold text-foreground mb-3">
-          Böne-balansen
-        </h2>
+        <h2 className="font-display text-lg font-semibold text-foreground mb-3">{t('insights.balance')}</h2>
         <PrayerBalanceChart data={data.prayerBalance} />
       </section>
 
-      {/* 6. Qadha Burndown */}
       {data.totalQadha > 0 && (
         <section>
-          <h2 className="font-display text-lg font-semibold text-foreground mb-3">
-            Qadha Burn-down
-          </h2>
-          <QadhaBurndown 
-            totalQadha={data.totalQadha}
-            projection={data.qadhaProjection}
-          />
+          <h2 className="font-display text-lg font-semibold text-foreground mb-3">{t('insights.burndown')}</h2>
+          <QadhaBurndown totalQadha={data.totalQadha} projection={data.qadhaProjection} />
         </section>
       )}
 
-      {/* 7. Spiritual Wheel */}
       <section>
-        <h2 className="font-display text-lg font-semibold text-foreground mb-3">
-          Spirituellt hjul
-        </h2>
+        <h2 className="font-display text-lg font-semibold text-foreground mb-3">{t('insights.wheel')}</h2>
         <SpiritualWheel data={data.spiritualWheel} />
       </section>
     </div>

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -5,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Layout } from "@/components/Layout";
+import { Onboarding, hasCompletedOnboarding } from "@/components/Onboarding";
 import Home from "./pages/Home";
 import Prayers from "./pages/Prayers";
 import Qadha from "./pages/Qadha";
@@ -50,25 +52,29 @@ function AnimatedRoutes() {
         <Route path="/insights" element={wrap(<Insights />)} />
         <Route path="/calendar" element={wrap(<Calendar />)} />
         <Route path="/settings" element={wrap(<Settings />)} />
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={wrap(<NotFound />)} />
       </Routes>
     </AnimatePresence>
   );
 }
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Layout>
-          <AnimatedRoutes />
-        </Layout>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  const [showOnboarding, setShowOnboarding] = useState(!hasCompletedOnboarding());
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          {showOnboarding && <Onboarding onComplete={() => setShowOnboarding(false)} />}
+          <Layout>
+            <AnimatedRoutes />
+          </Layout>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

@@ -5,14 +5,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { haptics } from '@/lib/haptics';
 import { usePrayerTracking } from '@/hooks/usePrayerTracking';
+import { useTranslation } from '@/lib/i18n';
 
 export function QuickActionsFAB() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [visible, setVisible] = useState(true);
   const navigate = useNavigate();
   const { markPrayer } = usePrayerTracking();
 
-  // Hide on scroll down, show on scroll up
   useEffect(() => {
     let lastY = window.scrollY;
     const onScroll = () => {
@@ -26,31 +27,9 @@ export function QuickActionsFAB() {
   }, []);
 
   const actions = [
-    {
-      label: 'Markera Fajr',
-      icon: Moon,
-      onClick: () => {
-        markPrayer('fajr', 'on-time');
-        haptics.medium();
-        setOpen(false);
-      },
-    },
-    {
-      label: 'Lägg till Qadha',
-      icon: RotateCcw,
-      onClick: () => {
-        setOpen(false);
-        navigate('/qadha');
-      },
-    },
-    {
-      label: 'Logga vana',
-      icon: BookOpen,
-      onClick: () => {
-        setOpen(false);
-        navigate('/habits');
-      },
-    },
+    { label: t('fab.markFajr'), icon: Moon, onClick: () => { markPrayer('fajr', 'on-time'); haptics.medium(); setOpen(false); } },
+    { label: t('fab.addQadha'), icon: RotateCcw, onClick: () => { setOpen(false); navigate('/qadha'); } },
+    { label: t('fab.logHabit'), icon: BookOpen, onClick: () => { setOpen(false); navigate('/habits'); } },
   ];
 
   return (
@@ -86,12 +65,9 @@ export function QuickActionsFAB() {
       </AnimatePresence>
 
       <button
-        onClick={() => {
-          haptics.light();
-          setOpen((v) => !v);
-        }}
+        onClick={() => { haptics.light(); setOpen((v) => !v); }}
         className="w-14 h-14 rounded-full gradient-primary text-primary-foreground shadow-elevated flex items-center justify-center"
-        aria-label="Snabbåtgärder"
+        aria-label={t('fab.quickActions')}
       >
         {open ? <X className="h-6 w-6" /> : <Plus className="h-6 w-6" />}
       </button>

@@ -7,26 +7,29 @@ import { DateNavigator } from '@/components/DateNavigator';
 import { NafilahSection } from '@/components/NafilahSection';
 import { CompletionCelebration } from '@/components/CompletionCelebration';
 import { JumpToTodayButton } from '@/components/JumpToTodayButton';
-import { usePrayerTracking, DailyPrayers, PrayerSunnah, getComboMultiplier, getComboLabel } from '@/hooks/usePrayerTracking';
+import { OneTimeTooltip } from '@/components/OneTimeTooltip';
+import { usePrayerTracking, DailyPrayers, PrayerSunnah, getComboLabel } from '@/hooks/usePrayerTracking';
 import { useNafilahTracking } from '@/hooks/useNafilahTracking';
 import { useSwipe } from '@/hooks/useSwipe';
 import { haptics } from '@/lib/haptics';
+import { useTranslation } from '@/lib/i18n';
 import { AlertCircle, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const COMBO_THRESHOLDS = [10, 30, 50, 100];
 
-const prayerInfo: { key: keyof DailyPrayers; name: string; arabicName: string }[] = [
-  { key: 'fajr', name: 'Fajr', arabicName: 'الفجر' },
-  { key: 'dhuhr', name: 'Dhuhr', arabicName: 'الظهر' },
-  { key: 'asr', name: 'Asr', arabicName: 'العصر' },
-  { key: 'maghrib', name: 'Maghrib', arabicName: 'المغرب' },
-  { key: 'isha', name: 'Isha', arabicName: 'العشاء' },
+const prayerInfo: { key: keyof DailyPrayers; nameKey: any; arabicName: string }[] = [
+  { key: 'fajr', nameKey: 'prayerNames.fajr', arabicName: 'الفجر' },
+  { key: 'dhuhr', nameKey: 'prayerNames.dhuhr', arabicName: 'الظهر' },
+  { key: 'asr', nameKey: 'prayerNames.asr', arabicName: 'العصر' },
+  { key: 'maghrib', nameKey: 'prayerNames.maghrib', arabicName: 'المغرب' },
+  { key: 'isha', nameKey: 'prayerNames.isha', arabicName: 'العشاء' },
 ];
 
 export default function Prayers() {
+  const { t } = useTranslation();
   const [selectedDate, setSelectedDate] = useState(new Date());
-  
+
   const {
     prayers,
     streaks,
@@ -41,17 +44,11 @@ export default function Prayers() {
     getCompletedCount,
   } = usePrayerTracking(selectedDate);
 
-  const {
-    nafilahPrayers,
-    toggleNafilah,
-    getTotalNafilahPoints,
-  } = useNafilahTracking(selectedDate);
+  const { nafilahPrayers, toggleNafilah, getTotalNafilahPoints } = useNafilahTracking(selectedDate);
 
-  const comboLabel = getComboLabel(combo);
   const totalPoints = getTotalPoints() + getTotalNafilahPoints();
   const completedCount = getCompletedCount();
 
-  // Detect combo threshold crossings for color flash
   const prevComboRef = useRef(combo);
   const [comboFlash, setComboFlash] = useState(false);
   useEffect(() => {
@@ -67,7 +64,6 @@ export default function Prayers() {
     prevComboRef.current = combo;
   }, [combo]);
 
-  // Daily completion celebration
   const [celebrate, setCelebrate] = useState(false);
   const prevCompletedRef = useRef(completedCount);
   useEffect(() => {
@@ -79,7 +75,6 @@ export default function Prayers() {
     prevCompletedRef.current = completedCount;
   }, [completedCount, isToday]);
 
-  // Swipe gestures: left = next day, right = previous day
   const swipe = useSwipe({
     onSwipeLeft: () => {
       const next = addDays(selectedDate, 1);
@@ -94,6 +89,8 @@ export default function Prayers() {
     },
   });
 
+  const noneMarked = Object.values(prayers).every((p: any) => p.status === 'pending');
+
   return (
     <div
       className="container max-w-lg mx-auto px-4 py-6"
@@ -103,60 +100,51 @@ export default function Prayers() {
       <CompletionCelebration show={celebrate} onDismiss={() => setCelebrate(false)} />
       <JumpToTodayButton show={!isToday} onClick={() => setSelectedDate(new Date())} />
 
-
       <div className="mb-6">
         <h2 className="font-display text-2xl font-bold text-foreground mb-1">
-          {isToday ? 'Dagens böner' : 'Böner'}
+          {t('prayers.title')}
         </h2>
         <p className="text-muted-foreground text-sm">
-          {isToday 
-            ? 'Markera dina obligatoriska böner och sunnah'
-            : 'Fyll i böner för tidigare dagar'
-          }
+          {t('prayers.subtitle')}
         </p>
       </div>
 
-      <DateNavigator 
-        selectedDate={selectedDate} 
-        onDateChange={setSelectedDate} 
-      />
+      <DateNavigator selectedDate={selectedDate} onDateChange={setSelectedDate} />
 
       {!isToday && (
         <div className="flex items-start gap-3 p-3 rounded-xl bg-accent/10 border border-accent/30 mb-4">
           <AlertCircle className="h-5 w-5 text-accent flex-shrink-0 mt-0.5" />
           <div className="text-sm">
-            <p className="font-medium text-foreground">Backfill-läge</p>
-            <p className="text-muted-foreground">
-              Böner markerade som "Missad" läggs automatiskt till i Qadha.
-            </p>
+            <p className="font-medium text-foreground">{t('prayers.backfillMode')}</p>
+            <p className="text-muted-foreground">{t('prayers.backfillDesc')}</p>
           </div>
         </div>
       )}
 
-      {/* Combo indicator */}
+      <OneTimeTooltip
+        id="combo-intro"
+        show={combo >= 1}
+        title={t('combo.firstTimeTitle')}
+        description={t('combo.firstTimeDesc')}
+      />
+
       <AnimatePresence>
         {combo >= 10 && (
           <motion.div
             initial={{ opacity: 0, y: -8 }}
-            animate={{
-              opacity: 1,
-              y: 0,
-              scale: comboFlash ? [1, 1.04, 1] : 1,
-            }}
+            animate={{ opacity: 1, y: 0, scale: comboFlash ? [1, 1.04, 1] : 1 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.3 }}
             className={cn(
               'flex items-center justify-between p-3 rounded-xl border mb-4 transition-colors duration-500',
-              comboFlash
-                ? 'bg-primary/15 border-primary/50'
-                : 'bg-accent/10 border-accent/30'
+              comboFlash ? 'bg-primary/15 border-primary/50' : 'bg-accent/10 border-accent/30'
             )}
           >
             <div className="flex items-center gap-2">
               <Zap className={cn('h-5 w-5', comboFlash ? 'text-primary' : 'text-accent')} />
               <div>
-                <p className="text-sm font-bold text-foreground">{comboLabel}</p>
-                <p className="text-xs text-muted-foreground">{combo} böner i rad</p>
+                <p className="text-sm font-bold text-foreground">{getComboLabel(combo)}</p>
+                <p className="text-xs text-muted-foreground">{combo} {t('prayers.comboLabel')}</p>
               </div>
             </div>
             <motion.div
@@ -175,18 +163,19 @@ export default function Prayers() {
         )}
       </AnimatePresence>
 
+      <DailyStats totalPoints={totalPoints} completedPrayers={completedCount} totalPrayers={5} />
 
-      <DailyStats
-        totalPoints={totalPoints}
-        completedPrayers={getCompletedCount()}
-        totalPrayers={5}
-      />
+      {isToday && noneMarked && (
+        <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 text-center mb-4">
+          <p className="text-sm text-foreground">{t('prayers.empty')}</p>
+        </div>
+      )}
 
       <div className="space-y-4">
         {prayerInfo.map((prayer, index) => (
           <DailyPrayerCard
             key={prayer.key}
-            name={prayer.name}
+            name={t(prayer.nameKey)}
             arabicName={prayer.arabicName}
             status={prayers[prayer.key].status}
             streak={streaks[prayer.key]}
@@ -200,10 +189,7 @@ export default function Prayers() {
         ))}
       </div>
 
-      <NafilahSection
-        prayers={nafilahPrayers}
-        onToggle={toggleNafilah}
-      />
+      <NafilahSection prayers={nafilahPrayers} onToggle={toggleNafilah} />
     </div>
   );
 }

@@ -67,9 +67,6 @@ export function CompletionCelebration({
               <p className="font-display text-2xl font-bold text-foreground">
                 MashaAllah!
               </p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Alla böner klara
-              </p>
               <p className="text-xs text-primary mt-2" dir="rtl">
                 ما شاء الله
               </p>
