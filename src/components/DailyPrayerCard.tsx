@@ -138,7 +138,7 @@ export function DailyPrayerCard({
       </div>
 
       {/* Status Buttons */}
-      <div className="flex gap-2 mb-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
         <Button
           variant={status === 'on-time' ? 'default' : 'outline'}
           size="sm"
