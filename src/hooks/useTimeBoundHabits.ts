@@ -1,23 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
+import { getDateString } from '@/lib/date';
+import {
+  gregorianToHijri,
+  daysUntilHijriDate,
+  hijriMonths,
+  type HijriDate,
+} from '@/lib/hijri';
+import type { TimeBoundEvent } from '@/types';
 
-interface HijriDate {
-  day: number;
-  month: number;
-  year: number;
-}
-
-interface TimeBoundEvent {
-  id: string;
-  name: string;
-  arabicName: string;
-  type: 'weekly' | 'monthly' | 'yearly';
-  description: string;
-  points: number;
-  isActive: boolean;
-  daysUntil: number | null;
-  nextDate: string | null; // Formatted date string
-  hijriDate?: string; // For yearly events
-}
+export type { TimeBoundEvent };
 
 interface TimeBoundState {
   completed: Set<string>;
@@ -26,63 +17,6 @@ interface TimeBoundState {
 
 const TIMEBOUND_KEY = 'timebound-habits';
 const TIMEBOUND_PAUSED_KEY = 'timebound-paused';
-
-// Hijri month names
-const hijriMonths = [
-  { en: 'Muharram', ar: 'محرم' },
-  { en: 'Safar', ar: 'صفر' },
-  { en: "Rabi' al-Awwal", ar: 'ربيع الأول' },
-  { en: "Rabi' al-Thani", ar: 'ربيع الثاني' },
-  { en: 'Jumada al-Awwal', ar: 'جمادى الأولى' },
-  { en: 'Jumada al-Thani', ar: 'جمادى الثانية' },
-  { en: 'Rajab', ar: 'رجب' },
-  { en: "Sha'ban", ar: 'شعبان' },
-  { en: 'Ramadan', ar: 'رمضان' },
-  { en: 'Shawwal', ar: 'شوال' },
-  { en: "Dhu al-Qi'dah", ar: 'ذو القعدة' },
-  { en: 'Dhu al-Hijjah', ar: 'ذو الحجة' },
-];
-
-// Convert Gregorian to Hijri
-function gregorianToHijri(date: Date): HijriDate {
-  const gregorianYear = date.getFullYear();
-  const gregorianMonth = date.getMonth() + 1;
-  const gregorianDay = date.getDate();
-
-  const a = Math.floor((14 - gregorianMonth) / 12);
-  const y = gregorianYear + 4800 - a;
-  const m = gregorianMonth + 12 * a - 3;
-  const jdn = gregorianDay + Math.floor((153 * m + 2) / 5) + 365 * y + 
-              Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
-
-  const l = jdn - 1948440 + 10632;
-  const n = Math.floor((l - 1) / 10631);
-  const remainder = l - 10631 * n + 354;
-  const j = Math.floor((10985 - remainder) / 5316) * Math.floor((50 * remainder) / 17719) +
-            Math.floor(remainder / 5670) * Math.floor((43 * remainder) / 15238);
-  const adjustedRemainder = remainder - Math.floor((30 - j) / 15) * 
-                           Math.floor((17719 * j) / 50) - Math.floor(j / 16) * 
-                           Math.floor((15238 * j) / 43) + 29;
-  const hijriMonth = Math.floor((24 * adjustedRemainder) / 709);
-  const hijriDay = adjustedRemainder - Math.floor((709 * hijriMonth) / 24);
-  const hijriYear = 30 * n + j - 30;
-
-  return { day: hijriDay, month: hijriMonth, year: hijriYear };
-}
-
-// Calculate days until next occurrence of a Hijri date
-function daysUntilHijriDate(targetMonth: number, targetDay: number, currentHijri: HijriDate): number {
-  // Simple approximation - each Hijri month is ~29.5 days
-  const currentDayOfYear = (currentHijri.month - 1) * 29.5 + currentHijri.day;
-  const targetDayOfYear = (targetMonth - 1) * 29.5 + targetDay;
-  
-  let diff = targetDayOfYear - currentDayOfYear;
-  if (diff < 0) {
-    diff += 354; // Add a Hijri year
-  }
-  
-  return Math.round(diff);
-}
 
 // Get day of week (0 = Sunday, 5 = Friday)
 function getDayOfWeek(date: Date): number {
@@ -97,7 +31,6 @@ function daysUntilWeekday(targetDay: number, currentDate: Date): number {
   return diff;
 }
 
-const getDateString = (date: Date) => date.toISOString().split('T')[0];
 
 export function useTimeBoundHabits(selectedDate?: Date) {
   const today = new Date();
