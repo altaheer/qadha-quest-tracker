@@ -89,7 +89,7 @@ export const habitCategories: HabitCategory[] = [
 // Get all habit IDs
 const allHabitIds = habitCategories.flatMap(c => c.habits.map(h => h.id));
 
-const getDateString = (date: Date) => date.toISOString().split('T')[0];
+
 
 export function useHabitsTracking(selectedDate?: Date) {
   const today = new Date();

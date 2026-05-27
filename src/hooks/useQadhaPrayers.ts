@@ -1,12 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
+import type { PrayerCounts } from '@/types';
 
-export interface PrayerCounts {
-  fajr: number;
-  dhuhr: number;
-  asr: number;
-  maghrib: number;
-  isha: number;
-}
+export type { PrayerCounts };
 
 const STORAGE_KEY = 'qadha-prayer-counts';
 const GOAL_STORAGE_KEY = 'qadha-daily-goal';

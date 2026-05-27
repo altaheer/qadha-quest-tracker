@@ -1,21 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
+import { getDateString } from '@/lib/date';
+import type { NafilahDifficulty, NafilahPrayer, DailyNafilah } from '@/types';
 
-export type NafilahDifficulty = 'hard' | 'medium' | 'easy';
-
-export interface NafilahPrayer {
-  id: string;
-  name: string;
-  arabicName: string;
-  description: string;
-  difficulty: NafilahDifficulty;
-  points: number;
-  rakaat: string;
-  completed: boolean;
-}
-
-export interface DailyNafilah {
-  [date: string]: { [prayerId: string]: boolean };
-}
+export type { NafilahDifficulty, NafilahPrayer, DailyNafilah };
 
 const NAFILAH_KEY = 'nafilah-history';
 
@@ -88,7 +75,7 @@ export const nafilahPrayers: Omit<NafilahPrayer, 'completed'>[] = [
   },
 ];
 
-const getDateString = (date: Date) => date.toISOString().split('T')[0];
+
 
 export function useNafilahTracking(selectedDate?: Date) {
   const currentDate = selectedDate || new Date();
