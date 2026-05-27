@@ -57,33 +57,54 @@
   }
 
   .dark {
-    --background: 160 25% 8%;
-    --foreground: 40 30% 95%;
+    /* Deep navy/charcoal — easier on eyes than pure black */
+    --background: 222 30% 9%;        /* ~#0f172a */
+    --foreground: 210 30% 96%;       /* off-white */
 
-    --card: 160 20% 12%;
-    --card-foreground: 40 30% 95%;
+    --card: 220 25% 14%;             /* ~#1e293b */
+    --card-foreground: 210 30% 96%;
 
-    --popover: 160 20% 12%;
-    --popover-foreground: 40 30% 95%;
+    --popover: 220 25% 14%;
+    --popover-foreground: 210 30% 96%;
 
-    --primary: 158 40% 45%;
-    --primary-foreground: 160 25% 8%;
+    /* Sophisticated emerald, slightly brighter for dark bg */
+    --primary: 158 50% 42%;
+    --primary-foreground: 210 30% 98%;
 
-    --secondary: 160 15% 18%;
-    --secondary-foreground: 40 30% 90%;
+    --secondary: 220 20% 20%;
+    --secondary-foreground: 210 30% 92%;
 
-    --muted: 160 15% 18%;
-    --muted-foreground: 40 15% 60%;
+    --muted: 220 20% 18%;
+    --muted-foreground: 215 18% 70%;
 
-    --accent: 43 70% 50%;
-    --accent-foreground: 160 25% 8%;
+    /* Warm amber/gold accent instead of cold blue */
+    --accent: 38 85% 60%;
+    --accent-foreground: 222 40% 12%;
 
-    --destructive: 0 60% 45%;
-    --destructive-foreground: 40 30% 95%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 210 30% 96%;
 
-    --border: 160 15% 20%;
-    --input: 160 15% 20%;
-    --ring: 158 40% 45%;
+    --border: 220 18% 22%;
+    --input: 220 18% 22%;
+    --ring: 158 50% 42%;
+
+    /* Re-tone custom tokens for dark */
+    --emerald-deep: 158 45% 40%;
+    --emerald-light: 158 35% 22%;
+    --gold: 38 85% 60%;
+    --gold-light: 38 50% 25%;
+    --cream: 220 25% 14%;
+    --cream-dark: 222 30% 9%;
+    --flame: 25 95% 60%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(158 50% 35%), hsl(158 45% 45%));
+    --gradient-gold: linear-gradient(135deg, hsl(38 85% 55%), hsl(38 90% 65%));
+    --gradient-card: linear-gradient(180deg, hsl(220 25% 15%), hsl(222 28% 12%));
+
+    /* Dark mode prefers borders over shadows */
+    --shadow-soft: 0 4px 20px -4px hsl(0 0% 0% / 0.4);
+    --shadow-card: 0 2px 12px -2px hsl(0 0% 0% / 0.3);
+    --shadow-elevated: 0 8px 30px -6px hsl(0 0% 0% / 0.5);
   }
 }
 
@@ -95,6 +116,15 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Plus Jakarta Sans', sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Smooth theme switching across the app */
+  html.theme-transition,
+  html.theme-transition *,
+  html.theme-transition *::before,
+  html.theme-transition *::after {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, fill 0.3s ease, stroke 0.3s ease !important;
   }
 
   h1, h2, h3, h4, h5, h6 {

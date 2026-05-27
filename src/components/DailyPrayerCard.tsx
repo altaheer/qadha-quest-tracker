@@ -7,6 +7,7 @@ import { PrayerStatus, SunnahItem, PrayerStreak } from '@/hooks/usePrayerTrackin
 import { Checkbox } from '@/components/ui/checkbox';
 import { haptics } from '@/lib/haptics';
 import { useTranslation } from '@/lib/i18n';
+import { useUserPrefs } from '@/hooks/useUserPrefs';
 import {
   Collapsible,
   CollapsibleContent,
@@ -48,6 +49,7 @@ export function DailyPrayerCard({
   delay = 0,
 }: DailyPrayerCardProps) {
   const { t } = useTranslation();
+  const { showArabic } = useUserPrefs();
   const [isOpen, setIsOpen] = useState(false);
   const config = statusBg[status];
   const completedSunnah = sunnahItems.filter(s => s.completed).length;
@@ -107,7 +109,9 @@ export function DailyPrayerCard({
           </AnimatePresence>
           <div>
             <h3 className="font-display text-lg font-semibold text-foreground">{name}</h3>
-            <p className="text-muted-foreground text-sm" dir="rtl">{arabicName}</p>
+            {showArabic && (
+              <p className="text-muted-foreground text-sm" dir="rtl">{arabicName}</p>
+            )}
           </div>
         </div>
         
@@ -134,7 +138,7 @@ export function DailyPrayerCard({
       </div>
 
       {/* Status Buttons */}
-      <div className="flex gap-2 mb-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3 [&>button]:min-h-11">
         <Button
           variant={status === 'on-time' ? 'default' : 'outline'}
           size="sm"
@@ -211,16 +215,18 @@ export function DailyPrayerCard({
                   onCheckedChange={() => handleSunnah(item.id)}
                   className="h-5 w-5"
                 />
-                <div className="flex-1 flex items-center justify-between">
+                <div className="flex-1 flex items-center justify-between gap-2">
                   <span className={cn(
                     'text-sm',
                     item.completed && 'text-muted-foreground line-through'
                   )}>
                     {item.name}
                   </span>
-                  <span className="text-xs text-muted-foreground" dir="rtl">
-                    {item.arabicName}
-                  </span>
+                  {showArabic && (
+                    <span className="text-xs text-muted-foreground" dir="rtl">
+                      {item.arabicName}
+                    </span>
+                  )}
                 </div>
               </label>
               <Popover>
