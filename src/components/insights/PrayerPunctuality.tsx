@@ -8,6 +8,7 @@ interface PrayerPunctualityProps {
 export function PrayerPunctuality({ data, getPrayerDisplayName }: PrayerPunctualityProps) {
   const getStatusColor = (status: PrayerStatus) => {
     switch (status) {
+      case 'jamaah': return 'bg-primary';
       case 'on-time': return 'bg-primary';
       case 'late': return 'bg-accent';
       case 'missed': return 'bg-destructive/70';
