@@ -9,6 +9,8 @@ export type Translations = {
   status: { pending: string; onTime: string; jamaah: string; late: string; missed: string };
   qadha: { title: string; subtitle: string; dailyGoal: string; daysToComplete: string; totalRemaining: string; empty: string; resetAll: string; timeEstimate: string; perDay: string; total: string; daysNeeded: string; duration: string; completion: string };
   habits: { title: string; subtitle: string; level: string; easy: string; medium: string; hard: string; sahabah: string; custom: string; morning: string; evening: string; sleep: string; daily: string; paused: string; selectLevel: string; pointsToday: string; completed: string; active: string; pauseHint: string; activateHint: string; timeBound: string };
+  habitCategoryNames: Record<string, string>;
+  habitNames: Record<string, string>;
   insights: { title: string; subtitle: string; streak: string; bestDay: string; quran: string; weekly: string; punctuality: string; heatmap: string; balance: string; burndown: string; wheel: string; empty: string; heatmapTip: string };
   calendar: { title: string; gregorian: string; hijri: string; today: string };
   settings: { title: string; subtitle: string; language: string; notifications: string; backup: string; restore: string; darkMode: string; appearance: string; appearanceDesc: string; theme: string; showArabic: string; showArabicDesc: string; dataMgmt: string; dataMgmtDesc: string; dataInfo: string; dataInfoDesc: string; export: string; import: string; resetOnboarding: string; resetOnboardingDone: string };
