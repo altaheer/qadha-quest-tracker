@@ -8,11 +8,11 @@ const tabs = [
   { title: 'Hem', url: '/', icon: Home },
   { title: 'Böner', url: '/prayers', icon: Moon },
   { title: 'Qadha', url: '/qadha', icon: RotateCcw },
-  { title: 'Insikter', url: '/insights', icon: BarChart3 },
+  { title: 'Vanor', url: '/habits', icon: BookOpen },
 ];
 
 const moreItems = [
-  { title: 'Vanor', url: '/habits', icon: BookOpen },
+  { title: 'Insikter', url: '/insights', icon: BarChart3 },
   { title: 'Kalender', url: '/calendar', icon: CalendarIcon },
   { title: 'Inställningar', url: '/settings', icon: Settings },
 ];
