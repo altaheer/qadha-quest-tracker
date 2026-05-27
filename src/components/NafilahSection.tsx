@@ -2,6 +2,7 @@ import { Moon, Sun, Sunrise, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
 import { NafilahPrayer, NafilahDifficulty } from '@/hooks/useNafilahTracking';
+import { haptics } from '@/lib/haptics';
 
 interface NafilahSectionProps {
   prayers: NafilahPrayer[];
