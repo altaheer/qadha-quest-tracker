@@ -124,7 +124,7 @@ export default function Habits() {
                     }`}
                   >
                     <button
-                      onClick={() => toggleHabit(habit.id)}
+                      onClick={() => { import('@/lib/haptics').then(m => m.haptics.light()); toggleHabit(habit.id); }}
                       className="flex-1 flex items-center gap-3 text-left"
                     >
                       <div
