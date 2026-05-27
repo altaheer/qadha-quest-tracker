@@ -4,6 +4,7 @@ import { usePrayerTracking } from '@/hooks/usePrayerTracking';
 import { useQadhaPrayers } from '@/hooks/useQadhaPrayers';
 import { useHabitsTracking } from '@/hooks/useHabitsTracking';
 import { DailyStats } from '@/components/DailyStats';
+import { QuickActionsFAB } from '@/components/QuickActionsFAB';
 
 export default function Home() {
   const { getTotalPoints: getPrayerPoints, getCompletedCount } = usePrayerTracking();
