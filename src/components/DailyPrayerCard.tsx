@@ -201,27 +201,43 @@ export function DailyPrayerCard({
         </CollapsibleTrigger>
         <CollapsibleContent className="space-y-3 pt-3">
           {sunnahItems.map((item) => (
-            <label
+            <div
               key={item.id}
-              className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 cursor-pointer transition-colors tap-target"
+              className="flex items-center gap-2 p-3 rounded-lg hover:bg-muted/50 transition-colors tap-target"
             >
-              <Checkbox
-                checked={item.completed}
-                onCheckedChange={() => handleSunnah(item.id)}
-                className="h-5 w-5"
-              />
-              <div className="flex-1 flex items-center justify-between">
-                <span className={cn(
-                  'text-sm',
-                  item.completed && 'text-muted-foreground line-through'
-                )}>
-                  {item.name}
-                </span>
-                <span className="text-xs text-muted-foreground" dir="rtl">
-                  {item.arabicName}
-                </span>
-              </div>
-            </label>
+              <label className="flex-1 flex items-center gap-4 cursor-pointer">
+                <Checkbox
+                  checked={item.completed}
+                  onCheckedChange={() => handleSunnah(item.id)}
+                  className="h-5 w-5"
+                />
+                <div className="flex-1 flex items-center justify-between">
+                  <span className={cn(
+                    'text-sm',
+                    item.completed && 'text-muted-foreground line-through'
+                  )}>
+                    {item.name}
+                  </span>
+                  <span className="text-xs text-muted-foreground" dir="rtl">
+                    {item.arabicName}
+                  </span>
+                </div>
+              </label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); haptics.light(); }}
+                    className="p-1.5 rounded-lg text-muted-foreground/60 hover:text-foreground hover:bg-muted/70 transition-colors"
+                    aria-label="Info"
+                  >
+                    <Info className="h-4 w-4" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent side="top" className="w-64 text-sm">
+                  <p className="text-muted-foreground italic">Mer info kommer snart…</p>
+                </PopoverContent>
+              </Popover>
+            </div>
           ))}
         </CollapsibleContent>
       </Collapsible>
