@@ -7,6 +7,7 @@ import { PrayerStatus, SunnahItem, PrayerStreak } from '@/hooks/usePrayerTrackin
 import { Checkbox } from '@/components/ui/checkbox';
 import { haptics } from '@/lib/haptics';
 import { useTranslation } from '@/lib/i18n';
+import { useUserPrefs } from '@/hooks/useUserPrefs';
 import {
   Collapsible,
   CollapsibleContent,
@@ -48,6 +49,7 @@ export function DailyPrayerCard({
   delay = 0,
 }: DailyPrayerCardProps) {
   const { t } = useTranslation();
+  const { showArabic } = useUserPrefs();
   const [isOpen, setIsOpen] = useState(false);
   const config = statusBg[status];
   const completedSunnah = sunnahItems.filter(s => s.completed).length;
