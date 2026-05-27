@@ -27,7 +27,7 @@ const hardHabits = [
   'duha', 'bismillah', 'right-hand', 'smile'
 ];
 
-const levelHabits: Record<HabitLevel, string[]> = {
+export const levelHabits: Record<HabitLevel, string[]> = {
   easy: [
     'morning-adhkar', 'evening-adhkar', 'wake-dua',
     'sleep-dua', 'sleep-kursi', 'sleep-3quls'
