@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, Clock, X, ChevronDown, ChevronUp, Flame, Users } from 'lucide-react';
+import { Check, Clock, X, ChevronDown, ChevronUp, Flame, Users, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -12,6 +12,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 interface DailyPrayerCardProps {
   name: string;
