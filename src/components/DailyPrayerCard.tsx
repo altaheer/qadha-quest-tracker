@@ -109,7 +109,9 @@ export function DailyPrayerCard({
           </AnimatePresence>
           <div>
             <h3 className="font-display text-lg font-semibold text-foreground">{name}</h3>
-            <p className="text-muted-foreground text-sm" dir="rtl">{arabicName}</p>
+            {showArabic && (
+              <p className="text-muted-foreground text-sm" dir="rtl">{arabicName}</p>
+            )}
           </div>
         </div>
         
