@@ -1,6 +1,7 @@
 import { Sun, Moon as MoonIcon, Bed, Utensils, Settings2, Pause, Play } from 'lucide-react';
 import { useHabitsTracking, habitCategories } from '@/hooks/useHabitsTracking';
 import { TimeBoundSection } from '@/components/TimeBoundSection';
+import { haptics } from '@/lib/haptics';
 
 type HabitLevel = 'easy' | 'medium' | 'hard' | 'sahabah' | 'custom';
 
@@ -124,7 +125,7 @@ export default function Habits() {
                     }`}
                   >
                     <button
-                      onClick={() => { import('@/lib/haptics').then(m => m.haptics.light()); toggleHabit(habit.id); }}
+                      onClick={() => { haptics.light(); toggleHabit(habit.id); }}
                       className="flex-1 flex items-center gap-3 text-left"
                     >
                       <div
