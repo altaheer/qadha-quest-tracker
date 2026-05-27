@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { PrayerStatus, SunnahItem, PrayerStreak } from '@/hooks/usePrayerTracking';
 import { Checkbox } from '@/components/ui/checkbox';
 import { haptics } from '@/lib/haptics';
+import { useTranslation } from '@/lib/i18n';
 import {
   Collapsible,
   CollapsibleContent,
@@ -25,37 +26,12 @@ interface DailyPrayerCardProps {
   delay?: number;
 }
 
-const statusConfig = {
-  pending: {
-    bgClass: 'bg-card',
-    borderClass: 'border-border/50',
-    label: 'Väntar',
-    icon: null,
-  },
-  'on-time': {
-    bgClass: 'bg-primary/10',
-    borderClass: 'border-primary/30',
-    label: 'I tid',
-    icon: Check,
-  },
-  jamaah: {
-    bgClass: 'bg-primary/20',
-    borderClass: 'border-primary/50',
-    label: 'Jamaah',
-    icon: Users,
-  },
-  late: {
-    bgClass: 'bg-accent/10',
-    borderClass: 'border-accent/30',
-    label: 'Sent',
-    icon: Clock,
-  },
-  missed: {
-    bgClass: 'bg-muted',
-    borderClass: 'border-muted-foreground/20',
-    label: 'Missad',
-    icon: X,
-  },
+const statusBg: Record<PrayerStatus, { bg: string; border: string; icon: any }> = {
+  pending: { bg: 'bg-card', border: 'border-border/50', icon: null },
+  'on-time': { bg: 'bg-primary/10', border: 'border-primary/30', icon: Check },
+  jamaah: { bg: 'bg-primary/20', border: 'border-primary/50', icon: Users },
+  late: { bg: 'bg-accent/10', border: 'border-accent/30', icon: Clock },
+  missed: { bg: 'bg-muted', border: 'border-muted-foreground/20', icon: X },
 };
 
 export function DailyPrayerCard({
