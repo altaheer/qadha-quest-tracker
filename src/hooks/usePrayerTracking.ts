@@ -53,6 +53,12 @@ const createDefaultSunnah = (): PrayerSunnah => ({
     { id: 'fajr-siwak', name: 'Siwāk', arabicName: 'السواك', completed: false },
     { id: 'fajr-adhan', name: 'Answer Adhān', arabicName: 'إجابة الأذان', completed: false },
     { id: 'fajr-sunnah', name: '2 Rak\'at Sunnah', arabicName: 'ركعتا الفجر', completed: false },
+  fajr: [
+    { id: 'fajr-siwak', name: 'Siwāk', arabicName: 'السواك', completed: false },
+    { id: 'fajr-adhan', name: 'Answer Adhān', arabicName: 'إجابة الأذان', completed: false },
+    { id: 'fajr-sunnah', name: '2 Rak\'at Sunnah', arabicName: 'ركعتا الفجر', completed: false },
+    { id: 'fajr-tasbih', name: '33× Subhanallah · Alhamdulillah · Allahu Akbar', arabicName: 'التسبيح بعد الصلاة', completed: false },
+    { id: 'fajr-kursi', name: 'Āyat al-Kursī', arabicName: 'آية الكرسي', completed: false },
     { id: 'fajr-dua', name: 'Du\'ā\' after prayer', arabicName: 'الدعاء بعد الصلاة', completed: false },
   ],
   dhuhr: [
@@ -60,42 +66,37 @@ const createDefaultSunnah = (): PrayerSunnah => ({
     { id: 'dhuhr-adhan', name: 'Answer Adhān', arabicName: 'إجابة الأذان', completed: false },
     { id: 'dhuhr-sunnah-before', name: '2-4 Rak\'at before', arabicName: 'ركعات قبلية', completed: false },
     { id: 'dhuhr-sunnah-after', name: '2-4 Rak\'at after', arabicName: 'ركعات بعدية', completed: false },
+    { id: 'dhuhr-tasbih', name: '33× Subhanallah · Alhamdulillah · Allahu Akbar', arabicName: 'التسبيح بعد الصلاة', completed: false },
+    { id: 'dhuhr-kursi', name: 'Āyat al-Kursī', arabicName: 'آية الكرسي', completed: false },
     { id: 'dhuhr-dua', name: 'Du\'ā\' after prayer', arabicName: 'الدعاء بعد الصلاة', completed: false },
   ],
   asr: [
     { id: 'asr-siwak', name: 'Siwāk', arabicName: 'السواك', completed: false },
     { id: 'asr-adhan', name: 'Answer Adhān', arabicName: 'إجابة الأذان', completed: false },
     { id: 'asr-sunnah-before', name: '4 Rak\'at before Asr', arabicName: 'أربع ركعات قبل العصر', completed: false },
-    { id: 'asr-dua', name: 'Du\'ā\' after prayer', arabicName: 'الدعاء بعد الصلاة', completed: false },
+    { id: 'asr-tasbih', name: '33× Subhanallah · Alhamdulillah · Allahu Akbar', arabicName: 'التسبيح بعد الصلاة', completed: false },
     { id: 'asr-kursi', name: 'Āyat al-Kursī', arabicName: 'آية الكرسي', completed: false },
+    { id: 'asr-dua', name: 'Du\'ā\' after prayer', arabicName: 'الدعاء بعد الصلاة', completed: false },
   ],
   maghrib: [
     { id: 'maghrib-siwak', name: 'Siwāk', arabicName: 'السواك', completed: false },
     { id: 'maghrib-adhan', name: 'Answer Adhān', arabicName: 'إجابة الأذان', completed: false },
     { id: 'maghrib-sunnah', name: '2 Rak\'at Sunnah', arabicName: 'ركعتان بعدية', completed: false },
-    { id: 'maghrib-dua', name: 'Du\'ā\' after prayer', arabicName: 'الدعاء بعد الصلاة', completed: false },
+    { id: 'maghrib-tasbih', name: '33× Subhanallah · Alhamdulillah · Allahu Akbar', arabicName: 'التسبيح بعد الصلاة', completed: false },
     { id: 'maghrib-kursi', name: 'Āyat al-Kursī', arabicName: 'آية الكرسي', completed: false },
+    { id: 'maghrib-dua', name: 'Du\'ā\' after prayer', arabicName: 'الدعاء بعد الصلاة', completed: false },
   ],
+
   isha: [
     { id: 'isha-siwak', name: 'Siwāk', arabicName: 'السواک', completed: false },
     { id: 'isha-adhan', name: 'Answer Adhān', arabicName: 'إجابة الأذان', completed: false },
     { id: 'isha-sunnah', name: '2 Rak\'at Sunnah', arabicName: 'ركعتان بعدية', completed: false },
     { id: 'isha-witr', name: 'Witr prayer', arabicName: 'صلاة الوتر', completed: false },
-    { id: 'isha-dua', name: 'Du\'ā\' after prayer', arabicName: 'الدعاء بعد الصلاة', completed: false },
+    { id: 'isha-tasbih', name: '33× Subhanallah · Alhamdulillah · Allahu Akbar', arabicName: 'التسبيح بعد الصلاة', completed: false },
     { id: 'isha-kursi', name: 'Āyat al-Kursī', arabicName: 'آية الكرسي', completed: false },
+    { id: 'isha-dua', name: 'Du\'ā\' after prayer', arabicName: 'الدعاء بعد الصلاة', completed: false },
   ],
-});
 
-// Combo multiplier: +0.1x per 10 consecutive on-time/jamaah prayers
-export function getComboMultiplier(combo: number): number {
-  return 1 + Math.floor(combo / 10) * 0.1;
-}
-
-export function getComboLabel(combo: number): string | null {
-  if (combo < 10) return null;
-  if (combo >= 200) return '🔥🔥🔥 LEGENDARY';
-  if (combo >= 150) return '🔥🔥 EPIC';
-  if (combo >= 100) return '🔥 MASTER';
   if (combo >= 50) return '⚡ EXCELLENT';
   if (combo >= 30) return '💪 GREAT';
   if (combo >= 10) return '✨ COMBO';

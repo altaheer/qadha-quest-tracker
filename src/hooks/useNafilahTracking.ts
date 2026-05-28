@@ -14,7 +14,14 @@ export const nafilahPrayers: Omit<NafilahPrayer, 'completed'>[] = [
     arabicName: 'تهجد',
     description: 'Nattbönen – vakna mitt i natten',
     difficulty: 'hard',
-    points: 50,
+  // Hard
+  {
+    id: 'tahajjud',
+    name: 'Tahajjud',
+    arabicName: 'تهجد',
+    description: 'Nattbönen – vakna mitt i natten',
+    difficulty: 'hard',
+    points: 20,
     rakaat: '2–8 rak\'at',
   },
   {
@@ -23,7 +30,7 @@ export const nafilahPrayers: Omit<NafilahPrayer, 'completed'>[] = [
     arabicName: 'صلاة التسبيح',
     description: 'Förlåtelsebönen – 300 tasbih under bönen',
     difficulty: 'hard',
-    points: 40,
+    points: 15,
     rakaat: '4 rak\'at',
   },
   // Medium
@@ -33,7 +40,7 @@ export const nafilahPrayers: Omit<NafilahPrayer, 'completed'>[] = [
     arabicName: 'إشراق',
     description: 'Bönen efter soluppgång – stanna vaken efter Fajr',
     difficulty: 'medium',
-    points: 25,
+    points: 12,
     rakaat: '2–4 rak\'at',
   },
   {
@@ -42,7 +49,7 @@ export const nafilahPrayers: Omit<NafilahPrayer, 'completed'>[] = [
     arabicName: 'صلاة الضحى',
     description: 'Förmiddagsbönen – under arbetstid',
     difficulty: 'medium',
-    points: 20,
+    points: 10,
     rakaat: '2–8 rak\'at',
   },
   {
@@ -51,7 +58,7 @@ export const nafilahPrayers: Omit<NafilahPrayer, 'completed'>[] = [
     arabicName: 'الأوابين',
     description: 'Mellan Maghrib och Isha',
     difficulty: 'medium',
-    points: 20,
+    points: 10,
     rakaat: '2–6 rak\'at',
   },
   // Easy
@@ -61,7 +68,7 @@ export const nafilahPrayers: Omit<NafilahPrayer, 'completed'>[] = [
     arabicName: 'استخارة / حاجة',
     description: 'Väglednings- eller behovsbönen',
     difficulty: 'easy',
-    points: 10,
+    points: 5,
     rakaat: '2 rak\'at',
   },
   {
@@ -70,7 +77,10 @@ export const nafilahPrayers: Omit<NafilahPrayer, 'completed'>[] = [
     arabicName: 'تحية المسجد',
     description: 'Hälsning till moskén',
     difficulty: 'easy',
-    points: 5,
+    points: 3,
+    rakaat: '2 rak\'at',
+  },
+
     rakaat: '2 rak\'at',
   },
 ];
