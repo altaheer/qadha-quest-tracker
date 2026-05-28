@@ -271,7 +271,7 @@ export function usePrayerTracking(selectedDate?: Date) {
     const status = prayers[prayer].status;
     
     let base = 0;
-    if (status === 'jamaah') base = 27;
+    if (status === 'jamaah') base = 25;
     else if (status === 'on-time') base = 10;
     else if (status === 'late') base = 6;
     
