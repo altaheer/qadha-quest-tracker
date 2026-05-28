@@ -14,13 +14,6 @@ export const nafilahPrayers: Omit<NafilahPrayer, 'completed'>[] = [
     arabicName: 'تهجد',
     description: 'Nattbönen – vakna mitt i natten',
     difficulty: 'hard',
-  // Hard
-  {
-    id: 'tahajjud',
-    name: 'Tahajjud',
-    arabicName: 'تهجد',
-    description: 'Nattbönen – vakna mitt i natten',
-    difficulty: 'hard',
     points: 20,
     rakaat: '2–8 rak\'at',
   },
@@ -80,10 +73,8 @@ export const nafilahPrayers: Omit<NafilahPrayer, 'completed'>[] = [
     points: 3,
     rakaat: '2 rak\'at',
   },
-
-    rakaat: '2 rak\'at',
-  },
 ];
+
 
 
 
