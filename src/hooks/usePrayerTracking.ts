@@ -272,8 +272,8 @@ export function usePrayerTracking(selectedDate?: Date) {
     
     let base = 0;
     if (status === 'jamaah') base = 25;
-    else if (status === 'on-time') base = 10;
-    else if (status === 'late') base = 6;
+    else if (status === 'on-time') base = 15;
+    else if (status === 'late') base = 5;
     
     return Math.round(base * comboMultiplier);
   }, [prayers, comboMultiplier]);
