@@ -17,26 +17,31 @@ const PAUSED_KEY = 'habits-paused';
 const LEVEL_KEY = 'habits-level';
 
 // Define which habits are active per level
-const sahabahExtras = [
-  'tahajjud-prep', 'quran-daily', 'istighfar-100', 'salawat-100', 'sadaqah-daily', 'dua-parents'
+const easyHabits = [
+  'morning-adhkar', 'evening-adhkar', 'wake-dua', 'sleep-dua',
+  'sleep-3quls', 'sleep-kursi', 'bismillah',
+];
+
+const mediumHabits = [
+  ...easyHabits,
+  'wake-siwak', 'sleep-mulk', 'sleep-baqarah',
+  'dua-after-eating', 'dua-leave-home', 'dua-enter-home',
+  'dua-before-bathroom', 'dua-after-bathroom', 'duha',
 ];
 
 const hardHabits = [
-  'morning-adhkar', 'evening-adhkar', 'wake-dua', 'wake-siwak',
-  'sleep-dua', 'sleep-kursi', 'sleep-3quls', 'sleep-wudu', 'sleep-mulk', 'sleep-baqarah', 'sleep-right',
-  'duha', 'bismillah', 'right-hand', 'smile'
+  ...mediumHabits,
+  'sleep-wudu', 'sleep-right', 'right-hand', 'smile',
+];
+
+const sahabahExtras = [
+  'tahajjud-prep', 'quran-daily', 'istighfar-100',
+  'salawat-100', 'sadaqah-daily', 'dua-parents',
 ];
 
 export const levelHabits: Record<HabitLevel, string[]> = {
-  easy: [
-    'morning-adhkar', 'evening-adhkar', 'wake-dua',
-    'sleep-dua', 'sleep-kursi', 'sleep-3quls'
-  ],
-  medium: [
-    'morning-adhkar', 'evening-adhkar', 'wake-dua', 'wake-siwak',
-    'sleep-dua', 'sleep-kursi', 'sleep-3quls', 'sleep-wudu', 'sleep-mulk',
-    'duha', 'bismillah'
-  ],
+  easy: easyHabits,
+  medium: mediumHabits,
   hard: hardHabits,
   sahabah: [...hardHabits, ...sahabahExtras],
   custom: [], // All habits available, user controls individually
@@ -66,11 +71,11 @@ export const habitCategories: HabitCategory[] = [
     name: 'Innan sömn',
     icon: 'Bed',
     habits: [
-      { id: 'sleep-wudu', name: 'Wudu före sömn', arabicName: 'الوضوء قبل النوم', points: 3, category: 'sleep' },
-      { id: 'sleep-kursi', name: 'Āyat al-Kursī', arabicName: 'آية الكرسي', points: 4, category: 'sleep' },
-      { id: 'sleep-mulk', name: 'Sūrah Al-Mulk', arabicName: 'سورة الملك', points: 4, category: 'sleep' },
+      { id: 'sleep-wudu', name: 'Wudu före sömn', arabicName: 'الوضوء قبل النوم', points: 4, category: 'sleep' },
+      { id: 'sleep-kursi', name: 'Āyat al-Kursī', arabicName: 'آية الكرسي', points: 3, category: 'sleep' },
+      { id: 'sleep-mulk', name: 'Sūrah Al-Mulk', arabicName: 'سورة الملك', points: 5, category: 'sleep' },
       { id: 'sleep-3quls', name: '3 Quls', arabicName: 'المعوذات', points: 3, category: 'sleep' },
-      { id: 'sleep-baqarah', name: 'Sista 2 verserna Al-Baqarah', arabicName: 'خواتيم البقرة', points: 3, category: 'sleep' },
+      { id: 'sleep-baqarah', name: 'Sista 2 verserna Al-Baqarah', arabicName: 'خواتيم البقرة', points: 4, category: 'sleep' },
       { id: 'sleep-dua', name: 'Sova-du\'a', arabicName: 'دعاء النوم', points: 2, category: 'sleep' },
       { id: 'sleep-right', name: 'Sova på höger sida', arabicName: 'النوم على الشق الأيمن', points: 2, category: 'sleep' },
     ],
@@ -80,10 +85,36 @@ export const habitCategories: HabitCategory[] = [
     name: 'Under dagen',
     icon: 'Utensils',
     habits: [
-      { id: 'duha', name: 'Duha-bön', arabicName: 'صلاة الضحى', points: 5, category: 'daily' },
-      { id: 'bismillah', name: 'Bismillah före mat', arabicName: 'البسملة', points: 2, category: 'daily' },
+      { id: 'duha', name: 'Duha-bön', arabicName: 'صلاة الضحى', points: 8, category: 'daily' },
       { id: 'right-hand', name: 'Äta med höger hand', arabicName: 'الأكل باليمين', points: 2, category: 'daily' },
       { id: 'smile', name: 'Le mot andra', arabicName: 'التبسم', points: 2, category: 'daily' },
+    ],
+  },
+  {
+    id: 'mealtime',
+    name: 'Mealtime',
+    icon: 'Utensils',
+    habits: [
+      { id: 'bismillah', name: 'Bismillah före mat', arabicName: 'البسملة', points: 2, category: 'mealtime' },
+      { id: 'dua-after-eating', name: 'Du\'a after eating', arabicName: 'دعاء بعد الأكل', points: 2, category: 'mealtime' },
+    ],
+  },
+  {
+    id: 'home',
+    name: 'Home',
+    icon: 'Home',
+    habits: [
+      { id: 'dua-leave-home', name: 'Du\'a when leaving home', arabicName: 'دعاء الخروج', points: 2, category: 'home' },
+      { id: 'dua-enter-home', name: 'Du\'a when entering home', arabicName: 'دعاء الدخول', points: 2, category: 'home' },
+    ],
+  },
+  {
+    id: 'bathroom',
+    name: 'Bathroom',
+    icon: 'Droplets',
+    habits: [
+      { id: 'dua-before-bathroom', name: 'Du\'a before entering', arabicName: 'دعاء دخول الخلاء', points: 1, category: 'bathroom' },
+      { id: 'dua-after-bathroom', name: 'Du\'a after leaving', arabicName: 'دعاء الخروج من الخلاء', points: 1, category: 'bathroom' },
     ],
   },
   {
@@ -93,10 +124,26 @@ export const habitCategories: HabitCategory[] = [
     habits: [
       { id: 'tahajjud-prep', name: 'Intention för Tahajjud', arabicName: 'نية قيام الليل', points: 5, category: 'sahabah' },
       { id: 'quran-daily', name: 'Daglig Quran-läsning (min 1 sida)', arabicName: 'قراءة القرآن يوميًا', points: 8, category: 'sahabah' },
-      { id: 'istighfar-100', name: '100x Istighfar', arabicName: 'مئة استغفار', points: 5, category: 'sahabah' },
-      { id: 'salawat-100', name: '100x Salawat på Profeten ﷺ', arabicName: 'مئة صلاة على النبي', points: 5, category: 'sahabah' },
+      { id: 'istighfar-100', name: '100x Istighfar', arabicName: 'مئة استغفار', points: 4, category: 'sahabah' },
+      { id: 'salawat-100', name: '100x Salawat på Profeten ﷺ', arabicName: 'مئة صلاة على النبي', points: 4, category: 'sahabah' },
       { id: 'sadaqah-daily', name: 'Daglig sadaqah', arabicName: 'صدقة يومية', points: 8, category: 'sahabah' },
       { id: 'dua-parents', name: 'Du\'a för föräldrar', arabicName: 'دعاء للوالدين', points: 3, category: 'sahabah' },
+    ],
+  },
+  {
+    id: 'misc',
+    name: 'Miscellaneous',
+    icon: 'Lightbulb',
+    habits: [
+      { id: 'misc-salaam', name: 'Say salaam', arabicName: 'إلقاء السلام', points: 2, category: 'misc' },
+      { id: 'misc-gaze', name: 'Lower your gaze', arabicName: 'غض البصر', points: 2, category: 'misc' },
+      { id: 'misc-speech', name: 'Speak good or remain silent', arabicName: 'قل خيراً أو اصمت', points: 2, category: 'misc' },
+      { id: 'misc-parents', name: 'Respect parents in word and tone', arabicName: 'بر الوالدين', points: 3, category: 'misc' },
+      { id: 'misc-husn', name: 'Think well of others', arabicName: 'حسن الظن', points: 2, category: 'misc' },
+      { id: 'misc-harm', name: 'Remove harm from the path', arabicName: 'إماطة الأذى', points: 2, category: 'misc' },
+      { id: 'misc-water', name: 'Do not waste water', arabicName: 'عدم إسراف الماء', points: 2, category: 'misc' },
+      { id: 'misc-walk', name: 'Walk humbly', arabicName: 'التواضع في المشية', points: 2, category: 'misc' },
+      { id: 'misc-bismillah-all', name: 'Begin every action with Bismillah', arabicName: 'البسملة', points: 2, category: 'misc' },
     ],
   },
 ];
