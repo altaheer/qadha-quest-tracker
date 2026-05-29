@@ -18,6 +18,7 @@ export type Translations = {
   onboarding: { step1Title: string; step1Desc: string; step2Title: string; step2Desc: string; step3Title: string; step3Desc: string; dontKnow: string; step: string };
   fab: { markFajr: string; addQadha: string; logHabit: string; quickActions: string };
   combo: { onFire: string; firstTimeTitle: string; firstTimeDesc: string };
+  hadith: { source: string; fadl: string; comingSoon: string };
 };
 
 const en: Translations = {
@@ -53,6 +54,7 @@ const en: Translations = {
   onboarding: { step1Title: 'Welcome to Qadha Companion', step1Desc: 'Track your prayers, habits, and spiritual growth', step2Title: 'Set your Qadha', step2Desc: 'How many missed prayers do you need to make up?', step3Title: 'Choose your level', step3Desc: 'Select Easy, Medium, Hard, or Sahabah mode', dontKnow: "I don't know yet", step: 'Step' },
   fab: { markFajr: 'Mark Fajr', addQadha: 'Add Qadha', logHabit: 'Log habit', quickActions: 'Quick actions' },
   combo: { onFire: 'On fire!', firstTimeTitle: 'Combo started!', firstTimeDesc: 'Pray on time or in jamaah in a row to grow your combo and earn bonus points.' },
+  hadith: { source: 'Source', fadl: 'Benefit', comingSoon: 'More info coming soon' },
 };
 
 const sv: Translations = {
@@ -88,6 +90,7 @@ const sv: Translations = {
   onboarding: { step1Title: 'Välkommen till Qadha Companion', step1Desc: 'Spåra dina böner, vanor och andliga utveckling', step2Title: 'Sätt din Qadha', step2Desc: 'Hur många missade böner behöver du ta igen?', step3Title: 'Välj din nivå', step3Desc: 'Välj Easy, Medium, Hard eller Sahabah-läge', dontKnow: 'Jag vet inte än', step: 'Steg' },
   fab: { markFajr: 'Markera Fajr', addQadha: 'Lägg till Qadha', logHabit: 'Logga vana', quickActions: 'Snabbåtgärder' },
   combo: { onFire: 'On fire!', firstTimeTitle: 'Combo startad!', firstTimeDesc: 'Be i tid eller i jamaah i rad för att öka din combo och få bonuspoäng.' },
+  hadith: { source: 'Källa', fadl: 'Förtjänst', comingSoon: 'Mer info kommer snart' },
 };
 
 const tr: Translations = {
@@ -123,6 +126,7 @@ const tr: Translations = {
   onboarding: { step1Title: 'Qadha Companion\'a hoş geldin', step1Desc: 'Namazlarını, alışkanlıklarını ve manevi gelişimini takip et', step2Title: 'Kaza\'nı belirle', step2Desc: 'Kaç tane kaçırılmış namazın var?', step3Title: 'Seviyeni seç', step3Desc: 'Kolay, Orta, Zor veya Sahabe modunu seç', dontKnow: 'Henüz bilmiyorum', step: 'Adım' },
   fab: { markFajr: 'Sabah namazını işaretle', addQadha: 'Kaza ekle', logHabit: 'Alışkanlık kaydet', quickActions: 'Hızlı işlemler' },
   combo: { onFire: 'Ateş gibi!', firstTimeTitle: 'Kombo başladı!', firstTimeDesc: 'Vaktinde ya da cemaatle arka arkaya kıl, kombo büyüsün, bonus puan kazan.' },
+  hadith: { source: 'Kaynak', fadl: 'Faydası', comingSoon: 'Yakında daha fazla bilgi' },
 };
 
 const ar: Translations = {
@@ -158,6 +162,7 @@ const ar: Translations = {
   onboarding: { step1Title: 'مرحباً بك في رفيق القضاء', step1Desc: 'تابع صلواتك وعاداتك ونموّك الروحي', step2Title: 'حدّد القضاء', step2Desc: 'كم عدد الصلوات التي تحتاج إلى قضائها؟', step3Title: 'اختر مستواك', step3Desc: 'اختر سهل، متوسط، صعب أو وضع الصحابة', dontKnow: 'لا أعرف بعد', step: 'الخطوة' },
   fab: { markFajr: 'سجّل الفجر', addQadha: 'أضف قضاء', logHabit: 'سجّل عادة', quickActions: 'إجراءات سريعة' },
   combo: { onFire: 'مشتعل!', firstTimeTitle: 'بدأت السلسلة!', firstTimeDesc: 'صلّ في الوقت أو في جماعة على التوالي لتنمو سلسلتك وتحصل على نقاط إضافية.' },
+  hadith: { source: 'المصدر', fadl: 'الفضل', comingSoon: 'قريباً' },
 };
 
 export const translations: Record<Language, Translations> = { en, sv, tr, ar };

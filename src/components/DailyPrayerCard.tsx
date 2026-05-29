@@ -14,6 +14,7 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { HadithInfoContent } from '@/components/HadithInfoContent';
 
 interface DailyPrayerCardProps {
   name: string;
@@ -239,8 +240,8 @@ export function DailyPrayerCard({
                     <Info className="h-4 w-4" />
                   </button>
                 </PopoverTrigger>
-                <PopoverContent side="top" className="w-64 text-sm">
-                  <p className="text-muted-foreground italic">Mer info kommer snart…</p>
+                <PopoverContent side="top" className="w-72">
+                  <HadithInfoContent id={item.id} />
                 </PopoverContent>
               </Popover>
             </div>
