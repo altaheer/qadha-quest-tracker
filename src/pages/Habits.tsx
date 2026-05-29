@@ -6,6 +6,7 @@ import { haptics } from '@/lib/haptics';
 import { useTranslation } from '@/lib/i18n';
 import { useUserPrefs } from '@/hooks/useUserPrefs';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { HadithInfoContent } from '@/components/HadithInfoContent';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
 
@@ -39,8 +40,8 @@ function InfoButton({ id }: { id: string }) {
           <Info className="h-4 w-4" />
         </button>
       </PopoverTrigger>
-      <PopoverContent side="top" className="w-64 text-sm">
-        <p className="text-muted-foreground italic">Mer info kommer snart…</p>
+      <PopoverContent side="top" className="w-72">
+        <HadithInfoContent id={id} />
       </PopoverContent>
     </Popover>
   );
