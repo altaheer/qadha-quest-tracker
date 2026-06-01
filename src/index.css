@@ -7,49 +7,49 @@
 @layer base {
   :root {
     --background: 40 30% 97%;
-    --foreground: 160 30% 15%;
+    --foreground: 160 18% 18%;
 
-    --card: 40 25% 95%;
-    --card-foreground: 160 30% 15%;
+    --card: 40 20% 94%;
+    --card-foreground: 160 18% 18%;
 
-    --popover: 40 25% 95%;
-    --popover-foreground: 160 30% 15%;
+    --popover: 40 20% 94%;
+    --popover-foreground: 160 18% 18%;
 
-    --primary: 158 45% 25%;
-    --primary-foreground: 40 30% 97%;
+    --primary: 158 28% 32%;
+    --primary-foreground: 40 25% 97%;
 
-    --secondary: 40 35% 90%;
-    --secondary-foreground: 160 30% 20%;
+    --secondary: 40 22% 89%;
+    --secondary-foreground: 160 18% 22%;
 
-    --muted: 40 20% 92%;
-    --muted-foreground: 160 15% 45%;
+    --muted: 40 16% 90%;
+    --muted-foreground: 160 10% 46%;
 
-    --accent: 43 75% 55%;
-    --accent-foreground: 160 30% 15%;
+    --accent: 38 48% 58%;
+    --accent-foreground: 160 22% 16%;
 
-    --destructive: 0 65% 50%;
-    --destructive-foreground: 40 30% 97%;
+    --destructive: 4 50% 52%;
+    --destructive-foreground: 40 25% 97%;
 
-    --border: 40 20% 88%;
-    --input: 40 20% 88%;
-    --ring: 158 45% 25%;
+    --border: 40 16% 85%;
+    --input: 40 16% 85%;
+    --ring: 158 28% 32%;
 
     --radius: 0.75rem;
 
     /* Custom tokens */
-    --emerald-deep: 158 50% 20%;
-    --emerald-light: 158 35% 85%;
-    --gold: 43 75% 55%;
-    --gold-light: 43 60% 85%;
-    --cream: 40 30% 97%;
-    --cream-dark: 40 25% 92%;
-    --flame: 25 95% 53%;
-    
+    --emerald-deep: 158 32% 26%;
+    --emerald-light: 158 22% 84%;
+    --gold: 38 48% 58%;
+    --gold-light: 38 38% 84%;
+    --cream: 40 25% 96%;
+    --cream-dark: 40 20% 90%;
+    --flame: 20 70% 56%;
+
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(158 50% 20%), hsl(158 45% 30%));
-    --gradient-gold: linear-gradient(135deg, hsl(43 75% 55%), hsl(43 80% 65%));
-    --gradient-card: linear-gradient(180deg, hsl(40 30% 98%), hsl(40 25% 95%));
-    
+    --gradient-primary: linear-gradient(135deg, hsl(158 32% 24%), hsl(158 28% 34%));
+    --gradient-gold: linear-gradient(135deg, hsl(38 48% 56%), hsl(38 52% 66%));
+    --gradient-card: linear-gradient(180deg, hsl(40 25% 97%), hsl(40 20% 94%));
+
     /* Shadows */
     --shadow-soft: 0 4px 20px -4px hsl(158 30% 20% / 0.1);
     --shadow-card: 0 2px 12px -2px hsl(158 30% 20% / 0.08);
@@ -57,49 +57,45 @@
   }
 
   .dark {
-    /* Deep navy/charcoal — easier on eyes than pure black */
-    --background: 222 30% 9%;        /* ~#0f172a */
-    --foreground: 210 30% 96%;       /* off-white */
+    --background: 220 22% 11%;
+    --foreground: 210 20% 92%;
 
-    --card: 220 25% 14%;             /* ~#1e293b */
-    --card-foreground: 210 30% 96%;
+    --card: 220 18% 16%;
+    --card-foreground: 210 20% 92%;
 
-    --popover: 220 25% 14%;
-    --popover-foreground: 210 30% 96%;
+    --popover: 220 18% 16%;
+    --popover-foreground: 210 20% 92%;
 
-    /* Sophisticated emerald, slightly brighter for dark bg */
-    --primary: 158 50% 42%;
-    --primary-foreground: 210 30% 98%;
+    --primary: 158 30% 46%;
+    --primary-foreground: 210 25% 96%;
 
-    --secondary: 220 20% 20%;
-    --secondary-foreground: 210 30% 92%;
+    --secondary: 220 14% 22%;
+    --secondary-foreground: 210 20% 88%;
 
-    --muted: 220 20% 18%;
-    --muted-foreground: 215 18% 70%;
+    --muted: 220 14% 20%;
+    --muted-foreground: 215 12% 66%;
 
-    /* Warm amber/gold accent instead of cold blue */
-    --accent: 38 85% 60%;
-    --accent-foreground: 222 40% 12%;
+    --accent: 38 52% 58%;
+    --accent-foreground: 220 30% 12%;
 
-    --destructive: 0 70% 55%;
-    --destructive-foreground: 210 30% 96%;
+    --destructive: 4 55% 56%;
+    --destructive-foreground: 210 20% 92%;
 
-    --border: 220 18% 22%;
-    --input: 220 18% 22%;
-    --ring: 158 50% 42%;
+    --border: 220 14% 24%;
+    --input: 220 14% 24%;
+    --ring: 158 30% 46%;
 
-    /* Re-tone custom tokens for dark */
-    --emerald-deep: 158 45% 40%;
-    --emerald-light: 158 35% 22%;
-    --gold: 38 85% 60%;
-    --gold-light: 38 50% 25%;
-    --cream: 220 25% 14%;
-    --cream-dark: 222 30% 9%;
-    --flame: 25 95% 60%;
+    --emerald-deep: 158 30% 42%;
+    --emerald-light: 158 24% 24%;
+    --gold: 38 52% 58%;
+    --gold-light: 38 36% 26%;
+    --cream: 220 18% 16%;
+    --cream-dark: 220 22% 11%;
+    --flame: 20 70% 60%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(158 50% 35%), hsl(158 45% 45%));
-    --gradient-gold: linear-gradient(135deg, hsl(38 85% 55%), hsl(38 90% 65%));
-    --gradient-card: linear-gradient(180deg, hsl(220 25% 15%), hsl(222 28% 12%));
+    --gradient-primary: linear-gradient(135deg, hsl(158 30% 36%), hsl(158 28% 46%));
+    --gradient-gold: linear-gradient(135deg, hsl(38 52% 54%), hsl(38 56% 64%));
+    --gradient-card: linear-gradient(180deg, hsl(220 18% 17%), hsl(220 22% 13%));
 
     /* Dark mode prefers borders over shadows */
     --shadow-soft: 0 4px 20px -4px hsl(0 0% 0% / 0.4);
