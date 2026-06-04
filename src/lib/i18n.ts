@@ -13,9 +13,9 @@ export type Translations = {
   habitNames: Record<string, string>;
   insights: { title: string; subtitle: string; streak: string; bestDay: string; quran: string; weekly: string; punctuality: string; heatmap: string; balance: string; burndown: string; wheel: string; empty: string; heatmapTip: string };
   calendar: { title: string; gregorian: string; hijri: string; today: string };
-  settings: { title: string; subtitle: string; language: string; notifications: string; backup: string; restore: string; darkMode: string; appearance: string; appearanceDesc: string; theme: string; showArabic: string; showArabicDesc: string; dataMgmt: string; dataMgmtDesc: string; dataInfo: string; dataInfoDesc: string; export: string; import: string; resetOnboarding: string; resetOnboardingDone: string };
+  settings: { title: string; subtitle: string; language: string; notifications: string; backup: string; restore: string; darkMode: string; appearance: string; appearanceDesc: string; theme: string; showArabic: string; showArabicDesc: string; dataMgmt: string; dataMgmtDesc: string; dataInfo: string; dataInfoDesc: string; export: string; import: string; resetOnboarding: string; resetOnboardingDone: string; autoMissed: string; autoMissedDesc: string; autoMissedTime: string; autoMissedTimeDesc: string };
   common: { save: string; cancel: string; done: string; skip: string; next: string; back: string; close: string; loading: string; getStarted: string };
-  onboarding: { step1Title: string; step1Desc: string; step2Title: string; step2Desc: string; step3Title: string; step3Desc: string; dontKnow: string; step: string };
+  onboarding: { step1Title: string; step1Desc: string; step2Title: string; step2Desc: string; step3Title: string; step3Desc: string; dontKnow: string; step: string; autoMissedNote: string; editLaterNote: string };
   fab: { markFajr: string; addQadha: string; logHabit: string; quickActions: string };
   combo: { onFire: string; firstTimeTitle: string; firstTimeDesc: string };
   hadith: { source: string; fadl: string; comingSoon: string };
