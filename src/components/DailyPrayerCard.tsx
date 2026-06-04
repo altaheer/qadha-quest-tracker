@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Check, Clock, X, ChevronDown, ChevronUp, Flame, Users, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { PrayerStatus, SunnahItem, PrayerStreak } from '@/hooks/usePrayerTracking';
@@ -15,6 +16,13 @@ import {
 } from '@/components/ui/collapsible';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { HadithInfoContent } from '@/components/HadithInfoContent';
+
+const missedToastMsg: Record<string, { title: string; desc: string }> = {
+  en: { title: 'Added to Qadha', desc: 'May Allah make it easy to make up.' },
+  sv: { title: 'Tillagd i Qadha', desc: 'Må Allah göra det lätt att ta igen.' },
+  tr: { title: 'Kazaya eklendi', desc: 'Allah kazasını kolaylaştırsın.' },
+  ar: { title: 'أُضيفت إلى القضاء', desc: 'يسّر الله قضاءها.' },
+};
 
 interface DailyPrayerCardProps {
   name: string;
@@ -49,7 +57,7 @@ export function DailyPrayerCard({
   onToggleSunnah,
   delay = 0,
 }: DailyPrayerCardProps) {
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const { showArabic } = useUserPrefs();
   const [isOpen, setIsOpen] = useState(false);
   const config = statusBg[status];
@@ -61,6 +69,10 @@ export function DailyPrayerCard({
   const handleMark = (next: PrayerStatus) => {
     haptics.medium();
     onMarkStatus(next);
+    if (next === 'missed' && status !== 'missed') {
+      const msg = missedToastMsg[lang] ?? missedToastMsg.en;
+      toast(`${name} — ${msg.title}`, { description: msg.desc, position: 'top-center' });
+    }
   };
 
   const handleSunnah = (id: string) => {
