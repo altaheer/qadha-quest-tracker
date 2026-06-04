@@ -183,6 +183,48 @@ export function usePrayerTracking(selectedDate?: Date) {
     window.dispatchEvent(new Event('qadha-updated'));
   }, []);
 
+  // Auto-mark pending past prayers as missed once the day's cutoff has passed.
+  useEffect(() => {
+    const sweep = () => {
+      let prefs: { autoMarkMissed?: boolean; autoMarkMissedTime?: string } = {};
+      try { prefs = JSON.parse(localStorage.getItem('app-prefs') || '{}'); } catch {}
+      if (prefs.autoMarkMissed === false) return;
+      const [hh, mm] = (prefs.autoMarkMissedTime || '00:00').split(':').map((n) => parseInt(n, 10));
+      const cutoffMin = (isNaN(hh) ? 0 : hh) * 60 + (isNaN(mm) ? 0 : mm);
+      const now = new Date();
+
+      setHistory((prev) => {
+        let changed = false;
+        const next = { ...prev };
+        for (const key of Object.keys(prev)) {
+          const [y, m, d] = key.split('-').map((n) => parseInt(n, 10));
+          if (!y || !m || !d) continue;
+          // Day "closes" at start of (key + 1) + cutoffMin minutes
+          const closeAt = new Date(y, m - 1, d + 1, 0, cutoffMin, 0, 0);
+          if (now < closeAt) continue;
+          const day = prev[key];
+          let dayChanged = false;
+          const newPrayers = { ...day.prayers };
+          (['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'] as const).forEach((p) => {
+            if (newPrayers[p]?.status === 'pending') {
+              newPrayers[p] = { status: 'missed', timestamp: closeAt.getTime() };
+              updateQadhaCount(p, 1);
+              dayChanged = true;
+            }
+          });
+          if (dayChanged) {
+            next[key] = { ...day, prayers: newPrayers };
+            changed = true;
+          }
+        }
+        return changed ? next : prev;
+      });
+    };
+    sweep();
+    const id = window.setInterval(sweep, 60_000);
+    return () => window.clearInterval(id);
+  }, [updateQadhaCount]);
+
   const markPrayer = useCallback((prayer: keyof DailyPrayers, status: PrayerStatus) => {
     const previousStatus = history[dateKey]?.prayers?.[prayer]?.status || 'pending';
     

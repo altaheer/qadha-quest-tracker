@@ -5,10 +5,12 @@ export type Theme = 'light' | 'dark' | 'system';
 type Prefs = {
   theme: Theme;
   showArabic: boolean;
+  autoMarkMissed: boolean;
+  autoMarkMissedTime: string; // HH:MM, 24h
 };
 
 const KEY = 'app-prefs';
-const DEFAULTS: Prefs = { theme: 'system', showArabic: false };
+const DEFAULTS: Prefs = { theme: 'system', showArabic: false, autoMarkMissed: true, autoMarkMissedTime: '00:00' };
 
 function read(): Prefs {
   if (typeof window === 'undefined') return DEFAULTS;
@@ -54,6 +56,18 @@ export function setShowArabic(showArabic: boolean) {
   listeners.forEach((l) => l());
 }
 
+export function setAutoMarkMissed(autoMarkMissed: boolean) {
+  state = { ...state, autoMarkMissed };
+  persist();
+  listeners.forEach((l) => l());
+}
+
+export function setAutoMarkMissedTime(autoMarkMissedTime: string) {
+  state = { ...state, autoMarkMissedTime };
+  persist();
+  listeners.forEach((l) => l());
+}
+
 // React to system changes when theme === 'system'
 if (typeof window !== 'undefined' && window.matchMedia) {
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
@@ -66,5 +80,5 @@ applyTheme();
 
 export function useUserPrefs() {
   const prefs = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
-  return { ...prefs, setTheme, setShowArabic };
+  return { ...prefs, setTheme, setShowArabic, setAutoMarkMissed, setAutoMarkMissedTime };
 }

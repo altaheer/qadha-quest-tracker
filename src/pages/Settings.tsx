@@ -3,7 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { useDataBackup } from '@/hooks/useDataBackup';
-import { Download, Upload, Database, Shield, RotateCcw, Palette } from 'lucide-react';
+import { Download, Upload, Database, Shield, RotateCcw, Palette, Clock } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { LanguageSelector } from '@/components/LanguageSelector';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -13,7 +14,7 @@ import { resetOnboarding } from '@/components/Onboarding';
 
 export default function Settings() {
   const { t } = useTranslation();
-  const { showArabic, setShowArabic } = useUserPrefs();
+  const { showArabic, setShowArabic, autoMarkMissed, setAutoMarkMissed, autoMarkMissedTime, setAutoMarkMissedTime } = useUserPrefs();
   const { exportData, importData } = useDataBackup();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -77,6 +78,39 @@ export default function Settings() {
                 <p className="text-xs text-muted-foreground mt-0.5">{t('settings.showArabicDesc')}</p>
               </div>
               <Switch checked={showArabic} onCheckedChange={setShowArabic} />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/50">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Clock className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="text-lg">{t('settings.autoMissed')}</CardTitle>
+                <CardDescription>{t('settings.autoMissedDesc')}</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <div className="flex items-center justify-between gap-4">
+              <span className="text-sm font-medium text-foreground">{t('settings.autoMissed')}</span>
+              <Switch checked={autoMarkMissed} onCheckedChange={setAutoMarkMissed} />
+            </div>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1">
+                <p className="text-sm font-medium text-foreground">{t('settings.autoMissedTime')}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{t('settings.autoMissedTimeDesc')}</p>
+              </div>
+              <Input
+                type="time"
+                value={autoMarkMissedTime}
+                onChange={(e) => setAutoMarkMissedTime(e.target.value || '00:00')}
+                disabled={!autoMarkMissed}
+                className="w-28"
+              />
             </div>
           </CardContent>
         </Card>
