@@ -7,6 +7,8 @@ import { Label } from '@/components/ui/label';
 import { useTranslation } from '@/lib/i18n';
 import { useQadhaPrayers } from '@/hooks/useQadhaPrayers';
 import { useHabitsTracking } from '@/hooks/useHabitsTracking';
+import { useUserPrefs } from '@/hooks/useUserPrefs';
+import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 
 const ONBOARDING_KEY = 'onboarding-complete';
@@ -36,6 +38,7 @@ export function Onboarding({ onComplete }: Props) {
   });
   const { setCount } = useQadhaPrayers();
   const { applyLevel } = useHabitsTracking();
+  const { autoMarkMissed, setAutoMarkMissed, autoMarkMissedTime, setAutoMarkMissedTime } = useUserPrefs();
 
   const levels: { key: Level; descKey: any }[] = [
     { key: 'easy', descKey: 'habits.easy' },
@@ -133,6 +136,30 @@ export function Onboarding({ onComplete }: Props) {
                       />
                     </div>
                   ))}
+                </div>
+
+                <div className="rounded-2xl border border-border bg-card p-4 mb-4 space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-foreground">{t('settings.autoMissed')}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{t('onboarding.autoMissedNote')}</p>
+                    </div>
+                    <Switch checked={autoMarkMissed} onCheckedChange={setAutoMarkMissed} />
+                  </div>
+                  {autoMarkMissed && (
+                    <div className="flex items-center justify-between gap-3 pt-1 border-t border-border/50">
+                      <span className="text-sm text-foreground">{t('settings.autoMissedTime')}</span>
+                      <Input
+                        type="time"
+                        value={autoMarkMissedTime}
+                        onChange={(e) => setAutoMarkMissedTime(e.target.value || '00:00')}
+                        className="w-28"
+                      />
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground italic">
+                    {t('onboarding.editLaterNote')}
+                  </p>
                 </div>
 
                 <div className="space-y-2">
