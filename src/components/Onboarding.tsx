@@ -4,12 +4,14 @@ import { Moon, Sparkles, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useTranslation } from '@/lib/i18n';
+import { useTranslation, languageLabels, Language } from '@/lib/i18n';
 import { useQadhaPrayers } from '@/hooks/useQadhaPrayers';
 import { useHabitsTracking } from '@/hooks/useHabitsTracking';
 import { useUserPrefs } from '@/hooks/useUserPrefs';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
+
+const languageFlags: Record<Language, string> = { en: '🇬🇧', sv: '🇸🇪', tr: '🇹🇷', ar: '🇸🇦' };
 
 const ONBOARDING_KEY = 'onboarding-complete';
 
@@ -31,7 +33,7 @@ type Level = 'easy' | 'medium' | 'hard' | 'sahabah';
 const prayerKeys = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'] as const;
 
 export function Onboarding({ onComplete }: Props) {
-  const { t } = useTranslation();
+  const { t, lang, setLanguage } = useTranslation();
   const [step, setStep] = useState(0);
   const [counts, setCounts] = useState<Record<string, string>>({
     fajr: '', dhuhr: '', asr: '', maghrib: '', isha: '',
@@ -91,9 +93,30 @@ export function Onboarding({ onComplete }: Props) {
                 <h1 className="font-display text-3xl font-bold mb-3">
                   {t('onboarding.step1Title')}
                 </h1>
-                <p className="text-muted-foreground mb-8">
+                <p className="text-muted-foreground mb-6">
                   {t('onboarding.step1Desc')}
                 </p>
+
+                <div className="grid grid-cols-2 gap-2 mb-6">
+                  {(Object.keys(languageLabels) as Language[]).map((l) => (
+                    <button
+                      key={l}
+                      onClick={() => setLanguage(l)}
+                      className={cn(
+                        'flex flex-col items-center justify-center gap-1 p-3 rounded-2xl border tap-target transition-all',
+                        lang === l
+                          ? 'border-primary bg-primary/10 ring-2 ring-primary/20'
+                          : 'border-border bg-card hover:border-primary/40 hover:bg-primary/5'
+                      )}
+                      aria-pressed={lang === l}
+                      dir={l === 'ar' ? 'rtl' : 'ltr'}
+                    >
+                      <span className="text-2xl leading-none">{languageFlags[l]}</span>
+                      <span className="text-sm font-medium text-foreground">{languageLabels[l]}</span>
+                    </button>
+                  ))}
+                </div>
+
                 <Button size="lg" className="w-full" onClick={goNext}>
                   {t('common.next')}
                 </Button>
