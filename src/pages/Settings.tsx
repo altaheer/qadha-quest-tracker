@@ -3,7 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { useDataBackup } from '@/hooks/useDataBackup';
-import { Download, Upload, Database, Shield, RotateCcw, Palette } from 'lucide-react';
+import { Download, Upload, Database, Shield, RotateCcw, Palette, Clock } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { LanguageSelector } from '@/components/LanguageSelector';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -13,7 +14,7 @@ import { resetOnboarding } from '@/components/Onboarding';
 
 export default function Settings() {
   const { t } = useTranslation();
-  const { showArabic, setShowArabic } = useUserPrefs();
+  const { showArabic, setShowArabic, autoMarkMissed, setAutoMarkMissed, autoMarkMissedTime, setAutoMarkMissedTime } = useUserPrefs();
   const { exportData, importData } = useDataBackup();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
