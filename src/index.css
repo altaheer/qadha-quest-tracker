@@ -129,8 +129,19 @@
   }
 
   html[dir="rtl"] body,
-  html[lang="ar"] body {
+  html[lang="ar"] body,
+  [dir="rtl"] {
     font-family: 'Cairo', 'Plus Jakarta Sans', sans-serif;
+  }
+  
+  html[dir="rtl"] h1, html[dir="rtl"] h2, html[dir="rtl"] h3,
+  html[dir="rtl"] h4, html[dir="rtl"] h5, html[dir="rtl"] h6 {
+    font-family: 'Cairo', 'Outfit', sans-serif;
+  }
+
+  .dark .gradient-card {
+    border: 1px solid hsl(var(--border));
+    box-shadow: none;
   }
   html[dir="rtl"] h1, html[dir="rtl"] h2, html[dir="rtl"] h3,
   html[dir="rtl"] h4, html[dir="rtl"] h5, html[dir="rtl"] h6 {

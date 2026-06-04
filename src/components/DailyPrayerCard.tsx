@@ -32,9 +32,9 @@ interface DailyPrayerCardProps {
 const statusBg: Record<PrayerStatus, { bg: string; border: string; icon: any }> = {
   pending: { bg: 'bg-card', border: 'border-border/50', icon: null },
   'on-time': { bg: 'bg-primary/10', border: 'border-primary/30', icon: Check },
-  jamaah: { bg: 'bg-primary/20', border: 'border-primary/50', icon: Users },
-  late: { bg: 'bg-accent/10', border: 'border-accent/30', icon: Clock },
-  missed: { bg: 'bg-muted', border: 'border-muted-foreground/20', icon: X },
+  jamaah: { bg: 'bg-accent/15', border: 'border-accent/40', icon: Users },
+  late: { bg: 'bg-orange-500/10', border: 'border-orange-500/30', icon: Clock },
+  missed: { bg: 'bg-rose-500/10', border: 'border-rose-500/20', icon: X },
 };
 
 export function DailyPrayerCard({
@@ -153,13 +153,10 @@ export function DailyPrayerCard({
           {t('status.onTime')}
         </Button>
         <Button
-          variant={status === 'jamaah' ? 'default' : 'outline'}
+          variant={status === 'jamaah' ? 'gold' : 'outline'}
           size="sm"
           onClick={() => handleMark('jamaah')}
-          className={cn(
-            'flex-1 gap-1.5',
-            status === 'jamaah' && 'bg-primary hover:bg-primary/90'
-          )}
+          className="flex-1 gap-1.5"
         >
           <Users className="h-3.5 w-3.5" />
           {t('status.jamaah')}
