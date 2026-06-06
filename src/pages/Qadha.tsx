@@ -1,6 +1,7 @@
 import { Header } from '@/components/Header';
 import { PrayerCard } from '@/components/PrayerCard';
 import { EstimateCard } from '@/components/EstimateCard';
+import { QadhaEstimateDialog } from '@/components/QadhaEstimateDialog';
 import { useQadhaPrayers, PrayerCounts } from '@/hooks/useQadhaPrayers';
 import { Button } from '@/components/ui/button';
 import { RotateCcw, Sparkles } from 'lucide-react';
@@ -38,6 +39,10 @@ export default function Qadha() {
         <p className="text-muted-foreground text-sm">
           {t('qadha.subtitle')}
         </p>
+      </div>
+
+      <div className="mb-6">
+        <QadhaEstimateDialog />
       </div>
 
       {totalPrayers === 0 ? (
