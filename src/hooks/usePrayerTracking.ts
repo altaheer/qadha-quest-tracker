@@ -82,6 +82,8 @@ const createDefaultSunnah = (): PrayerSunnah => ({
     { id: 'maghrib-sunnah', name: '2 Rak\'at Sunnah', arabicName: 'ركعتان بعدية', completed: false },
     { id: 'maghrib-tasbih', name: '33× Subhanallah · Alhamdulillah · Allahu Akbar', arabicName: 'التسبيح بعد الصلاة', completed: false },
     { id: 'maghrib-kursi', name: 'Āyat al-Kursī', arabicName: 'آية الكرسي', completed: false },
+    { id: 'maghrib-tahlil10', name: '10× La ilaha illa Allah', arabicName: 'التهليل عشرًا', completed: false },
+    { id: 'maghrib-ajirni7', name: '7× Allahumma inni as\'aluka al-jannah', arabicName: 'اللهم إني أسألك الجنة', completed: false },
     { id: 'maghrib-dua', name: 'Du\'ā\' after prayer', arabicName: 'الدعاء بعد الصلاة', completed: false },
   ],
   isha: [
