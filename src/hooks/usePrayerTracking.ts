@@ -55,6 +55,8 @@ const createDefaultSunnah = (): PrayerSunnah => ({
     { id: 'fajr-sunnah', name: '2 Rak\'at Sunnah', arabicName: 'ركعتا الفجر', completed: false },
     { id: 'fajr-tasbih', name: '33× Subhanallah · Alhamdulillah · Allahu Akbar', arabicName: 'التسبيح بعد الصلاة', completed: false },
     { id: 'fajr-kursi', name: 'Āyat al-Kursī', arabicName: 'آية الكرسي', completed: false },
+    { id: 'fajr-tahlil10', name: '10× La ilaha illa Allah', arabicName: 'التهليل عشرًا', completed: false },
+    { id: 'fajr-ajirni7', name: '7× Allahumma ajirni min an-nar', arabicName: 'اللهم أجرني من النار', completed: false },
     { id: 'fajr-dua', name: 'Du\'ā\' after prayer', arabicName: 'الدعاء بعد الصلاة', completed: false },
   ],
   dhuhr: [
@@ -80,6 +82,8 @@ const createDefaultSunnah = (): PrayerSunnah => ({
     { id: 'maghrib-sunnah', name: '2 Rak\'at Sunnah', arabicName: 'ركعتان بعدية', completed: false },
     { id: 'maghrib-tasbih', name: '33× Subhanallah · Alhamdulillah · Allahu Akbar', arabicName: 'التسبيح بعد الصلاة', completed: false },
     { id: 'maghrib-kursi', name: 'Āyat al-Kursī', arabicName: 'آية الكرسي', completed: false },
+    { id: 'maghrib-tahlil10', name: '10× La ilaha illa Allah', arabicName: 'التهليل عشرًا', completed: false },
+    { id: 'maghrib-ajirni7', name: '7× Allahumma inni as\'aluka al-jannah', arabicName: 'اللهم إني أسألك الجنة', completed: false },
     { id: 'maghrib-dua', name: 'Du\'ā\' after prayer', arabicName: 'الدعاء بعد الصلاة', completed: false },
   ],
   isha: [
