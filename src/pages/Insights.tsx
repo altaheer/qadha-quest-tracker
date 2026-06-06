@@ -6,6 +6,7 @@ import { ImanHeatmap } from '@/components/insights/ImanHeatmap';
 import { PrayerBalanceChart } from '@/components/insights/PrayerBalanceChart';
 import { QadhaBurndown } from '@/components/insights/QadhaBurndown';
 import { SpiritualWheel } from '@/components/insights/SpiritualWheel';
+import { AchievementsSection } from '@/components/AchievementsSection';
 import { OneTimeTooltip } from '@/components/OneTimeTooltip';
 import { useTranslation } from '@/lib/i18n';
 
@@ -16,7 +17,7 @@ export default function Insights() {
   const hasData = data.currentStreak > 0 || data.weeklyData.some((d: any) => (d.points ?? d.value ?? 0) > 0);
 
   return (
-    <div className="container max-w-lg mx-auto px-4 py-6 space-y-6">
+    <div className="container max-w-lg mx-auto px-4 py-6 space-y-6 bottom-nav-offset">
       <div className="text-center mb-6">
         <h1 className="font-display text-2xl font-bold text-foreground mb-1">{t('insights.title')}</h1>
         <p className="text-sm text-muted-foreground">{t('insights.subtitle')}</p>
@@ -67,6 +68,8 @@ export default function Insights() {
         <h2 className="font-display text-lg font-semibold text-foreground mb-3">{t('insights.wheel')}</h2>
         <SpiritualWheel data={data.spiritualWheel} />
       </section>
+
+      <AchievementsSection />
     </div>
   );
 }
