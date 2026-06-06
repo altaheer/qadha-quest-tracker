@@ -30,8 +30,8 @@ export function QadhaEstimateDialog() {
   const [currentAge, setCurrentAge] = useState('');
   const [result, setResult] = useState<QadhaEstimateResult | null>(null);
 
-  const arabicClass = lang === 'ar' ? 'font-arabic' : '';
   const dir = isRTL ? 'rtl' : 'ltr';
+  const arabicStyle = lang === 'ar' ? { fontFamily: "'Cairo', sans-serif" } : undefined;
 
   const reset = () => {
     setBulughAge('');
