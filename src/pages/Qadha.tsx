@@ -41,6 +41,10 @@ export default function Qadha() {
         </p>
       </div>
 
+      <div className="mb-6">
+        <QadhaEstimateDialog />
+      </div>
+
       {totalPrayers === 0 ? (
         <div className="rounded-2xl border border-primary/30 bg-primary/5 p-6 text-center mb-6">
           <Sparkles className="h-8 w-8 text-primary mx-auto mb-2" />
