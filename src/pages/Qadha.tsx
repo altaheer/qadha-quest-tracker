@@ -1,6 +1,7 @@
 import { Header } from '@/components/Header';
 import { PrayerCard } from '@/components/PrayerCard';
 import { EstimateCard } from '@/components/EstimateCard';
+import { QadhaEstimateDialog } from '@/components/QadhaEstimateDialog';
 import { useQadhaPrayers, PrayerCounts } from '@/hooks/useQadhaPrayers';
 import { Button } from '@/components/ui/button';
 import { RotateCcw, Sparkles } from 'lucide-react';
