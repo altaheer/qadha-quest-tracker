@@ -72,12 +72,12 @@ export function QadhaEstimateDialog() {
       }}
     >
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-full gap-2">
+        <Button variant="outline" className="w-full gap-2" style={arabicStyle}>
           <Sparkles className="h-4 w-4 text-accent" />
-          <span className={arabicClass}>{s.title}</span>
+          <span>{s.title}</span>
         </Button>
       </DialogTrigger>
-      <DialogContent dir={dir} className={`max-w-md ${arabicClass}`}>
+      <DialogContent dir={dir} className="max-w-md" style={arabicStyle}>
         <DialogHeader>
           <DialogTitle className={isRTL ? 'text-right' : 'text-left'}>
             {s.title}
