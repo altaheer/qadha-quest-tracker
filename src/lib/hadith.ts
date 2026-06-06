@@ -628,6 +628,41 @@ export const hadithData: Record<string, HadithInfo> = {
     fadl_en: 'Nothing between you and Paradise except death.',
     fadl_tr: 'Seni cennetten yalnızca ölüm ayırır.',
   },
+  'fajr-tahlil10': {
+    en: 'Whoever says ten times after Fajr, before moving or speaking: "La ilaha illa Allah, alone without partner, to Him belongs the dominion and the praise, He gives life and causes death, and He is powerful over all things" — ten good deeds are written for him, ten sins erased, he is raised ten degrees, and he is protected from every disliked thing and from shaytan all day.',
+    tr: 'Kim sabah namazından sonra, yerinden kalkmadan ve konuşmadan önce on kez "Lâ ilâhe illallâhu vahdehû lâ şerîke leh, lehü\'l-mülkü ve lehü\'l-hamdü, yuhyî ve yumît, ve hüve alâ külli şey\'in kadîr" derse, ona on hasene yazılır, on günahı silinir, on derece yükseltilir ve o gün boyunca her kötülükten ve şeytandan korunur.',
+    arabic: 'لَا إِلَهَ إِلَّا اللهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ، يُحْيِي وَيُمِيتُ، وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ',
+    source: 'At-Tirmidhi 3484 (hasan sahih), Musnad Ahmad 17990 — narrated by Abu Dharr (r.a.)',
+    fadl_en: 'Ten good deeds, ten sins erased, and protection from shaytan all day (×10 after Fajr and Maghrib).',
+    fadl_tr: 'On hasene, on günahın silinmesi ve gün boyu şeytandan korunma (Sabah ve Akşamdan sonra ×10).',
+  },
+
+  'maghrib-tahlil10': {
+    en: 'Whoever says ten times after Maghrib: "La ilaha illa Allah, alone without partner, to Him belongs the dominion and the praise, He gives life and causes death, and He is powerful over all things" — Allah sends protectors to guard him from shaytan until morning, and writes for him ten good deeds.',
+    tr: 'Kim akşam namazından sonra on kez "Lâ ilâhe illallâhu vahdehû lâ şerîke leh, lehü\'l-mülkü ve lehü\'l-hamdü, yuhyî ve yumît, ve hüve alâ külli şey\'in kadîr" derse, Allah ona sabaha kadar şeytandan koruyacak muhafızlar gönderir ve ona on hasene yazar.',
+    arabic: 'لَا إِلَهَ إِلَّا اللهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ، يُحْيِي وَيُمِيتُ، وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ',
+    source: 'At-Tirmidhi 3534 (hasan), Musnad Ahmad — narrated by Abu Ayyub (r.a.)',
+    fadl_en: 'Protection from shaytan until morning and ten good deeds (×10 after Maghrib and Fajr).',
+    fadl_tr: 'Sabaha kadar şeytandan korunma ve on hasene (Akşam ve Sabahtan sonra ×10).',
+  },
+
+  'fajr-ajirni7': {
+    en: 'Whoever says after Fajr, before speaking, "Allahumma ajirni min an-nar (O Allah, protect me from the Fire)" seven times — if he dies that day, Allah grants him protection from the Fire.',
+    tr: 'Kim sabah namazından sonra, konuşmadan önce yedi kez "Allâhümme ecirnî mine\'n-nâr (Allah\'ım, beni ateşten koru)" derse ve o gün ölürse, Allah ona ateşten korunma bağışlar.',
+    arabic: 'اللَّهُمَّ أَجِرْنِي مِنَ النَّارِ',
+    source: 'Abu Dawud 5079, Musnad Ahmad 17362 — narrated by Muslim ibn al-Harith (r.a.). Note: scholars differ on its authenticity; widely practiced.',
+    fadl_en: 'Protection from the Fire that day. (Scholars differ on the hadith\'s strength; many still practice it.)',
+    fadl_tr: 'O gün ateşten korunma. (Âlimler hadisin gücünde ihtilaf etti; birçok kişi yine de uygular.)',
+  },
+
+  'maghrib-ajirni7': {
+    en: 'Whoever says after Maghrib, before speaking, "Allahumma inni as\'aluka al-jannah, Allahumma ajirni min an-nar (O Allah, I ask You for Paradise; O Allah, protect me from the Fire)" seven times — if he dies that night, Allah grants him protection from the Fire.',
+    tr: 'Kim akşam namazından sonra, konuşmadan önce yedi kez "Allâhümme innî es\'elüke\'l-cenneh, Allâhümme ecirnî mine\'n-nâr (Allah\'ım, Senden cenneti isterim; Allah\'ım, beni ateşten koru)" derse ve o gece ölürse, Allah ona ateşten korunma bağışlar.',
+    arabic: 'اللَّهُمَّ إِنِّي أَسْأَلُكَ الْجَنَّةَ، اللَّهُمَّ أَجِرْنِي مِنَ النَّارِ',
+    source: 'Abu Dawud 5079, Musnad Ahmad — narrated by Muslim ibn al-Harith (r.a.). Note: scholars differ on its authenticity; widely practiced.',
+    fadl_en: 'Protection from the Fire that night. (Scholars differ on the hadith\'s strength; many still practice it.)',
+    fadl_tr: 'O gece ateşten korunma. (Âlimler hadisin gücünde ihtilaf etti; birçok kişi yine de uygular.)',
+  },
 };
 
 /**
