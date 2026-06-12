@@ -15,6 +15,8 @@ import Insights from "./pages/Insights";
 import Calendar from "./pages/Calendar";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import Missions from "./pages/Missions";
+
 
 const queryClient = new QueryClient();
 
@@ -52,7 +54,9 @@ function AnimatedRoutes() {
         <Route path="/insights" element={wrap(<Insights />)} />
         <Route path="/calendar" element={wrap(<Calendar />)} />
         <Route path="/settings" element={wrap(<Settings />)} />
+        <Route path="/missions" element={wrap(<Missions />)} />
         <Route path="*" element={wrap(<NotFound />)} />
+
       </Routes>
     </AnimatePresence>
   );

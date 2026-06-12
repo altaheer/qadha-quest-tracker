@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Home, Moon, RotateCcw, BarChart3, MoreHorizontal, BookOpen, Calendar as CalendarIcon, Settings } from 'lucide-react';
+import { Home, Moon, RotateCcw, BarChart3, MoreHorizontal, BookOpen, Calendar as CalendarIcon, Settings, Target } from 'lucide-react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
@@ -19,10 +19,12 @@ export function BottomNav() {
   ];
 
   const moreItems = [
+    { titleKey: 'missions.title' as const, url: '/missions', icon: Target },
     { titleKey: 'nav.insights' as const, url: '/insights', icon: BarChart3 },
     { titleKey: 'nav.calendar' as const, url: '/calendar', icon: CalendarIcon },
     { titleKey: 'nav.settings' as const, url: '/settings', icon: Settings },
   ];
+
 
   const moreActive = moreItems.some(i => i.url === pathname);
 

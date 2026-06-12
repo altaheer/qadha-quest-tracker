@@ -1,4 +1,4 @@
-import { Home, Moon, Calendar, BarChart3, Settings, BookOpen, RotateCcw, Sparkles } from 'lucide-react';
+import { Home, Moon, Calendar, BarChart3, Settings, BookOpen, RotateCcw, Sparkles, Target } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useLocation } from 'react-router-dom';
 import {
@@ -31,9 +31,11 @@ export function AppSidebar() {
   ];
   const secondaryItems = [
     { titleKey: 'nav.habits' as const, url: '/habits', icon: BookOpen },
+    { titleKey: 'missions.title' as const, url: '/missions', icon: Target },
     { titleKey: 'nav.insights' as const, url: '/insights', icon: BarChart3 },
     { titleKey: 'nav.calendar' as const, url: '/calendar', icon: Calendar },
   ];
+
   const settingsItems = [
     { titleKey: 'nav.settings' as const, url: '/settings', icon: Settings },
   ];
