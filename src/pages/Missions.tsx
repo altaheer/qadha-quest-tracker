@@ -105,10 +105,19 @@ export default function MissionsPage() {
         ? Math.max(1, Number(customDays) || 0)
         : Number(daysValue);
     if (days < 1) return;
-    createMission({ ...parsed, days });
+    let missesAllowed: number | undefined;
+    if (missesValue === 'custom') {
+      const n = Math.max(0, Number(customMisses) || 0);
+      missesAllowed = n;
+    } else if (missesValue !== 'auto') {
+      missesAllowed = Math.max(0, Number(missesValue));
+    }
+    createMission({ ...parsed, days, missesAllowed });
     setActionValue('');
     setDaysValue('30');
     setCustomDays('');
+    setMissesValue('auto');
+    setCustomMisses('');
   };
 
   const activeHabits = habitCategories
