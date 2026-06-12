@@ -8,11 +8,15 @@ import { QadhaBurndown } from '@/components/insights/QadhaBurndown';
 import { SpiritualWheel } from '@/components/insights/SpiritualWheel';
 import { AchievementsSection } from '@/components/AchievementsSection';
 import { OneTimeTooltip } from '@/components/OneTimeTooltip';
+import { useMissions } from '@/hooks/useMissions';
+import { Target } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 
 export default function Insights() {
   const data = useInsightsData();
   const { t } = useTranslation();
+  const { totalCompletedBonus, completed } = useMissions();
+
 
   const hasData = data.currentStreak > 0 || data.weeklyData.some((d: any) => (d.points ?? d.value ?? 0) > 0);
 
