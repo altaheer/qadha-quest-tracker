@@ -80,6 +80,8 @@ export default function MissionsPage() {
   const [actionValue, setActionValue] = useState('');
   const [daysValue, setDaysValue] = useState<string>('30');
   const [customDays, setCustomDays] = useState('');
+  const [missesValue, setMissesValue] = useState<string>('auto');
+  const [customMisses, setCustomMisses] = useState('');
   const [celebrate, setCelebrate] = useState<{ sentence: string; bonus: number } | null>(null);
 
   const pausedHabits = useMemo(() => getPausedHabits(), []);
@@ -103,10 +105,19 @@ export default function MissionsPage() {
         ? Math.max(1, Number(customDays) || 0)
         : Number(daysValue);
     if (days < 1) return;
-    createMission({ ...parsed, days });
+    let missesAllowed: number | undefined;
+    if (missesValue === 'custom') {
+      const n = Math.max(0, Number(customMisses) || 0);
+      missesAllowed = n;
+    } else if (missesValue !== 'auto') {
+      missesAllowed = Math.max(0, Number(missesValue));
+    }
+    createMission({ ...parsed, days, missesAllowed });
     setActionValue('');
     setDaysValue('30');
     setCustomDays('');
+    setMissesValue('auto');
+    setCustomMisses('');
   };
 
   const activeHabits = habitCategories
@@ -186,7 +197,36 @@ export default function MissionsPage() {
           placeholder="..."
         />
       )}
-      <span className="text-foreground/80">{t('missions.days')}</span>
+      <span className="text-foreground/80">{t('missions.days')},</span>
+      <span className="text-foreground/80">{t('missions.allowingUpTo')}</span>
+      <select
+        value={missesValue}
+        onChange={(e) => setMissesValue(e.target.value)}
+        className="px-3 py-1.5 rounded-lg border border-border bg-card text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-primary/40"
+        style={arabicStyle}
+        dir={isRTL ? 'rtl' : 'ltr'}
+      >
+        <option value="auto">10% (auto)</option>
+        <option value="0">0</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="5">5</option>
+        <option value="7">7</option>
+        <option value="custom">{t('missions.custom')}</option>
+      </select>
+      {missesValue === 'custom' && (
+        <Input
+          type="number"
+          inputMode="numeric"
+          min={0}
+          value={customMisses}
+          onChange={(e) => setCustomMisses(e.target.value)}
+          className="w-24"
+          placeholder="..."
+        />
+      )}
+      <span className="text-foreground/80">{t('missions.misses')}</span>
     </div>
   );
 

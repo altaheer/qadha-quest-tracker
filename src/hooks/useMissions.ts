@@ -14,6 +14,7 @@ export interface Mission {
   actionId: string; // prayer name, habit id, nafilah id, or 'all' for all 5 prayers
   qualifier?: MissionQualifier;
   days: number;
+  missesAllowed?: number; // optional override; defaults to ceil(days * 0.1)
   startDate: string; // YYYY-MM-DD
   status: MissionStatus;
 }
@@ -120,7 +121,7 @@ export function computeProgress(mission: Mission): MissionProgress {
     }
   }
 
-  const missesAllowed = Math.ceil(mission.days * 0.1);
+  const missesAllowed = mission.missesAllowed ?? Math.ceil(mission.days * 0.1);
   const missesUsed = Math.max(0, daysElapsed - progress);
   const daysRemaining = Math.max(0, mission.days - daysElapsed);
   const bonus = getActionBasePoints(mission) * mission.days;
