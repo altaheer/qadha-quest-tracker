@@ -80,6 +80,8 @@ export default function MissionsPage() {
   const [actionValue, setActionValue] = useState('');
   const [daysValue, setDaysValue] = useState<string>('30');
   const [customDays, setCustomDays] = useState('');
+  const [missesValue, setMissesValue] = useState<string>('auto');
+  const [customMisses, setCustomMisses] = useState('');
   const [celebrate, setCelebrate] = useState<{ sentence: string; bonus: number } | null>(null);
 
   const pausedHabits = useMemo(() => getPausedHabits(), []);
