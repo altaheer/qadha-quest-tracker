@@ -99,7 +99,42 @@ export default function Home() {
         </Link>
       </div>
 
+      {missions.length > 0 && (
+        <div className="mt-4 space-y-2">
+          <div className="flex items-center justify-between">
+            <h3 className="font-display text-sm font-semibold text-foreground/80">
+              {t('missions.active')}
+            </h3>
+            <Link to="/missions" className="text-xs text-primary">
+              {t('missions.title')} →
+            </Link>
+          </div>
+          {missions.slice(0, 2).map((m) => {
+            const p = computeProgress(m);
+            const pct = Math.min(100, (p.progress / m.days) * 100);
+            return (
+              <Link
+                key={m.id}
+                to="/missions"
+                className="block p-3 rounded-xl border border-border bg-card hover:shadow-card transition-all"
+              >
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Target className="h-3.5 w-3.5 text-primary" />
+                  <p className="text-sm text-foreground truncate">
+                    {t('missions.iIntendTo')}{' '}
+                    <span className="text-primary font-medium">{activeMissionLabel(m)}</span>{' '}
+                    {t('missions.for')} {m.days} {t('missions.days')}
+                  </p>
+                </div>
+                <Progress value={pct} className="h-1.5" />
+              </Link>
+            );
+          })}
+        </div>
+      )}
+
       <QuickActionsFAB />
+
     </div>
   );
 }
