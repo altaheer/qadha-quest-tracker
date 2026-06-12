@@ -1,20 +1,36 @@
-import { Moon, Flame, RotateCcw, ChevronRight } from 'lucide-react';
+import { Moon, Flame, RotateCcw, ChevronRight, Target } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { usePrayerTracking } from '@/hooks/usePrayerTracking';
 import { useQadhaPrayers } from '@/hooks/useQadhaPrayers';
 import { useHabitsTracking } from '@/hooks/useHabitsTracking';
+import { useMissions, computeProgress } from '@/hooks/useMissions';
+import { Progress } from '@/components/ui/progress';
 import { DailyStats } from '@/components/DailyStats';
 import { QuickActionsFAB } from '@/components/QuickActionsFAB';
+import { nafilahPrayers } from '@/hooks/useNafilahTracking';
+import { habitCategories } from '@/hooks/useHabitsTracking';
 import { useTranslation } from '@/lib/i18n';
 
 export default function Home() {
-  const { t } = useTranslation();
+  const { t, tHabit } = useTranslation();
   const { getTotalPoints: getPrayerPoints, getCompletedCount } = usePrayerTracking();
   const { totalPrayers: qadhaPrayers, calculateDaysToComplete } = useQadhaPrayers();
   const { getTotalPoints: getHabitPoints, getCompletedCount: getHabitCompletedCount, getActiveCount } = useHabitsTracking();
+  const { missions } = useMissions();
 
   const totalPoints = getPrayerPoints() + getHabitPoints();
   const completed = getCompletedCount();
+
+  const activeMissionLabel = (m: typeof missions[number]) => {
+    if (m.actionType === 'prayer') {
+      const qual = m.qualifier === 'jamaah' ? t('missions.inJamaah') : t('missions.onTime');
+      const name = m.actionId === 'all' ? t('missions.allFive') : t(`prayerNames.${m.actionId}` as any);
+      return `${name} ${qual}`;
+    }
+    if (m.actionType === 'habit') return tHabit(m.actionId);
+    return nafilahPrayers.find((p) => p.id === m.actionId)?.name ?? m.actionId;
+  };
+
 
   return (
     <div className="container max-w-lg mx-auto px-4 py-6">
