@@ -35,6 +35,20 @@ export default function Insights() {
 
       <HighlightCards streak={data.currentStreak} bestDay={data.bestDay} quranPages={0} />
 
+      {completed.length > 0 && (
+        <div className="rounded-2xl border border-gold/40 bg-gradient-to-br from-gold/10 to-amber-100/10 p-4 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gold/20 flex items-center justify-center">
+            <Target className="h-5 w-5 text-gold" />
+          </div>
+          <div className="flex-1">
+            <p className="text-xs text-muted-foreground">{t('missions.bonus')}</p>
+            <p className="text-xl font-bold text-gold">+{totalCompletedBonus}</p>
+          </div>
+          <p className="text-xs text-muted-foreground">{completed.length} {t('missions.completed').toLowerCase()}</p>
+        </div>
+      )}
+
+
       <section>
         <h2 className="font-display text-lg font-semibold text-foreground mb-3">{t('insights.weekly')}</h2>
         <WeeklyChart data={data.weeklyData} />
