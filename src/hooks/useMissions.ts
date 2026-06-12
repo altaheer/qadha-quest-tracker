@@ -14,6 +14,7 @@ export interface Mission {
   actionId: string; // prayer name, habit id, nafilah id, or 'all' for all 5 prayers
   qualifier?: MissionQualifier;
   days: number;
+  missesAllowed?: number; // optional override; defaults to ceil(days * 0.1)
   startDate: string; // YYYY-MM-DD
   status: MissionStatus;
 }
