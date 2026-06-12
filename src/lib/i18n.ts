@@ -95,7 +95,7 @@ const sv: Translations = {
   fab: { markFajr: 'Markera Fajr', addQadha: 'Lägg till Qadha', logHabit: 'Logga vana', quickActions: 'Snabbåtgärder' },
   combo: { onFire: 'On fire!', firstTimeTitle: 'Combo startad!', firstTimeDesc: 'Be i tid eller i jamaah i rad för att öka din combo och få bonuspoäng.' },
   hadith: { source: 'Källa', fadl: 'Förtjänst', comingSoon: 'Mer info kommer snart' },
-  missions: { title: 'Uppdrag', subtitle: 'Ett personligt åtagande, nedskrivet och bevittnat', newMission: 'Nytt uppdrag', iIntendTo: 'Jag har för avsikt att', for: 'i', days: 'dagar', begin: 'Börja — Bismillah', active: 'Aktiva uppdrag', completed: 'Avklarade', endedTitle: 'Avslutade', accepted: 'Må Allah acceptera det', endedEarly: 'Avslutades tidigt — din avsikt skrevs', tryAgain: 'Försök igen', bonus: 'Bonus', missesUsed: 'missar använda', remaining: 'kvar', allFive: 'alla 5 böner', onTime: 'i tid', inJamaah: 'i jamaah', custom: 'eget' },
+  missions: { title: 'Uppdrag', subtitle: 'Ett personligt åtagande, nedskrivet och bevittnat', newMission: 'Nytt uppdrag', iIntendTo: 'Jag har för avsikt att', for: 'i', days: 'dagar', begin: 'Börja — Bismillah', active: 'Aktiva uppdrag', completed: 'Avklarade', endedTitle: 'Avslutade', accepted: 'Må Allah acceptera det', endedEarly: 'Avslutades tidigt — din avsikt skrevs', tryAgain: 'Försök igen', bonus: 'Bonus', missesUsed: 'missar använda', remaining: 'kvar', allFive: 'alla 5 böner', onTime: 'i tid', inJamaah: 'i jamaah', custom: 'eget', allowingUpTo: 'med upp till', misses: 'missar' },
 };
 
 
