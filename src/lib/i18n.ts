@@ -19,7 +19,9 @@ export type Translations = {
   fab: { markFajr: string; addQadha: string; logHabit: string; quickActions: string };
   combo: { onFire: string; firstTimeTitle: string; firstTimeDesc: string };
   hadith: { source: string; fadl: string; comingSoon: string };
+  missions: { title: string; subtitle: string; newMission: string; iIntendTo: string; for: string; days: string; begin: string; active: string; completed: string; endedTitle: string; accepted: string; endedEarly: string; tryAgain: string; bonus: string; missesUsed: string; remaining: string; allFive: string; onTime: string; inJamaah: string; custom: string };
 };
+
 
 const en: Translations = {
   nav: { home: 'Home', prayers: 'Prayers', qadha: 'Qadha', habits: 'Habits', insights: 'Insights', calendar: 'Calendar', settings: 'Settings', more: 'More' },
