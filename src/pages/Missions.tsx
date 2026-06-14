@@ -70,7 +70,7 @@ export default function MissionsPage() {
     const { justCompleted } = reconcile();
     if (justCompleted.length > 0) {
       const first = justCompleted[0];
-      const sentence = getActionLabel(first, t, tHabit);
+      const sentence = getActionLabel(first, t, tHabit, lang);
       setCelebrate({ sentence, bonus: first.bonus });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -249,7 +249,7 @@ export default function MissionsPage() {
           </h2>
           {missions.map((m) => {
             const p = computeProgress(m);
-            const label = getActionLabel(m, t, tHabit);
+            const label = getActionLabel(m, t, tHabit, lang);
             const pct = Math.min(100, (p.progress / m.days) * 100);
             return (
               <div
@@ -297,7 +297,7 @@ export default function MissionsPage() {
             {t('missions.completed')}
           </h2>
           {completed.map((m) => {
-            const label = getActionLabel(m, t, tHabit);
+            const label = getActionLabel(m, t, tHabit, lang);
             return (
               <div
                 key={m.id}
@@ -326,7 +326,7 @@ export default function MissionsPage() {
             {t('missions.endedTitle')}
           </h2>
           {endedMissions.map((m) => {
-            const label = getActionLabel(m, t, tHabit);
+            const label = getActionLabel(m, t, tHabit, lang);
             return (
               <div
                 key={m.id}
