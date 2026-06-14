@@ -144,7 +144,12 @@ export default function Home() {
     });
 
     // habits: per day done / total-active-that-day
-    const activeHabitIds = habits.map((h) => h.id);
+    const allIds = habitCategories.flatMap((c) => c.habits.map((h) => h.id));
+    const activeHabitIds = allIds.filter((id) => {
+      if (pausedHabits.has(id)) return false;
+      if (level === 'custom') return true;
+      return levelHabits[level].includes(id);
+    });
     const totalActive = activeHabitIds.length;
     const habitGrid: Record<string, { done: number; total: number }> = {};
     days.forEach((dk) => {
