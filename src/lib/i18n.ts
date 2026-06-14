@@ -4,7 +4,7 @@ export type Language = 'en' | 'sv' | 'tr' | 'ar';
 
 export type Translations = {
   nav: { home: string; prayers: string; qadha: string; habits: string; insights: string; calendar: string; settings: string; more: string };
-  home: { subtitle: string; rightNow: string; dayComplete: string; moreItems: string; sunnahLabel: string };
+  home: { subtitle: string; rightNow: string; dayComplete: string; moreItems: string; sunnahLabel: string; last5days: string; summary: string; remaining: string; active: string };
   prayers: { title: string; subtitle: string; backfillMode: string; backfillDesc: string; combo: string; comboLabel: string; multiplier: string; streak: string; bestStreak: string; empty: string; jumpToToday: string; previous: string; next: string; today: string; tapForToday: string };
   prayerNames: { fajr: string; dhuhr: string; asr: string; maghrib: string; isha: string };
   status: { pending: string; onTime: string; jamaah: string; late: string; missed: string };
