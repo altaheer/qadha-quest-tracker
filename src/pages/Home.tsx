@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Moon, Target, BookOpen, RotateCcw, Check, X, Minus, ChevronRight } from 'lucide-react';
+import { Moon, Target, BookOpen, RotateCcw, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { usePrayerTracking, type DailyPrayers } from '@/hooks/usePrayerTracking';
 import { useHabitsTracking } from '@/hooks/useHabitsTracking';
@@ -8,7 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { useTranslation } from '@/lib/i18n';
 import { getDateString } from '@/lib/date';
 import { cn } from '@/lib/utils';
-import type { PrayerHistory, HabitsHistory, PrayerCounts } from '@/types';
+import type { PrayerHistory, HabitsHistory, PrayerCounts, PrayerStatus } from '@/types';
 
 const PRAYER_KEYS: (keyof DailyPrayers)[] = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
 
@@ -21,37 +21,81 @@ function readJSON<T>(key: string, fallback: T): T {
   }
 }
 
-type DayMark = 'full' | 'partial' | 'empty' | 'none';
-
 const localeMap: Record<string, string> = {
   en: 'en-US', sv: 'sv-SE', tr: 'tr-TR', ar: 'ar-EG',
 };
 
-function FiveDayStrip({ marks, lang }: { marks: { date: string; mark: DayMark }[]; lang: string }) {
+type PrayerCellState = 'done' | 'missed' | 'none';
+
+function prayerCellState(s: PrayerStatus | undefined, isPast: boolean): PrayerCellState {
+  if (s === 'on-time' || s === 'jamaah' || s === 'late') return 'done';
+  if (s === 'missed') return 'missed';
+  if (isPast) return 'missed';
+  return 'none';
+}
+
+function CardShell({
+  to,
+  icon: Icon,
+  label,
+  value,
+  children,
+}: {
+  to: string;
+  icon: typeof Moon;
+  label: string;
+  value: string;
+  children?: React.ReactNode;
+}) {
   return (
-    <div className="grid grid-cols-5 gap-1.5">
-      {marks.map(({ date, mark }) => {
-        const d = new Date(date);
+    <Link
+      to={to}
+      className="block rounded-2xl gradient-card shadow-card border border-border/50 overflow-hidden hover:shadow-elevated transition-all"
+    >
+      <div className="flex items-center gap-3 px-4 py-3">
+        <span className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+          <Icon className="h-4 w-4 text-primary" />
+        </span>
+        <p className="flex-1 font-display text-sm font-semibold text-foreground/90 truncate">
+          {label}
+        </p>
+        <span className="text-base font-semibold text-foreground tabular-nums">{value}</span>
+        <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+      </div>
+      {children && (
+        <div className="border-t border-border/50 bg-background/30 px-2 py-2">{children}</div>
+      )}
+    </Link>
+  );
+}
+
+function DayColumns({
+  days,
+  lang,
+  renderBody,
+}: {
+  days: string[];
+  lang: string;
+  renderBody: (date: string, isToday: boolean) => React.ReactNode;
+}) {
+  const todayKey = getDateString(new Date());
+  return (
+    <div className="grid grid-cols-5 gap-1">
+      {days.map((dk) => {
+        const d = new Date(dk);
         const weekday = d.toLocaleDateString(localeMap[lang] || 'en-US', { weekday: 'short' });
+        const isToday = dk === todayKey;
         return (
-          <div key={date} className="flex flex-col items-center gap-1">
-            <span className="text-[10px] text-muted-foreground capitalize leading-none">
-              {weekday.slice(0, 2)}
-            </span>
-            <div
+          <div key={dk} className="flex flex-col items-center gap-1">
+            <span
               className={cn(
-                'w-8 h-8 rounded-md flex items-center justify-center border transition-colors',
-                mark === 'full' && 'bg-primary text-primary-foreground border-primary',
-                mark === 'partial' && 'bg-primary/15 text-primary border-primary/30',
-                mark === 'empty' && 'bg-destructive/10 text-destructive/70 border-destructive/20',
-                mark === 'none' && 'bg-muted/40 text-muted-foreground border-border',
+                'text-[10px] capitalize leading-none',
+                isToday ? 'text-primary font-semibold' : 'text-muted-foreground',
               )}
             >
-              {mark === 'full' && <Check className="h-4 w-4" strokeWidth={3} />}
-              {mark === 'partial' && <Check className="h-3.5 w-3.5" strokeWidth={2.5} />}
-              {mark === 'empty' && <X className="h-3.5 w-3.5" strokeWidth={2.5} />}
-              {mark === 'none' && <Minus className="h-3 w-3" />}
-            </div>
+              {weekday.slice(0, 3)}
+            </span>
+            {renderBody(dk, isToday)}
           </div>
         );
       })}
@@ -59,44 +103,10 @@ function FiveDayStrip({ marks, lang }: { marks: { date: string; mark: DayMark }[
   );
 }
 
-interface SummaryCardProps {
-  to: string;
-  icon: typeof Moon;
-  label: string;
-  value: string;
-  marks: { date: string; mark: DayMark }[];
-  lang: string;
-}
-
-function SummaryCard({ to, icon: Icon, label, value, marks, lang }: SummaryCardProps) {
-  return (
-    <Link
-      to={to}
-      className="block rounded-2xl gradient-card shadow-card border border-border/50 p-4 hover:shadow-elevated transition-all"
-    >
-      <div className="flex items-center gap-3 mb-3">
-        <span className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-          <Icon className="h-4 w-4 text-primary" />
-        </span>
-        <div className="flex-1 min-w-0">
-          <p className="font-display text-sm font-semibold text-foreground/90 truncate">
-            {label}
-          </p>
-        </div>
-        <span className="text-base font-semibold text-foreground tabular-nums">
-          {value}
-        </span>
-        <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-      </div>
-      <FiveDayStrip marks={marks} lang={lang} />
-    </Link>
-  );
-}
-
 export default function Home() {
   const { t, tHabit, lang } = useTranslation();
   const { prayers } = usePrayerTracking();
-  const { getActiveCount, getCompletedCount } = useHabitsTracking();
+  const { getActiveCount, getCompletedCount, habits } = useHabitsTracking();
   const { missions } = useMissions();
 
   const data = useMemo(() => {
@@ -106,6 +116,7 @@ export default function Home() {
       fajr: 0, dhuhr: 0, asr: 0, maghrib: 0, isha: 0,
     });
 
+    const todayKey = getDateString(new Date());
     const days: string[] = [];
     for (let i = 4; i >= 0; i--) {
       const d = new Date();
@@ -113,57 +124,42 @@ export default function Home() {
       days.push(getDateString(d));
     }
 
-    let prayersDone = 0;
-    const prayerMarks = days.map((dk) => {
-      const day = prayerHistory[dk];
-      if (!day) return { date: dk, mark: 'none' as DayMark };
-      let c = 0;
+    let prayersDoneToday = 0;
+    const todayData = prayerHistory[todayKey];
+    if (todayData) {
       PRAYER_KEYS.forEach((p) => {
-        const s = day.prayers[p]?.status;
-        if (s === 'on-time' || s === 'jamaah' || s === 'late') c++;
+        const s = todayData.prayers[p]?.status;
+        if (s === 'on-time' || s === 'jamaah' || s === 'late') prayersDoneToday++;
       });
-      prayersDone += c;
-      const mark: DayMark = c === 5 ? 'full' : c >= 3 ? 'partial' : c > 0 ? 'partial' : 'empty';
-      return { date: dk, mark };
+    }
+
+    // per day, per prayer state
+    const prayerGrid: Record<string, PrayerCellState[]> = {};
+    days.forEach((dk) => {
+      const isPast = dk < todayKey;
+      const day = prayerHistory[dk];
+      prayerGrid[dk] = PRAYER_KEYS.map((p) =>
+        prayerCellState(day?.prayers[p]?.status, isPast),
+      );
     });
 
-    const habitMarks = days.map((dk) => {
-      const day = habitsHistory[dk];
-      if (!day) return { date: dk, mark: 'none' as DayMark };
-      const vals = Object.values(day);
-      const done = vals.filter(Boolean).length;
-      if (done === 0) return { date: dk, mark: 'empty' as DayMark };
-      if (vals.length > 0 && done >= vals.length * 0.8) return { date: dk, mark: 'full' as DayMark };
-      return { date: dk, mark: 'partial' as DayMark };
-    });
-
-    // Qadha: mark a day "full" if user logged any qadha that day (we don't have history, so neutral)
-    const qadhaMarks = days.map((dk) => ({ date: dk, mark: 'none' as DayMark }));
-
-    // Missions: mark days within an active mission window
-    const missionMarks = days.map((dk) => {
-      if (missions.length === 0) return { date: dk, mark: 'none' as DayMark };
-      const inAny = missions.some((m) => {
-        const start = new Date(m.startDate);
-        const end = new Date(start);
-        end.setDate(end.getDate() + m.days - 1);
-        const d = new Date(dk);
-        return d >= start && d <= end;
+    // habits: per day done / total-active-that-day
+    const activeHabitIds = habits.map((h) => h.id);
+    const totalActive = activeHabitIds.length;
+    const habitGrid: Record<string, { done: number; total: number }> = {};
+    days.forEach((dk) => {
+      const day = habitsHistory[dk] || {};
+      let done = 0;
+      activeHabitIds.forEach((id) => {
+        if (day[id]) done++;
       });
-      return { date: dk, mark: inAny ? 'full' as DayMark : 'none' as DayMark };
+      habitGrid[dk] = { done, total: totalActive };
     });
 
     const qadhaRemaining = Object.values(qadhaCounts).reduce((a, b) => a + (b || 0), 0);
 
-    return {
-      prayersDone,
-      prayerMarks,
-      habitMarks,
-      qadhaMarks,
-      missionMarks,
-      qadhaRemaining,
-    };
-  }, [prayers, missions]);
+    return { days, prayersDoneToday, prayerGrid, habitGrid, qadhaRemaining };
+  }, [prayers, habits, missions]);
 
   return (
     <div className="container max-w-lg mx-auto px-4 py-6 space-y-4">
@@ -186,48 +182,93 @@ export default function Home() {
         </span>
       </div>
 
-      <SummaryCard
+      {/* Prayers */}
+      <CardShell
         to="/prayers"
         icon={Moon}
         label={t('nav.prayers')}
-        value={`${data.prayersDone}/25`}
-        marks={data.prayerMarks}
-        lang={lang}
-      />
+        value={`${data.prayersDoneToday}/5`}
+      >
+        <DayColumns
+          days={data.days}
+          lang={lang}
+          renderBody={(dk) => (
+            <div className="w-full flex flex-col gap-[2px]">
+              {data.prayerGrid[dk].map((state, i) => (
+                <div
+                  key={i}
+                  className={cn(
+                    'h-2 rounded-sm',
+                    state === 'done' && 'bg-primary',
+                    state === 'missed' && 'bg-destructive/70',
+                    state === 'none' && 'bg-muted/60',
+                  )}
+                />
+              ))}
+            </div>
+          )}
+        />
+      </CardShell>
 
-      <SummaryCard
+      {/* Qadha */}
+      <CardShell
         to="/qadha"
         icon={RotateCcw}
         label={t('nav.qadha')}
         value={`${data.qadhaRemaining} ${t('home.remaining')}`}
-        marks={data.qadhaMarks}
-        lang={lang}
       />
 
-      <SummaryCard
+      {/* Habits */}
+      <CardShell
         to="/habits"
         icon={BookOpen}
         label={t('nav.habits')}
         value={`${getCompletedCount()}/${getActiveCount()}`}
-        marks={data.habitMarks}
-        lang={lang}
-      />
+      >
+        <DayColumns
+          days={data.days}
+          lang={lang}
+          renderBody={(dk) => {
+            const { done, total } = data.habitGrid[dk];
+            const ratio = total > 0 ? done / total : 0;
+            return (
+              <div
+                className={cn(
+                  'w-full h-8 rounded-md flex items-center justify-center text-[11px] font-semibold tabular-nums border',
+                  total === 0 && 'bg-muted/40 text-muted-foreground border-border',
+                  total > 0 && ratio === 0 && 'bg-destructive/10 text-destructive/80 border-destructive/20',
+                  total > 0 && ratio > 0 && ratio < 0.8 && 'bg-primary/15 text-primary border-primary/30',
+                  total > 0 && ratio >= 0.8 && 'bg-primary text-primary-foreground border-primary',
+                )}
+              >
+                {total > 0 ? `${done}/${total}` : '–'}
+              </div>
+            );
+          }}
+        />
+      </CardShell>
 
-      <SummaryCard
-        to="/missions"
-        icon={Target}
-        label={t('missions.title')}
-        value={`${missions.length} ${t('home.active')}`}
-        marks={data.missionMarks}
-        lang={lang}
-      />
-
-      {missions.length > 0 && (
-        <div className="space-y-2 pt-2">
-          <h3 className="font-display text-sm font-semibold text-foreground/80 px-1">
-            {t('missions.active')}
+      {/* Missions — simple list, no boxes */}
+      <div className="space-y-2 pt-2">
+        <div className="flex items-center justify-between px-1">
+          <h3 className="font-display text-sm font-semibold text-foreground/80">
+            {t('missions.title')}
           </h3>
-          {missions.slice(0, 2).map((m) => {
+          <Link to="/missions" className="text-xs text-primary hover:underline">
+            {t('missions.newMission')}
+          </Link>
+        </div>
+
+        {missions.length === 0 ? (
+          <Link
+            to="/missions"
+            className="block p-4 rounded-2xl border border-dashed border-border bg-card/40 text-center text-sm text-muted-foreground hover:border-primary/40 transition"
+          >
+            <Target className="h-4 w-4 inline-block me-1.5 -mt-0.5" />
+            {t('missions.newMission')}
+          </Link>
+        ) : (
+          missions.map((m) => {
             const p = computeProgress(m);
             const pct = Math.min(100, (p.progress / m.days) * 100);
             const label = getActionLabel(m, t, tHabit, lang);
@@ -235,22 +276,25 @@ export default function Home() {
               <Link
                 key={m.id}
                 to="/missions"
-                className="block p-3 rounded-xl border border-border bg-card hover:shadow-card transition-all"
+                className="block rounded-2xl gradient-card shadow-card border border-border/50 px-4 py-3 hover:shadow-elevated transition-all"
               >
-                <div className="flex items-center gap-2 mb-1.5">
-                  <Target className="h-3.5 w-3.5 text-primary" />
-                  <p className="text-sm text-foreground truncate">
+                <div className="flex items-start gap-2 mb-2">
+                  <Target className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
+                  <p className="text-sm text-foreground flex-1">
                     {t('missions.iIntendTo')}{' '}
                     <span className="text-primary font-medium">{label}</span>{' '}
                     {t('missions.for')} {m.days} {t('missions.days')}
                   </p>
+                  <span className="text-xs font-semibold tabular-nums text-foreground/80 shrink-0">
+                    {p.progress}/{m.days}
+                  </span>
                 </div>
                 <Progress value={pct} className="h-1.5" />
               </Link>
             );
-          })}
-        </div>
-      )}
+          })
+        )}
+      </div>
     </div>
   );
 }
