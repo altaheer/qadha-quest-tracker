@@ -40,13 +40,11 @@ export default function Prayers() {
     markPrayer,
     toggleSunnah,
     getPoints,
-    getTotalPoints,
     getCompletedCount,
   } = usePrayerTracking(selectedDate);
 
-  const { nafilahPrayers, toggleNafilah, getTotalNafilahPoints } = useNafilahTracking(selectedDate);
+  const { nafilahPrayers, toggleNafilah } = useNafilahTracking(selectedDate);
 
-  const totalPoints = getTotalPoints() + getTotalNafilahPoints();
   const completedCount = getCompletedCount();
 
   const prevComboRef = useRef(combo);
