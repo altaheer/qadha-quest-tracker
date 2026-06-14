@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Moon, Target, BookOpen, RotateCcw, Sparkles, ChevronRight } from 'lucide-react';
+import { Moon, Target, BookOpen, RotateCcw, Check, X, Minus, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { usePrayerTracking, type DailyPrayers } from '@/hooks/usePrayerTracking';
 import { useHabitsTracking } from '@/hooks/useHabitsTracking';
@@ -7,6 +7,7 @@ import { useMissions, computeProgress, getActionLabel } from '@/hooks/useMission
 import { Progress } from '@/components/ui/progress';
 import { useTranslation } from '@/lib/i18n';
 import { getDateString } from '@/lib/date';
+import { cn } from '@/lib/utils';
 import type { PrayerHistory, HabitsHistory, PrayerCounts } from '@/types';
 
 const PRAYER_KEYS: (keyof DailyPrayers)[] = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
@@ -20,21 +21,75 @@ function readJSON<T>(key: string, fallback: T): T {
   }
 }
 
-function Dots({ values }: { values: number[] }) {
-  // values: array of 0..1 intensity for last N days (oldest -> newest)
+type DayMark = 'full' | 'partial' | 'empty' | 'none';
+
+const localeMap: Record<string, string> = {
+  en: 'en-US', sv: 'sv-SE', tr: 'tr-TR', ar: 'ar-EG',
+};
+
+function FiveDayStrip({ marks, lang }: { marks: { date: string; mark: DayMark }[]; lang: string }) {
   return (
-    <div className="flex items-center gap-1">
-      {values.map((v, i) => {
-        const opacity = v <= 0 ? 0.15 : 0.35 + v * 0.65;
+    <div className="grid grid-cols-5 gap-1.5">
+      {marks.map(({ date, mark }) => {
+        const d = new Date(date);
+        const weekday = d.toLocaleDateString(localeMap[lang] || 'en-US', { weekday: 'short' });
         return (
-          <span
-            key={i}
-            className="w-1.5 h-1.5 rounded-full bg-primary"
-            style={{ opacity }}
-          />
+          <div key={date} className="flex flex-col items-center gap-1">
+            <span className="text-[10px] text-muted-foreground capitalize leading-none">
+              {weekday.slice(0, 2)}
+            </span>
+            <div
+              className={cn(
+                'w-8 h-8 rounded-md flex items-center justify-center border transition-colors',
+                mark === 'full' && 'bg-primary text-primary-foreground border-primary',
+                mark === 'partial' && 'bg-primary/15 text-primary border-primary/30',
+                mark === 'empty' && 'bg-destructive/10 text-destructive/70 border-destructive/20',
+                mark === 'none' && 'bg-muted/40 text-muted-foreground border-border',
+              )}
+            >
+              {mark === 'full' && <Check className="h-4 w-4" strokeWidth={3} />}
+              {mark === 'partial' && <Check className="h-3.5 w-3.5" strokeWidth={2.5} />}
+              {mark === 'empty' && <X className="h-3.5 w-3.5" strokeWidth={2.5} />}
+              {mark === 'none' && <Minus className="h-3 w-3" />}
+            </div>
+          </div>
         );
       })}
     </div>
+  );
+}
+
+interface SummaryCardProps {
+  to: string;
+  icon: typeof Moon;
+  label: string;
+  value: string;
+  marks: { date: string; mark: DayMark }[];
+  lang: string;
+}
+
+function SummaryCard({ to, icon: Icon, label, value, marks, lang }: SummaryCardProps) {
+  return (
+    <Link
+      to={to}
+      className="block rounded-2xl gradient-card shadow-card border border-border/50 p-4 hover:shadow-elevated transition-all"
+    >
+      <div className="flex items-center gap-3 mb-3">
+        <span className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+          <Icon className="h-4 w-4 text-primary" />
+        </span>
+        <div className="flex-1 min-w-0">
+          <p className="font-display text-sm font-semibold text-foreground/90 truncate">
+            {label}
+          </p>
+        </div>
+        <span className="text-base font-semibold text-foreground tabular-nums">
+          {value}
+        </span>
+        <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+      </div>
+      <FiveDayStrip marks={marks} lang={lang} />
+    </Link>
   );
 }
 
@@ -44,7 +99,7 @@ export default function Home() {
   const { getActiveCount, getCompletedCount } = useHabitsTracking();
   const { missions } = useMissions();
 
-  const summary = useMemo(() => {
+  const data = useMemo(() => {
     const prayerHistory = readJSON<PrayerHistory>('prayer-history', {});
     const habitsHistory = readJSON<HabitsHistory>('habits-tracking', {});
     const qadhaCounts = readJSON<PrayerCounts>('qadha-prayer-counts', {
@@ -58,90 +113,60 @@ export default function Home() {
       days.push(getDateString(d));
     }
 
-    // Prayers: per-day count of completed (on-time/jamaah/late) out of 5
     let prayersDone = 0;
-    const prayerDots = days.map((dk) => {
+    const prayerMarks = days.map((dk) => {
       const day = prayerHistory[dk];
-      if (!day) return 0;
+      if (!day) return { date: dk, mark: 'none' as DayMark };
       let c = 0;
       PRAYER_KEYS.forEach((p) => {
         const s = day.prayers[p]?.status;
         if (s === 'on-time' || s === 'jamaah' || s === 'late') c++;
       });
       prayersDone += c;
-      return c / 5;
+      const mark: DayMark = c === 5 ? 'full' : c >= 3 ? 'partial' : c > 0 ? 'partial' : 'empty';
+      return { date: dk, mark };
     });
 
-    // Habits: per-day completion ratio (completed / active that day)
-    const habitDots = days.map((dk) => {
+    const habitMarks = days.map((dk) => {
       const day = habitsHistory[dk];
-      if (!day) return 0;
+      if (!day) return { date: dk, mark: 'none' as DayMark };
       const vals = Object.values(day);
-      if (vals.length === 0) return 0;
       const done = vals.filter(Boolean).length;
-      return Math.min(1, done / Math.max(1, vals.length));
+      if (done === 0) return { date: dk, mark: 'empty' as DayMark };
+      if (vals.length > 0 && done >= vals.length * 0.8) return { date: dk, mark: 'full' as DayMark };
+      return { date: dk, mark: 'partial' as DayMark };
+    });
+
+    // Qadha: mark a day "full" if user logged any qadha that day (we don't have history, so neutral)
+    const qadhaMarks = days.map((dk) => ({ date: dk, mark: 'none' as DayMark }));
+
+    // Missions: mark days within an active mission window
+    const missionMarks = days.map((dk) => {
+      if (missions.length === 0) return { date: dk, mark: 'none' as DayMark };
+      const inAny = missions.some((m) => {
+        const start = new Date(m.startDate);
+        const end = new Date(start);
+        end.setDate(end.getDate() + m.days - 1);
+        const d = new Date(dk);
+        return d >= start && d <= end;
+      });
+      return { date: dk, mark: inAny ? 'full' as DayMark : 'none' as DayMark };
     });
 
     const qadhaRemaining = Object.values(qadhaCounts).reduce((a, b) => a + (b || 0), 0);
 
-    // Missions: dot intensity = 1 if any active mission progressed that day (simplified: any prayer/habit/nafilah activity)
-    const missionDots = days.map((dk) => {
-      const pHist = prayerHistory[dk];
-      const hHist = habitsHistory[dk];
-      const any = !!(pHist || hHist);
-      return any ? 0.6 : 0;
-    });
-
     return {
       prayersDone,
-      prayersMax: 25,
-      prayerDots,
-      habitsCompleted: getCompletedCount(),
-      habitsActive: getActiveCount(),
-      habitDots,
+      prayerMarks,
+      habitMarks,
+      qadhaMarks,
+      missionMarks,
       qadhaRemaining,
-      missionsActive: missions.length,
-      missionDots,
     };
-  }, [prayers, missions, getActiveCount, getCompletedCount]);
-
-  const rows = [
-    {
-      key: 'prayers',
-      to: '/prayers',
-      icon: Moon,
-      label: t('nav.prayers'),
-      value: `${summary.prayersDone}/${summary.prayersMax}`,
-      dots: summary.prayerDots,
-    },
-    {
-      key: 'qadha',
-      to: '/qadha',
-      icon: RotateCcw,
-      label: t('nav.qadha'),
-      value: `${summary.qadhaRemaining} ${t('home.remaining')}`,
-      dots: null as number[] | null,
-    },
-    {
-      key: 'habits',
-      to: '/habits',
-      icon: BookOpen,
-      label: t('nav.habits'),
-      value: `${summary.habitsCompleted}/${summary.habitsActive}`,
-      dots: summary.habitDots,
-    },
-    {
-      key: 'missions',
-      to: '/missions',
-      icon: Target,
-      label: t('missions.title'),
-      value: `${summary.missionsActive} ${t('home.active')}`,
-      dots: summary.missionDots,
-    },
-  ];
+  }, [prayers, missions]);
 
   return (
-    <div className="container max-w-lg mx-auto px-4 py-6 space-y-5">
+    <div className="container max-w-lg mx-auto px-4 py-6 space-y-4">
       <div className="text-center animate-fade-in">
         <div className="inline-flex items-center justify-center w-14 h-14 rounded-full gradient-primary shadow-elevated mb-3">
           <Moon className="h-7 w-7 text-primary-foreground" />
@@ -152,55 +177,56 @@ export default function Home() {
         <p className="text-muted-foreground text-sm">{t('home.subtitle')}</p>
       </div>
 
-      {/* Summary card */}
-      <div className="rounded-2xl gradient-card shadow-card border border-border/50 p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-display text-sm font-semibold text-foreground/90 flex items-center gap-1.5">
-            <Sparkles className="h-3.5 w-3.5 text-primary" />
-            {t('home.summary')}
-          </h2>
-          <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
-            {t('home.last5days')}
-          </span>
-        </div>
-
-        <ul className="divide-y divide-border/50">
-          {rows.map((r) => {
-            const Icon = r.icon;
-            return (
-              <li key={r.key}>
-                <Link
-                  to={r.to}
-                  className="flex items-center gap-3 py-2.5 -mx-1 px-1 rounded-lg hover:bg-muted/40 transition-colors"
-                >
-                  <span className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <Icon className="h-3.5 w-3.5 text-primary" />
-                  </span>
-                  <span className="flex-1 text-sm text-foreground/90 truncate">
-                    {r.label}
-                  </span>
-                  {r.dots && <Dots values={r.dots} />}
-                  <span className="text-sm font-medium text-foreground tabular-nums">
-                    {r.value}
-                  </span>
-                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+      <div className="flex items-center justify-between px-1">
+        <h2 className="font-display text-sm font-semibold text-foreground/80">
+          {t('home.summary')}
+        </h2>
+        <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
+          {t('home.last5days')}
+        </span>
       </div>
 
+      <SummaryCard
+        to="/prayers"
+        icon={Moon}
+        label={t('nav.prayers')}
+        value={`${data.prayersDone}/25`}
+        marks={data.prayerMarks}
+        lang={lang}
+      />
+
+      <SummaryCard
+        to="/qadha"
+        icon={RotateCcw}
+        label={t('nav.qadha')}
+        value={`${data.qadhaRemaining} ${t('home.remaining')}`}
+        marks={data.qadhaMarks}
+        lang={lang}
+      />
+
+      <SummaryCard
+        to="/habits"
+        icon={BookOpen}
+        label={t('nav.habits')}
+        value={`${getCompletedCount()}/${getActiveCount()}`}
+        marks={data.habitMarks}
+        lang={lang}
+      />
+
+      <SummaryCard
+        to="/missions"
+        icon={Target}
+        label={t('missions.title')}
+        value={`${missions.length} ${t('home.active')}`}
+        marks={data.missionMarks}
+        lang={lang}
+      />
+
       {missions.length > 0 && (
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <h3 className="font-display text-sm font-semibold text-foreground/80">
-              {t('missions.active')}
-            </h3>
-            <Link to="/missions" className="text-xs text-primary">
-              {t('missions.title')} →
-            </Link>
-          </div>
+        <div className="space-y-2 pt-2">
+          <h3 className="font-display text-sm font-semibold text-foreground/80 px-1">
+            {t('missions.active')}
+          </h3>
           {missions.slice(0, 2).map((m) => {
             const p = computeProgress(m);
             const pct = Math.min(100, (p.progress / m.days) * 100);
