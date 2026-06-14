@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Moon, Target, BookOpen, RotateCcw, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { usePrayerTracking, type DailyPrayers } from '@/hooks/usePrayerTracking';
-import { useHabitsTracking } from '@/hooks/useHabitsTracking';
+import { useHabitsTracking, habitCategories, levelHabits } from '@/hooks/useHabitsTracking';
 import { useMissions, computeProgress, getActionLabel } from '@/hooks/useMissions';
 import { Progress } from '@/components/ui/progress';
 import { useTranslation } from '@/lib/i18n';
