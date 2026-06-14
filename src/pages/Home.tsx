@@ -1,129 +1,194 @@
-import { Moon, Target, Sparkles } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useMemo } from 'react';
+import { Moon, Target, BookOpen, RotateCcw, Sparkles, ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { usePrayerTracking, type DailyPrayers } from '@/hooks/usePrayerTracking';
-import { useHabitsTracking, habitCategories, levelHabits } from '@/hooks/useHabitsTracking';
+import { useHabitsTracking } from '@/hooks/useHabitsTracking';
 import { useMissions, computeProgress, getActionLabel } from '@/hooks/useMissions';
 import { Progress } from '@/components/ui/progress';
-import { DateHeader } from '@/components/DateHeader';
-import { QuickActionsFAB } from '@/components/QuickActionsFAB';
 import { useTranslation } from '@/lib/i18n';
-import { haptics } from '@/lib/haptics';
+import { getDateString } from '@/lib/date';
+import type { PrayerHistory, HabitsHistory, PrayerCounts } from '@/types';
 
 const PRAYER_KEYS: (keyof DailyPrayers)[] = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
-const MAX_CHIPS = 6;
+
+function readJSON<T>(key: string, fallback: T): T {
+  try {
+    const v = localStorage.getItem(key);
+    return v ? JSON.parse(v) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function Dots({ values }: { values: number[] }) {
+  // values: array of 0..1 intensity for last N days (oldest -> newest)
+  return (
+    <div className="flex items-center gap-1">
+      {values.map((v, i) => {
+        const opacity = v <= 0 ? 0.15 : 0.35 + v * 0.65;
+        return (
+          <span
+            key={i}
+            className="w-1.5 h-1.5 rounded-full bg-primary"
+            style={{ opacity }}
+          />
+        );
+      })}
+    </div>
+  );
+}
 
 export default function Home() {
   const { t, tHabit, lang } = useTranslation();
-  const navigate = useNavigate();
-  const { prayers, markPrayer } = usePrayerTracking();
-  const {
-    completedHabits,
-    pausedHabits,
-    level,
-    toggleHabit,
-  } = useHabitsTracking();
+  const { prayers } = usePrayerTracking();
+  const { getActiveCount, getCompletedCount } = useHabitsTracking();
   const { missions } = useMissions();
 
-  // Pending prayers today
-  const pendingPrayers = PRAYER_KEYS.filter((p) => prayers[p].status === 'pending');
+  const summary = useMemo(() => {
+    const prayerHistory = readJSON<PrayerHistory>('prayer-history', {});
+    const habitsHistory = readJSON<HabitsHistory>('habits-tracking', {});
+    const qadhaCounts = readJSON<PrayerCounts>('qadha-prayer-counts', {
+      fajr: 0, dhuhr: 0, asr: 0, maghrib: 0, isha: 0,
+    });
 
-  // Active (tracked) habits not completed
-  const trackedHabitIds = level === 'custom'
-    ? habitCategories.flatMap((c) => c.habits.map((h) => h.id)).filter((id) => !pausedHabits.has(id))
-    : levelHabits[level].filter((id) => !pausedHabits.has(id));
-  const pendingHabits = trackedHabitIds.filter((id) => !completedHabits.has(id));
+    const days: string[] = [];
+    for (let i = 4; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      days.push(getDateString(d));
+    }
 
-  type Chip =
-    | { kind: 'prayer'; key: keyof DailyPrayers; label: string }
-    | { kind: 'habit'; id: string; label: string };
+    // Prayers: per-day count of completed (on-time/jamaah/late) out of 5
+    let prayersDone = 0;
+    const prayerDots = days.map((dk) => {
+      const day = prayerHistory[dk];
+      if (!day) return 0;
+      let c = 0;
+      PRAYER_KEYS.forEach((p) => {
+        const s = day.prayers[p]?.status;
+        if (s === 'on-time' || s === 'jamaah' || s === 'late') c++;
+      });
+      prayersDone += c;
+      return c / 5;
+    });
 
-  const allChips: Chip[] = [
-    ...pendingPrayers.map((p) => ({
-      kind: 'prayer' as const,
-      key: p,
-      label: t(`prayerNames.${p}` as any),
-    })),
-    ...pendingHabits.map((id) => ({
-      kind: 'habit' as const,
-      id,
-      label: tHabit(id),
-    })),
+    // Habits: per-day completion ratio (completed / active that day)
+    const habitDots = days.map((dk) => {
+      const day = habitsHistory[dk];
+      if (!day) return 0;
+      const vals = Object.values(day);
+      if (vals.length === 0) return 0;
+      const done = vals.filter(Boolean).length;
+      return Math.min(1, done / Math.max(1, vals.length));
+    });
+
+    const qadhaRemaining = Object.values(qadhaCounts).reduce((a, b) => a + (b || 0), 0);
+
+    // Missions: dot intensity = 1 if any active mission progressed that day (simplified: any prayer/habit/nafilah activity)
+    const missionDots = days.map((dk) => {
+      const pHist = prayerHistory[dk];
+      const hHist = habitsHistory[dk];
+      const any = !!(pHist || hHist);
+      return any ? 0.6 : 0;
+    });
+
+    return {
+      prayersDone,
+      prayersMax: 25,
+      prayerDots,
+      habitsCompleted: getCompletedCount(),
+      habitsActive: getActiveCount(),
+      habitDots,
+      qadhaRemaining,
+      missionsActive: missions.length,
+      missionDots,
+    };
+  }, [prayers, missions, getActiveCount, getCompletedCount]);
+
+  const rows = [
+    {
+      key: 'prayers',
+      to: '/prayers',
+      icon: Moon,
+      label: t('nav.prayers'),
+      value: `${summary.prayersDone}/${summary.prayersMax}`,
+      dots: summary.prayerDots,
+    },
+    {
+      key: 'qadha',
+      to: '/qadha',
+      icon: RotateCcw,
+      label: t('nav.qadha'),
+      value: `${summary.qadhaRemaining} ${t('home.remaining')}`,
+      dots: null as number[] | null,
+    },
+    {
+      key: 'habits',
+      to: '/habits',
+      icon: BookOpen,
+      label: t('nav.habits'),
+      value: `${summary.habitsCompleted}/${summary.habitsActive}`,
+      dots: summary.habitDots,
+    },
+    {
+      key: 'missions',
+      to: '/missions',
+      icon: Target,
+      label: t('missions.title'),
+      value: `${summary.missionsActive} ${t('home.active')}`,
+      dots: summary.missionDots,
+    },
   ];
 
-  const allDone = allChips.length === 0;
-  const visibleChips = allChips.slice(0, MAX_CHIPS - 1);
-  const overflow = allChips.length - visibleChips.length;
-  const showOverflowChip = overflow > 0;
-
-  const handlePrayerChip = (p: keyof DailyPrayers) => {
-    haptics.light();
-    markPrayer(p, 'on-time');
-  };
-
-  const handleHabitChip = (id: string) => {
-    haptics.light();
-    toggleHabit(id);
-  };
-
   return (
-    <div className="container max-w-lg mx-auto px-4 py-6 space-y-6">
+    <div className="container max-w-lg mx-auto px-4 py-6 space-y-5">
       <div className="text-center animate-fade-in">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full gradient-primary shadow-elevated mb-4">
-          <Moon className="h-8 w-8 text-primary-foreground" />
+        <div className="inline-flex items-center justify-center w-14 h-14 rounded-full gradient-primary shadow-elevated mb-3">
+          <Moon className="h-7 w-7 text-primary-foreground" />
         </div>
-        <h1 className="font-display text-3xl font-bold text-foreground mb-2">
+        <h1 className="font-display text-2xl font-bold text-foreground mb-1">
           Assalamu Alaikum
         </h1>
         <p className="text-muted-foreground text-sm">{t('home.subtitle')}</p>
-        <div className="mt-3">
-          <DateHeader />
-        </div>
       </div>
 
-      {/* Right now card */}
-      <div className="rounded-2xl gradient-card shadow-card border border-border/50 p-5">
-        <h2 className="font-display text-base font-semibold text-foreground/90 mb-3">
-          {t('home.rightNow')}
-        </h2>
+      {/* Summary card */}
+      <div className="rounded-2xl gradient-card shadow-card border border-border/50 p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-display text-sm font-semibold text-foreground/90 flex items-center gap-1.5">
+            <Sparkles className="h-3.5 w-3.5 text-primary" />
+            {t('home.summary')}
+          </h2>
+          <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
+            {t('home.last5days')}
+          </span>
+        </div>
 
-        {allDone ? (
-          <div className="text-center py-4">
-            <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/15 mb-2 shadow-[0_0_24px_rgba(16,185,129,0.35)]">
-              <Sparkles className="h-5 w-5 text-primary" />
-            </div>
-            <p className="text-sm text-foreground/90">{t('home.dayComplete')}</p>
-          </div>
-        ) : (
-          <div className="flex flex-wrap gap-2">
-            {visibleChips.map((c) =>
-              c.kind === 'prayer' ? (
-                <button
-                  key={`p-${c.key}`}
-                  onClick={() => handlePrayerChip(c.key)}
-                  className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium border border-primary/20 hover:bg-primary/15 transition-colors"
+        <ul className="divide-y divide-border/50">
+          {rows.map((r) => {
+            const Icon = r.icon;
+            return (
+              <li key={r.key}>
+                <Link
+                  to={r.to}
+                  className="flex items-center gap-3 py-2.5 -mx-1 px-1 rounded-lg hover:bg-muted/40 transition-colors"
                 >
-                  {c.label}
-                </button>
-              ) : (
-                <button
-                  key={`h-${c.id}`}
-                  onClick={() => handleHabitChip(c.id)}
-                  className="px-3 py-1.5 rounded-full bg-accent/10 text-accent-foreground text-sm border border-accent/20 hover:bg-accent/15 transition-colors"
-                >
-                  {c.label}
-                </button>
-              ),
-            )}
-            {showOverflowChip && (
-              <button
-                onClick={() => navigate(pendingPrayers.length > 0 ? '/prayers' : '/habits')}
-                className="px-3 py-1.5 rounded-full bg-muted text-muted-foreground text-sm border border-border hover:bg-muted/80 transition-colors"
-              >
-                {t('home.moreItems').replace('{n}', String(overflow))}
-              </button>
-            )}
-          </div>
-        )}
+                  <span className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <Icon className="h-3.5 w-3.5 text-primary" />
+                  </span>
+                  <span className="flex-1 text-sm text-foreground/90 truncate">
+                    {r.label}
+                  </span>
+                  {r.dots && <Dots values={r.dots} />}
+                  <span className="text-sm font-medium text-foreground tabular-nums">
+                    {r.value}
+                  </span>
+                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       </div>
 
       {missions.length > 0 && (
@@ -160,8 +225,6 @@ export default function Home() {
           })}
         </div>
       )}
-
-      <QuickActionsFAB />
     </div>
   );
 }

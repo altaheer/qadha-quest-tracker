@@ -4,7 +4,7 @@ export type Language = 'en' | 'sv' | 'tr' | 'ar';
 
 export type Translations = {
   nav: { home: string; prayers: string; qadha: string; habits: string; insights: string; calendar: string; settings: string; more: string };
-  home: { subtitle: string; rightNow: string; dayComplete: string; moreItems: string; sunnahLabel: string };
+  home: { subtitle: string; rightNow: string; dayComplete: string; moreItems: string; sunnahLabel: string; last5days: string; summary: string; remaining: string; active: string };
   prayers: { title: string; subtitle: string; backfillMode: string; backfillDesc: string; combo: string; comboLabel: string; multiplier: string; streak: string; bestStreak: string; empty: string; jumpToToday: string; previous: string; next: string; today: string; tapForToday: string };
   prayerNames: { fajr: string; dhuhr: string; asr: string; maghrib: string; isha: string };
   status: { pending: string; onTime: string; jamaah: string; late: string; missed: string };
@@ -26,7 +26,7 @@ export type Translations = {
 
 const en: Translations = {
   nav: { home: 'Home', prayers: 'Prayers', qadha: 'Qadha', habits: 'Habits', insights: 'Insights', calendar: 'Calendar', settings: 'Settings', more: 'More' },
-  home: { subtitle: 'A new day, a new page', rightNow: 'Right now', dayComplete: 'The day is complete — may Allah accept it', moreItems: '+{n} more', sunnahLabel: 'Sunnah' },
+  home: { subtitle: 'A new day, a new page', rightNow: 'Right now', dayComplete: 'The day is complete — may Allah accept it', moreItems: '+{n} more', sunnahLabel: 'Sunnah', last5days: 'Last 5 days', summary: 'Summary', remaining: 'remaining', active: 'active' },
   prayers: { title: "Today's Prayers", subtitle: 'Mark your obligatory prayers and sunnah', backfillMode: 'Backfill mode', backfillDesc: 'Prayers marked "Missed" auto-add to Qadha.', combo: 'Combo', comboLabel: 'prayers in a row', multiplier: 'Multiplier', streak: 'Streak', bestStreak: 'Best', empty: 'Start your day with Fajr ☀️', jumpToToday: 'Back to today', previous: 'Previous day', next: 'Next day', today: 'Today', tapForToday: 'Tap to go to today' },
   prayerNames: { fajr: 'Fajr', dhuhr: 'Dhuhr', asr: 'Asr', maghrib: 'Maghrib', isha: 'Isha' },
   status: { pending: 'Pending', onTime: 'On Time', jamaah: 'Jamaah', late: 'Late', missed: 'Missed' },
@@ -65,7 +65,7 @@ const en: Translations = {
 
 const sv: Translations = {
   nav: { home: 'Hem', prayers: 'Böner', qadha: 'Qadha', habits: 'Vanor', insights: 'Insikter', calendar: 'Kalender', settings: 'Inställningar', more: 'Mer' },
-  home: { subtitle: 'En ny dag, ett nytt blad', rightNow: 'Just nu', dayComplete: 'Dagen är klar — må Allah acceptera den', moreItems: '+{n} mer', sunnahLabel: 'Sunnah' },
+  home: { subtitle: 'En ny dag, ett nytt blad', rightNow: 'Just nu', dayComplete: 'Dagen är klar — må Allah acceptera den', moreItems: '+{n} mer', sunnahLabel: 'Sunnah', last5days: 'Senaste 5 dagarna', summary: 'Sammanfattning', remaining: 'kvar', active: 'aktiva' },
   prayers: { title: 'Dagens böner', subtitle: 'Markera dina obligatoriska böner och sunnah', backfillMode: 'Backfill-läge', backfillDesc: 'Böner markerade som "Missad" läggs automatiskt till i Qadha.', combo: 'Combo', comboLabel: 'böner i rad', multiplier: 'Multiplikator', streak: 'Streak', bestStreak: 'Bästa', empty: 'Börja din dag med Fajr ☀️', jumpToToday: 'Tillbaka till idag', previous: 'Föregående dag', next: 'Nästa dag', today: 'Idag', tapForToday: 'Tryck för att gå till idag' },
   prayerNames: { fajr: 'Fajr', dhuhr: 'Dhuhr', asr: 'Asr', maghrib: 'Maghrib', isha: 'Isha' },
   status: { pending: 'Väntar', onTime: 'I tid', jamaah: 'Jamaah', late: 'Sent', missed: 'Missad' },
@@ -104,7 +104,7 @@ const sv: Translations = {
 
 const tr: Translations = {
   nav: { home: 'Ana Sayfa', prayers: 'Namazlar', qadha: 'Kaza', habits: 'Alışkanlıklar', insights: 'İstatistikler', calendar: 'Takvim', settings: 'Ayarlar', more: 'Daha Fazla' },
-  home: { subtitle: 'Yeni bir gün, yeni bir sayfa', rightNow: 'Şu anda', dayComplete: 'Gün tamamlandı — Allah kabul etsin', moreItems: '+{n} daha', sunnahLabel: 'Sünnet' },
+  home: { subtitle: 'Yeni bir gün, yeni bir sayfa', rightNow: 'Şu anda', dayComplete: 'Gün tamamlandı — Allah kabul etsin', moreItems: '+{n} daha', sunnahLabel: 'Sünnet', last5days: 'Son 5 gün', summary: 'Özet', remaining: 'kaldı', active: 'aktif' },
   prayers: { title: 'Günün Namazları', subtitle: 'Farz ve sünnet namazlarını işaretle', backfillMode: 'Geriye dönük mod', backfillDesc: '"Kaçırıldı" işaretlenen namazlar otomatik olarak Kaza\'ya eklenir.', combo: 'Kombo', comboLabel: 'arka arkaya namaz', multiplier: 'Çarpan', streak: 'Seri', bestStreak: 'En iyi', empty: 'Güne Sabah namazıyla başla ☀️', jumpToToday: 'Bugüne dön', previous: 'Önceki gün', next: 'Sonraki gün', today: 'Bugün', tapForToday: 'Bugüne gitmek için dokun' },
   prayerNames: { fajr: 'Sabah', dhuhr: 'Öğle', asr: 'İkindi', maghrib: 'Akşam', isha: 'Yatsı' },
   status: { pending: 'Bekliyor', onTime: 'Vaktinde', jamaah: 'Cemaat', late: 'Geç', missed: 'Kaçırıldı' },
@@ -143,7 +143,7 @@ const tr: Translations = {
 
 const ar: Translations = {
   nav: { home: 'الرئيسية', prayers: 'الصلوات', qadha: 'القضاء', habits: 'العادات', insights: 'الإحصاءات', calendar: 'التقويم', settings: 'الإعدادات', more: 'المزيد' },
-  home: { subtitle: 'يوم جديد، صفحة جديدة', rightNow: 'الآن', dayComplete: 'اكتمل اليوم — تقبّل الله', moreItems: '+{n} المزيد', sunnahLabel: 'سنن' },
+  home: { subtitle: 'يوم جديد، صفحة جديدة', rightNow: 'الآن', dayComplete: 'اكتمل اليوم — تقبّل الله', moreItems: '+{n} المزيد', sunnahLabel: 'سنن', last5days: 'آخر 5 أيام', summary: 'ملخّص', remaining: 'متبقي', active: 'نشطة' },
   prayers: { title: 'صلوات اليوم', subtitle: 'سجّل صلواتك الفريضة والسنن', backfillMode: 'وضع التعويض', backfillDesc: 'الصلوات المعلّمة "فائتة" تُضاف تلقائياً إلى القضاء.', combo: 'سلسلة', comboLabel: 'صلوات متتالية', multiplier: 'المضاعِف', streak: 'سلسلة', bestStreak: 'الأفضل', empty: 'ابدأ يومك بصلاة الفجر ☀️', jumpToToday: 'العودة إلى اليوم', previous: 'اليوم السابق', next: 'اليوم التالي', today: 'اليوم', tapForToday: 'اضغط للعودة إلى اليوم' },
   prayerNames: { fajr: 'الفجر', dhuhr: 'الظهر', asr: 'العصر', maghrib: 'المغرب', isha: 'العشاء' },
   status: { pending: 'قيد الانتظار', onTime: 'في الوقت', jamaah: 'جماعة', late: 'متأخر', missed: 'فائت' },
