@@ -118,9 +118,9 @@ export default function Home() {
 
     const todayKey = getDateString(new Date());
     const days: string[] = [];
-    for (let i = 4; i >= 0; i--) {
+    for (let i = 0; i < 5; i++) {
       const d = new Date();
-      d.setDate(d.getDate() - i);
+      d.setDate(d.getDate() + i);
       days.push(getDateString(d));
     }
 
