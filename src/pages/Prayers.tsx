@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { addDays, isFuture, isToday as isTodayFn } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DailyPrayerCard } from '@/components/DailyPrayerCard';
-import { DailyStats } from '@/components/DailyStats';
+import { Progress } from '@/components/ui/progress';
 import { DateNavigator } from '@/components/DateNavigator';
 import { NafilahSection } from '@/components/NafilahSection';
 import { CompletionCelebration } from '@/components/CompletionCelebration';
@@ -163,7 +163,13 @@ export default function Prayers() {
         )}
       </AnimatePresence>
 
-      <DailyStats totalPoints={totalPoints} completedPrayers={completedCount} totalPrayers={5} />
+      <div className="mb-4">
+        <div className="flex items-center justify-between mb-1.5 text-xs text-muted-foreground">
+          <span>{t('prayers.title')}</span>
+          <span className="font-medium text-foreground">{completedCount} / 5</span>
+        </div>
+        <Progress value={(completedCount / 5) * 100} className="h-1.5" />
+      </div>
 
       {isToday && noneMarked && (
         <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 text-center mb-4">

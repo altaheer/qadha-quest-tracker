@@ -118,7 +118,7 @@ export default function Habits() {
       </div>
 
       <div className="space-y-4 mb-6">
-        {habitCategories.map((category) => {
+        {habitCategories.filter(c => c.id !== 'misc' || level === 'custom').map((category) => {
           const IconComponent = iconMap[category.icon] || Sun;
           const activeHabits = category.habits.filter(h => !pausedHabits.has(h.id));
           const pausedHabitsInCategory = category.habits.filter(h => pausedHabits.has(h.id));
