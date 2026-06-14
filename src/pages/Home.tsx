@@ -106,7 +106,7 @@ function DayColumns({
 export default function Home() {
   const { t, tHabit, lang } = useTranslation();
   const { prayers } = usePrayerTracking();
-  const { getActiveCount, getCompletedCount, habits } = useHabitsTracking();
+  const { getActiveCount, getCompletedCount, pausedHabits, level } = useHabitsTracking();
   const { missions } = useMissions();
 
   const data = useMemo(() => {
