@@ -164,7 +164,7 @@ export default function Home() {
     const qadhaRemaining = Object.values(qadhaCounts).reduce((a, b) => a + (b || 0), 0);
 
     return { days, prayersDoneToday, prayerGrid, habitGrid, qadhaRemaining };
-  }, [prayers, habits, missions]);
+  }, [prayers, pausedHabits, level, missions]);
 
   return (
     <div className="container max-w-lg mx-auto px-4 py-6 space-y-4">
