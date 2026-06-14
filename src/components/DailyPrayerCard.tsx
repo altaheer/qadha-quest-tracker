@@ -196,12 +196,12 @@ export function DailyPrayerCard({
         </Button>
       </div>
 
-      {/* Sunnah & Extras */}
+      {/* Sunnah */}
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
           <button className="flex items-center justify-between w-full text-sm text-muted-foreground hover:text-foreground transition-colors py-2">
             <span className="flex items-center gap-2">
-              Sunnah & Extras
+              Sunnah
               <span className="text-xs bg-muted px-1.5 py-0.5 rounded-full">
                 {completedSunnah}/{sunnahItems.length}
               </span>

@@ -71,6 +71,42 @@ export function getActionBasePoints(m: Pick<Mission, 'actionType' | 'actionId' |
   return 5;
 }
 
+function getVerbKey(m: Pick<Mission, 'actionType' | 'actionId'>): string {
+  if (m.actionType === 'prayer' || m.actionType === 'nafilah') return 'missions.verbPray';
+  if (m.actionType === 'habit') {
+    const id = m.actionId;
+    if (id.includes('quran')) return 'missions.verbRead';
+    if (id.includes('sadaqah')) return 'missions.verbGive';
+    if (id.includes('istighfar') || id.includes('salawat')) return 'missions.verbSay';
+  }
+  return 'missions.verbDo';
+}
+
+/** Build a localized, verb-led label like "pray Maghrib in jamaah" or
+ *  "Akşam namazını cemaatle kılmaya" (verb after for TR). */
+export function getActionLabel(
+  m: Pick<Mission, 'actionType' | 'actionId' | 'qualifier'>,
+  t: (k: any) => string,
+  tHabit: (id: string) => string,
+  lang: 'en' | 'sv' | 'tr' | 'ar',
+): string {
+  let phrase: string;
+  if (m.actionType === 'prayer') {
+    const qual = m.qualifier === 'jamaah' ? t('missions.inJamaah') : t('missions.onTime');
+    const name = m.actionId === 'all' ? t('missions.allFive') : t(`prayerNames.${m.actionId}`);
+    phrase = `${name} ${qual}`;
+  } else if (m.actionType === 'habit') {
+    phrase = tHabit(m.actionId);
+  } else if (m.actionType === 'nafilah') {
+    const n = nafilahPrayers.find((p) => p.id === m.actionId);
+    phrase = n?.name ?? m.actionId;
+  } else {
+    phrase = m.actionId;
+  }
+  const verb = t(getVerbKey(m));
+  return lang === 'tr' ? `${phrase} ${verb}` : `${verb} ${phrase}`;
+}
+
 function isDayFulfilled(
   date: string,
   mission: Mission,
