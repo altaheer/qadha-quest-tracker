@@ -9,7 +9,7 @@ import { nafilahPrayers } from '@/hooks/useNafilahTracking';
 import {
   useMissions,
   computeProgress,
-  getActionBasePoints,
+  getActionLabel,
   type Mission,
   type MissionActionType,
   type MissionQualifier,
@@ -30,27 +30,6 @@ function parseActionValue(v: string): {
     return { actionType: 'prayer', actionId: parts[1], qualifier: parts[2] as MissionQualifier };
   }
   return { actionType: type, actionId: parts[1] };
-}
-
-function getActionLabel(
-  m: Pick<Mission, 'actionType' | 'actionId' | 'qualifier'>,
-  t: (k: any) => string,
-  tHabit: (id: string) => string,
-): string {
-  if (m.actionType === 'prayer') {
-    const qual = m.qualifier === 'jamaah' ? t('missions.inJamaah') : t('missions.onTime');
-    if (m.actionId === 'all') return `${t('missions.allFive')} ${qual}`;
-    const pName = t(`prayerNames.${m.actionId}` as any);
-    return `${pName} ${qual}`;
-  }
-  if (m.actionType === 'habit') {
-    return tHabit(m.actionId);
-  }
-  if (m.actionType === 'nafilah') {
-    const n = nafilahPrayers.find((p) => p.id === m.actionId);
-    return n?.name ?? m.actionId;
-  }
-  return '';
 }
 
 function getPausedHabits(): Set<string> {
