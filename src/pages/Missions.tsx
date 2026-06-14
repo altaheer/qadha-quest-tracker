@@ -120,15 +120,15 @@ export default function MissionsPage() {
       >
         <option value="">—</option>
         <optgroup label={t('nav.prayers')}>
-          <option value="prayer:all:on-time">{t('missions.allFive')} {t('missions.onTime')}</option>
-          <option value="prayer:all:jamaah">{t('missions.allFive')} {t('missions.inJamaah')}</option>
+          <option value="prayer:all:on-time">{getActionLabel({ actionType: 'prayer', actionId: 'all', qualifier: 'on-time' }, t, tHabit, lang)}</option>
+          <option value="prayer:all:jamaah">{getActionLabel({ actionType: 'prayer', actionId: 'all', qualifier: 'jamaah' }, t, tHabit, lang)}</option>
           {(['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'] as const).map((p) => (
             <optgroup key={p} label={t(`prayerNames.${p}` as any)}>
               <option value={`prayer:${p}:on-time`}>
-                {t(`prayerNames.${p}` as any)} {t('missions.onTime')}
+                {getActionLabel({ actionType: 'prayer', actionId: p, qualifier: 'on-time' }, t, tHabit, lang)}
               </option>
               <option value={`prayer:${p}:jamaah`}>
-                {t(`prayerNames.${p}` as any)} {t('missions.inJamaah')}
+                {getActionLabel({ actionType: 'prayer', actionId: p, qualifier: 'jamaah' }, t, tHabit, lang)}
               </option>
             </optgroup>
           ))}
@@ -137,7 +137,7 @@ export default function MissionsPage() {
           <optgroup label={t('habits.title')}>
             {activeHabits.map((h) => (
               <option key={h.id} value={`habit:${h.id}`}>
-                {tHabit(h.id)}
+                {getActionLabel({ actionType: 'habit', actionId: h.id }, t, tHabit, lang)}
               </option>
             ))}
           </optgroup>
@@ -145,7 +145,7 @@ export default function MissionsPage() {
         <optgroup label="Nafilah">
           {nafilahPrayers.map((n) => (
             <option key={n.id} value={`nafilah:${n.id}`}>
-              {n.name}
+              {getActionLabel({ actionType: 'nafilah', actionId: n.id }, t, tHabit, lang)}
             </option>
           ))}
         </optgroup>
