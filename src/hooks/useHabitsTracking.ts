@@ -246,30 +246,37 @@ export function useHabitsTracking(selectedDate?: Date) {
     setPausedHabits(newPaused);
   }, []);
 
-  // Calculate points for today (only non-paused, completed habits)
+  // Helper: only habits considered "tracked" given the current level
+  const isTracked = useCallback((id: string) => {
+    if (pausedHabits.has(id)) return false;
+    if (level === 'custom') return true;
+    return levelHabits[level].includes(id);
+  }, [pausedHabits, level]);
+
+  // Calculate points for today (only tracked, completed habits)
   const getTotalPoints = useCallback(() => {
     let total = 0;
     habitCategories.forEach(cat => {
       cat.habits.forEach(habit => {
-        if (completedHabits.has(habit.id) && !pausedHabits.has(habit.id)) {
+        if (completedHabits.has(habit.id) && isTracked(habit.id)) {
           total += habit.points;
         }
       });
     });
     return total;
-  }, [completedHabits, pausedHabits]);
+  }, [completedHabits, isTracked]);
 
-  // Get active habit count (non-paused)
+  // Get active habit count (tracked under current level)
   const getActiveCount = useCallback(() => {
-    return allHabitIds.filter(id => !pausedHabits.has(id)).length;
-  }, [pausedHabits]);
+    return allHabitIds.filter(id => isTracked(id)).length;
+  }, [isTracked]);
 
-  // Get completed count (only active habits)
+  // Get completed count (only tracked habits)
   const getCompletedCount = useCallback(() => {
     return allHabitIds.filter(id => 
-      completedHabits.has(id) && !pausedHabits.has(id)
+      completedHabits.has(id) && isTracked(id)
     ).length;
-  }, [completedHabits, pausedHabits]);
+  }, [completedHabits, isTracked]);
 
   return {
     habitCategories,
