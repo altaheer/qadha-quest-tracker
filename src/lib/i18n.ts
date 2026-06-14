@@ -20,7 +20,7 @@ export type Translations = {
   fab: { markFajr: string; addQadha: string; logHabit: string; quickActions: string };
   combo: { onFire: string; firstTimeTitle: string; firstTimeDesc: string };
   hadith: { source: string; fadl: string; comingSoon: string };
-  missions: { title: string; subtitle: string; newMission: string; iIntendTo: string; for: string; days: string; begin: string; active: string; completed: string; endedTitle: string; accepted: string; endedEarly: string; tryAgain: string; bonus: string; missesUsed: string; remaining: string; allFive: string; onTime: string; inJamaah: string; custom: string; allowingUpTo: string; misses: string; verbPray: string; verbDo: string; verbRead: string; verbGive: string; verbSay: string };
+  missions: { title: string; subtitle: string; newMission: string; iIntendTo: string; for: string; days: string; begin: string; active: string; completed: string; endedTitle: string; accepted: string; endedEarly: string; tryAgain: string; bonus: string; missesUsed: string; remaining: string; allFive: string; onTime: string; inJamaah: string; custom: string; allowingUpTo: string; misses: string; verbPray: string; verbDo: string; verbRead: string; verbGive: string; verbSay: string; missedBeforeLose: string; mayMiss: string };
 };
 
 
@@ -59,7 +59,7 @@ const en: Translations = {
   fab: { markFajr: 'Mark Fajr', addQadha: 'Add Qadha', logHabit: 'Log habit', quickActions: 'Quick actions' },
   combo: { onFire: 'On fire!', firstTimeTitle: 'Combo started!', firstTimeDesc: 'Pray on time or in jamaah in a row to grow your combo and earn bonus points.' },
   hadith: { source: 'Source', fadl: 'Benefit', comingSoon: 'More info coming soon' },
-  missions: { title: 'Missions', subtitle: 'A personal commitment, written and witnessed', newMission: 'New mission', iIntendTo: 'I intend to', for: 'for', days: 'days', begin: 'Begin — Bismillah', active: 'Active missions', completed: 'Completed', endedTitle: 'Ended', accepted: 'May Allah accept it', endedEarly: 'Ended early — your intention was written', tryAgain: 'Try again', bonus: 'Bonus', missesUsed: 'misses used', remaining: 'remaining', allFive: 'all 5 prayers', onTime: 'on time', inJamaah: 'in jamaah', custom: 'custom', allowingUpTo: 'allowing up to', misses: 'misses', verbPray: 'pray', verbDo: 'complete', verbRead: 'read', verbGive: 'give', verbSay: 'say' },
+  missions: { title: 'Missions', subtitle: 'A personal commitment, written and witnessed', newMission: 'New mission', iIntendTo: 'I intend to', for: 'for', days: 'days', begin: 'Begin — Bismillah', active: 'Active missions', completed: 'Completed', endedTitle: 'Ended', accepted: 'May Allah accept it', endedEarly: 'Ended early — your intention was written', tryAgain: 'Try again', bonus: 'Bonus', missesUsed: 'misses used', remaining: 'remaining', allFive: 'all 5 prayers', onTime: 'on time', inJamaah: 'in jamaah', custom: 'custom', allowingUpTo: 'allowing up to', misses: 'misses', verbPray: 'pray', verbDo: 'complete', verbRead: 'read', verbGive: 'give', verbSay: 'say', missedBeforeLose: 'Missed {used} of {allowed} before losing', mayMiss: 'and may miss' },
 };
 
 
@@ -98,7 +98,7 @@ const sv: Translations = {
   fab: { markFajr: 'Markera Fajr', addQadha: 'Lägg till Qadha', logHabit: 'Logga vana', quickActions: 'Snabbåtgärder' },
   combo: { onFire: 'On fire!', firstTimeTitle: 'Combo startad!', firstTimeDesc: 'Be i tid eller i jamaah i rad för att öka din combo och få bonuspoäng.' },
   hadith: { source: 'Källa', fadl: 'Förtjänst', comingSoon: 'Mer info kommer snart' },
-  missions: { title: 'Uppdrag', subtitle: 'Ett personligt åtagande, nedskrivet och bevittnat', newMission: 'Nytt uppdrag', iIntendTo: 'Jag har för avsikt att', for: 'i', days: 'dagar', begin: 'Börja — Bismillah', active: 'Aktiva uppdrag', completed: 'Avklarade', endedTitle: 'Avslutade', accepted: 'Må Allah acceptera det', endedEarly: 'Avslutades tidigt — din avsikt skrevs', tryAgain: 'Försök igen', bonus: 'Bonus', missesUsed: 'missar använda', remaining: 'kvar', allFive: 'alla 5 böner', onTime: 'i tid', inJamaah: 'i jamaah', custom: 'eget', allowingUpTo: 'med upp till', misses: 'missar', verbPray: 'be', verbDo: 'göra', verbRead: 'läsa', verbGive: 'ge', verbSay: 'säga' },
+  missions: { title: 'Uppdrag', subtitle: 'Ett personligt åtagande, nedskrivet och bevittnat', newMission: 'Nytt uppdrag', iIntendTo: 'Jag har för avsikt att', for: 'i', days: 'dagar', begin: 'Börja — Bismillah', active: 'Aktiva uppdrag', completed: 'Avklarade', endedTitle: 'Avslutade', accepted: 'Må Allah acceptera det', endedEarly: 'Avslutades tidigt — din avsikt skrevs', tryAgain: 'Försök igen', bonus: 'Bonus', missesUsed: 'missar använda', remaining: 'kvar', allFive: 'alla 5 böner', onTime: 'i tid', inJamaah: 'i jamaah', custom: 'eget', allowingUpTo: 'med upp till', misses: 'missar', verbPray: 'be', verbDo: 'göra', verbRead: 'läsa', verbGive: 'ge', verbSay: 'säga', missedBeforeLose: 'Missat {used} av {allowed} innan du förlorar', mayMiss: 'och får missa' },
 };
 
 
@@ -137,7 +137,7 @@ const tr: Translations = {
   fab: { markFajr: 'Sabah namazını işaretle', addQadha: 'Kaza ekle', logHabit: 'Alışkanlık kaydet', quickActions: 'Hızlı işlemler' },
   combo: { onFire: 'Ateş gibi!', firstTimeTitle: 'Kombo başladı!', firstTimeDesc: 'Vaktinde ya da cemaatle arka arkaya kıl, kombo büyüsün, bonus puan kazan.' },
   hadith: { source: 'Kaynak', fadl: 'Faydası', comingSoon: 'Yakında daha fazla bilgi' },
-  missions: { title: 'Görevler', subtitle: 'Yazıya dökülmüş kişisel bir niyet', newMission: 'Yeni görev', iIntendTo: 'Niyet ediyorum', for: 'boyunca', days: 'gün', begin: 'Başla — Bismillah', active: 'Aktif görevler', completed: 'Tamamlanan', endedTitle: 'Sonlandı', accepted: 'Allah kabul etsin', endedEarly: 'Erken bitti — niyetin yazıldı', tryAgain: 'Tekrar dene', bonus: 'Bonus', missesUsed: 'kaçırma hakkı', remaining: 'kaldı', allFive: '5 vakit namaz', onTime: 'vaktinde', inJamaah: 'cemaatle', custom: 'özel', allowingUpTo: 'en fazla', misses: 'kaçırma hakkı ile', verbPray: 'kılmaya', verbDo: 'yapmaya', verbRead: 'okumaya', verbGive: 'vermeye', verbSay: 'söylemeye' },
+  missions: { title: 'Görevler', subtitle: 'Yazıya dökülmüş kişisel bir niyet', newMission: 'Yeni görev', iIntendTo: 'Niyet ediyorum', for: 'boyunca', days: 'gün', begin: 'Başla — Bismillah', active: 'Aktif görevler', completed: 'Tamamlanan', endedTitle: 'Sonlandı', accepted: 'Allah kabul etsin', endedEarly: 'Erken bitti — niyetin yazıldı', tryAgain: 'Tekrar dene', bonus: 'Bonus', missesUsed: 'kaçırma hakkı', remaining: 'kaldı', allFive: '5 vakit namaz', onTime: 'vaktinde', inJamaah: 'cemaatle', custom: 'özel', allowingUpTo: 'en fazla', misses: 'kaçırma hakkı ile', verbPray: 'kılmaya', verbDo: 'yapmaya', verbRead: 'okumaya', verbGive: 'vermeye', verbSay: 'söylemeye', missedBeforeLose: 'Kaybetmeden önce {allowed} kaçırma hakkından {used} kullanıldı', mayMiss: 've kaçırabilir' },
 };
 
 
@@ -176,7 +176,7 @@ const ar: Translations = {
   fab: { markFajr: 'سجّل الفجر', addQadha: 'أضف قضاء', logHabit: 'سجّل عادة', quickActions: 'إجراءات سريعة' },
   combo: { onFire: 'مشتعل!', firstTimeTitle: 'بدأت السلسلة!', firstTimeDesc: 'صلّ في الوقت أو في جماعة على التوالي لتنمو سلسلتك وتحصل على نقاط إضافية.' },
   hadith: { source: 'المصدر', fadl: 'الفضل', comingSoon: 'قريباً' },
-  missions: { title: 'المهمات', subtitle: 'عهد شخصي مكتوب', newMission: 'مهمة جديدة', iIntendTo: 'نويت أن', for: 'لمدة', days: 'يوماً', begin: 'ابدأ — بسم الله', active: 'المهمات النشطة', completed: 'المكتملة', endedTitle: 'منتهية', accepted: 'تقبل الله', endedEarly: 'انتهت مبكراً — نيتك كُتبت', tryAgain: 'حاول مجدداً', bonus: 'مكافأة', missesUsed: 'أيام فائتة', remaining: 'متبقي', allFive: 'الصلوات الخمس', onTime: 'في الوقت', inJamaah: 'في جماعة', custom: 'مخصص', allowingUpTo: 'بحد أقصى', misses: 'أيام فائتة', verbPray: 'أصلي', verbDo: 'أؤدي', verbRead: 'أقرأ', verbGive: 'أتصدق بـ', verbSay: 'أقول' },
+  missions: { title: 'المهمات', subtitle: 'عهد شخصي مكتوب', newMission: 'مهمة جديدة', iIntendTo: 'نويت أن', for: 'لمدة', days: 'يوماً', begin: 'ابدأ — بسم الله', active: 'المهمات النشطة', completed: 'المكتملة', endedTitle: 'منتهية', accepted: 'تقبل الله', endedEarly: 'انتهت مبكراً — نيتك كُتبت', tryAgain: 'حاول مجدداً', bonus: 'مكافأة', missesUsed: 'أيام فائتة', remaining: 'متبقي', allFive: 'الصلوات الخمس', onTime: 'في الوقت', inJamaah: 'في جماعة', custom: 'مخصص', allowingUpTo: 'بحد أقصى', misses: 'أيام فائتة', verbPray: 'أصلي', verbDo: 'أؤدي', verbRead: 'أقرأ', verbGive: 'أتصدق بـ', verbSay: 'أقول', missedBeforeLose: 'فاتك {used} من {allowed} قبل الخسارة', mayMiss: 'ويمكنك تفويت' },
 };
 
 
