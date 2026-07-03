@@ -123,8 +123,8 @@ function PrayerHeatmap({
     t('prayers.isha'),
   ];
   return (
-    <div className="px-1 py-1">
-      <div className="grid grid-cols-[auto_repeat(5,1fr)] gap-x-1.5 gap-y-1 items-center">
+    <div className="px-0 py-0">
+      <div className="grid grid-cols-[auto_repeat(5,1fr)] gap-0 items-center">
         {/* Header row: empty + weekday labels */}
         <span />
         {days.map((dk) => {
@@ -135,7 +135,7 @@ function PrayerHeatmap({
             <span
               key={dk}
               className={cn(
-                'text-[9px] uppercase tracking-wide text-center leading-none',
+                'text-[10px] uppercase tracking-wide text-center leading-none py-1.5',
                 isToday ? 'text-primary font-bold' : 'text-muted-foreground',
               )}
             >
@@ -147,8 +147,8 @@ function PrayerHeatmap({
         {/* One row per prayer */}
         {PRAYER_KEYS.map((_p, rowIdx) => (
           <div key={rowIdx} className="contents">
-            <span className="text-[9px] font-medium text-muted-foreground/80 pr-0.5 text-right leading-none">
-              {prayerLabels[rowIdx].slice(0, 1)}
+            <span className="text-[10px] font-medium text-muted-foreground/80 pr-2 text-right leading-none">
+              {prayerLabels[rowIdx].slice(0, 2)}
             </span>
             {days.map((dk) => {
               const state = grid[dk][rowIdx];
@@ -157,14 +157,14 @@ function PrayerHeatmap({
                 <div
                   key={dk}
                   className={cn(
-                    'aspect-square w-full max-w-6 mx-auto rounded-md transition-all',
+                    'h-8 w-full rounded-none transition-all border',
                     state === 'done' &&
-                      'bg-primary shadow-[0_1px_3px_hsl(var(--primary)/0.35)]',
+                      'bg-primary border-primary/90 shadow-[inset_0_1px_0_hsl(var(--primary-foreground)/0.15)]',
                     state === 'missed' &&
-                      'bg-destructive/25 border border-destructive/40',
+                      'bg-destructive/40 border-destructive/60',
                     state === 'none' &&
-                      'bg-muted/50 border border-border/40',
-                    isToday && state === 'none' && 'ring-1 ring-primary/40',
+                      'bg-muted/70 border-border/70',
+                    isToday && state === 'none' && 'ring-1 ring-inset ring-primary/50',
                   )}
                 />
               );
