@@ -50,10 +50,18 @@ export function Onboarding({ onComplete }: Props) {
   ];
 
   const finish = (level: Level) => {
+    // Write directly to localStorage so values persist even though this
+    // component unmounts before React flushes the setCount state updates.
+    const parsed: Record<string, number> = {};
     prayerKeys.forEach((k) => {
       const n = parseInt(counts[k] || '0', 10);
-      if (!isNaN(n) && n > 0) setCount(k, n);
+      parsed[k] = !isNaN(n) && n > 0 ? n : 0;
+      setCount(k, parsed[k]);
     });
+    try {
+      localStorage.setItem('qadha-prayer-counts', JSON.stringify(parsed));
+      window.dispatchEvent(new Event('qadha-updated'));
+    } catch {}
     applyLevel(level);
     try { localStorage.setItem(ONBOARDING_KEY, '1'); } catch {}
     onComplete();
