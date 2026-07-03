@@ -187,32 +187,14 @@ export default function Home() {
         </span>
       </div>
 
-      {/* Prayers */}
+      {/* Prayers — heatmap: rows=prayers, cols=days */}
       <CardShell
         to="/prayers"
         icon={Moon}
         label={t('nav.prayers')}
         value={`${data.prayersDoneToday}/5`}
       >
-        <DayColumns
-          days={data.days}
-          lang={lang}
-          renderBody={(dk) => (
-            <div className="w-full flex flex-col gap-[2px]">
-              {data.prayerGrid[dk].map((state, i) => (
-                <div
-                  key={i}
-                  className={cn(
-                    'h-2 rounded-sm',
-                    state === 'done' && 'bg-primary',
-                    state === 'missed' && 'bg-destructive/70',
-                    state === 'none' && 'bg-muted/60',
-                  )}
-                />
-              ))}
-            </div>
-          )}
-        />
+        <PrayerHeatmap days={data.days} grid={data.prayerGrid} lang={lang} t={t} />
       </CardShell>
 
       {/* Qadha */}
