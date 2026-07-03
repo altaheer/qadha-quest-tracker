@@ -103,6 +103,79 @@ function DayColumns({
   );
 }
 
+function PrayerHeatmap({
+  days,
+  grid,
+  lang,
+  t,
+}: {
+  days: string[];
+  grid: Record<string, PrayerCellState[]>;
+  lang: string;
+  t: (k: string) => string;
+}) {
+  const todayKey = getDateString(new Date());
+  const prayerLabels = [
+    t('prayers.fajr'),
+    t('prayers.dhuhr'),
+    t('prayers.asr'),
+    t('prayers.maghrib'),
+    t('prayers.isha'),
+  ];
+  return (
+    <div className="px-1 py-1">
+      <div className="grid grid-cols-[auto_repeat(5,1fr)] gap-x-1.5 gap-y-1 items-center">
+        {/* Header row: empty + weekday labels */}
+        <span />
+        {days.map((dk) => {
+          const d = new Date(dk);
+          const weekday = d.toLocaleDateString(localeMap[lang] || 'en-US', { weekday: 'short' });
+          const isToday = dk === todayKey;
+          return (
+            <span
+              key={dk}
+              className={cn(
+                'text-[9px] uppercase tracking-wide text-center leading-none',
+                isToday ? 'text-primary font-bold' : 'text-muted-foreground',
+              )}
+            >
+              {weekday.slice(0, 2)}
+            </span>
+          );
+        })}
+
+        {/* One row per prayer */}
+        {PRAYER_KEYS.map((_p, rowIdx) => (
+          <div key={rowIdx} className="contents">
+            <span className="text-[9px] font-medium text-muted-foreground/80 pr-0.5 text-right leading-none">
+              {prayerLabels[rowIdx].slice(0, 1)}
+            </span>
+            {days.map((dk) => {
+              const state = grid[dk][rowIdx];
+              const isToday = dk === todayKey;
+              return (
+                <div
+                  key={dk}
+                  className={cn(
+                    'aspect-square w-full max-w-6 mx-auto rounded-md transition-all',
+                    state === 'done' &&
+                      'bg-primary shadow-[0_1px_3px_hsl(var(--primary)/0.35)]',
+                    state === 'missed' &&
+                      'bg-destructive/25 border border-destructive/40',
+                    state === 'none' &&
+                      'bg-muted/50 border border-border/40',
+                    isToday && state === 'none' && 'ring-1 ring-primary/40',
+                  )}
+                />
+              );
+            })}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const { t, tHabit, lang } = useTranslation();
   const { prayers } = usePrayerTracking();
@@ -187,32 +260,14 @@ export default function Home() {
         </span>
       </div>
 
-      {/* Prayers */}
+      {/* Prayers — heatmap: rows=prayers, cols=days */}
       <CardShell
         to="/prayers"
         icon={Moon}
         label={t('nav.prayers')}
         value={`${data.prayersDoneToday}/5`}
       >
-        <DayColumns
-          days={data.days}
-          lang={lang}
-          renderBody={(dk) => (
-            <div className="w-full flex flex-col gap-[2px]">
-              {data.prayerGrid[dk].map((state, i) => (
-                <div
-                  key={i}
-                  className={cn(
-                    'h-2 rounded-sm',
-                    state === 'done' && 'bg-primary',
-                    state === 'missed' && 'bg-destructive/70',
-                    state === 'none' && 'bg-muted/60',
-                  )}
-                />
-              ))}
-            </div>
-          )}
-        />
+        <PrayerHeatmap days={data.days} grid={data.prayerGrid} lang={lang} t={t} />
       </CardShell>
 
       {/* Qadha */}
