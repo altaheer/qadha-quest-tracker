@@ -80,7 +80,7 @@ function DayColumns({
 }) {
   const todayKey = getDateString(new Date());
   return (
-    <div className="grid grid-cols-5 gap-1">
+    <div className="grid grid-cols-5 gap-0">
       {days.map((dk) => {
         const d = new Date(dk);
         const weekday = d.toLocaleDateString(localeMap[lang] || 'en-US', { weekday: 'short' });
