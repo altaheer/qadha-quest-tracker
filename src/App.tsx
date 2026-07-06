@@ -73,10 +73,21 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          {showOnboarding && <Onboarding onComplete={() => setShowOnboarding(false)} />}
-          <Layout>
-            <AnimatedRoutes />
-          </Layout>
+          <Routes>
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
+            <Route
+              path="*"
+              element={
+                <>
+                  {showOnboarding && <Onboarding onComplete={() => setShowOnboarding(false)} />}
+                  <Layout>
+                    <AnimatedRoutes />
+                  </Layout>
+                </>
+              }
+            />
+          </Routes>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
