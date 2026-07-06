@@ -16,6 +16,8 @@ import Calendar from "./pages/Calendar";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Missions from "./pages/Missions";
+import Auth from "./pages/Auth";
+import OAuthConsent from "./pages/OAuthConsent";
 
 
 const queryClient = new QueryClient();
