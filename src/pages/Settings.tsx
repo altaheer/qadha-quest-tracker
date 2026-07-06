@@ -21,6 +21,24 @@ export default function Settings() {
   const { exportData, importData } = useDataBackup();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { user, signOut } = useAuth();
+  const [syncing, setSyncing] = useState(false);
+
+  const handleSync = async () => {
+    if (!user) return;
+    setSyncing(true);
+    try {
+      const r = await syncLocalDataToCloud(user.id);
+      toast({
+        title: 'Synced to your account',
+        description: `${r.prayers} prayer entries, ${r.qadha} qadha counters.`,
+      });
+    } catch (e) {
+      toast({ title: 'Sync failed', description: e instanceof Error ? e.message : String(e), variant: 'destructive' });
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const handleExport = () => {
     exportData();
