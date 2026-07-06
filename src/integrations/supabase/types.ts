@@ -14,7 +14,188 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      habit_logs: {
+        Row: {
+          count: number
+          date: string
+          habit_id: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          count?: number
+          date: string
+          habit_id: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          count?: number
+          date?: string
+          habit_id?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "habit_logs_habit_id_fkey"
+            columns: ["habit_id"]
+            isOneToOne: false
+            referencedRelation: "habits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      habits: {
+        Row: {
+          archived: boolean
+          created_at: string
+          id: string
+          name: string
+          points: number
+          target_per_day: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          archived?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          points?: number
+          target_per_day?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          archived?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          points?: number
+          target_per_day?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      prayer_logs: {
+        Row: {
+          date: string
+          id: string
+          logged_at: string
+          prayer: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          date: string
+          id?: string
+          logged_at?: string
+          prayer: string
+          status: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          date?: string
+          id?: string
+          logged_at?: string
+          prayer?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          auto_mark_missed: boolean
+          auto_mark_missed_time: string
+          created_at: string
+          day_reset: string
+          display_name: string | null
+          id: string
+          locale: string
+          show_arabic: boolean
+          updated_at: string
+        }
+        Insert: {
+          auto_mark_missed?: boolean
+          auto_mark_missed_time?: string
+          created_at?: string
+          day_reset?: string
+          display_name?: string | null
+          id: string
+          locale?: string
+          show_arabic?: boolean
+          updated_at?: string
+        }
+        Update: {
+          auto_mark_missed?: boolean
+          auto_mark_missed_time?: string
+          created_at?: string
+          day_reset?: string
+          display_name?: string | null
+          id?: string
+          locale?: string
+          show_arabic?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      qadha_counts: {
+        Row: {
+          prayer: string
+          remaining: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          prayer: string
+          remaining?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          prayer?: string
+          remaining?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      qadha_events: {
+        Row: {
+          delta: number
+          id: string
+          occurred_at: string
+          prayer: string
+          reason: string | null
+          user_id: string
+        }
+        Insert: {
+          delta: number
+          id?: string
+          occurred_at?: string
+          prayer: string
+          reason?: string | null
+          user_id: string
+        }
+        Update: {
+          delta?: number
+          id?: string
+          occurred_at?: string
+          prayer?: string
+          reason?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
