@@ -16,6 +16,8 @@ import Calendar from "./pages/Calendar";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Missions from "./pages/Missions";
+import Auth from "./pages/Auth";
+import OAuthConsent from "./pages/OAuthConsent";
 
 
 const queryClient = new QueryClient();
@@ -71,10 +73,21 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          {showOnboarding && <Onboarding onComplete={() => setShowOnboarding(false)} />}
-          <Layout>
-            <AnimatedRoutes />
-          </Layout>
+          <Routes>
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
+            <Route
+              path="*"
+              element={
+                <>
+                  {showOnboarding && <Onboarding onComplete={() => setShowOnboarding(false)} />}
+                  <Layout>
+                    <AnimatedRoutes />
+                  </Layout>
+                </>
+              }
+            />
+          </Routes>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
