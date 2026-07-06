@@ -1,0 +1,214 @@
+{
+  "version": 1,
+  "sdk_version": "0.20.0",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://rflirpyjrklzyuwxsaxe.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "ibadah-mcp",
+      "version": "0.1.0",
+      "title": "Ibadah Tracker"
+    },
+    "tools": [
+      {
+        "name": "log_prayer",
+        "title": "Log a prayer",
+        "description": "Record the status of one of the five daily fard prayers for a given date. Status 'jamaah' = prayed in congregation, 'ontime' = prayed on time alone, 'late' = prayed after the window, 'missed' = did not pray, 'none' = clear the entry.",
+        "annotations": {
+          "readOnlyHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "date": {
+              "type": "string",
+              "description": "ISO date YYYY-MM-DD. Defaults to today if omitted."
+            },
+            "prayer": {
+              "type": "string",
+              "enum": [
+                "fajr",
+                "dhuhr",
+                "asr",
+                "maghrib",
+                "isha"
+              ]
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "jamaah",
+                "ontime",
+                "late",
+                "missed",
+                "none"
+              ]
+            }
+          },
+          "required": [
+            "prayer",
+            "status"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_prayer_day",
+        "title": "Get prayers for a day",
+        "description": "Return the status of all five fard prayers for a given date (defaults to today).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "date": {
+              "type": "string",
+              "description": "ISO date YYYY-MM-DD. Defaults to today."
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_qadha_summary",
+        "title": "Get qadha (missed prayer) backlog",
+        "description": "Return the remaining count of missed prayers per prayer type, and the total.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "adjust_qadha",
+        "title": "Adjust qadha count",
+        "description": "Increment or decrement the remaining missed-prayer count for one prayer. Positive delta adds to the backlog, negative delta subtracts (e.g. after making up a prayer).",
+        "annotations": {
+          "readOnlyHint": false,
+          "idempotentHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "prayer": {
+              "type": "string",
+              "enum": [
+                "fajr",
+                "dhuhr",
+                "asr",
+                "maghrib",
+                "isha",
+                "witr"
+              ]
+            },
+            "delta": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991,
+              "description": "Signed integer, e.g. -1 to make up one prayer, +5 to add five."
+            },
+            "reason": {
+              "type": "string",
+              "maxLength": 200
+            }
+          },
+          "required": [
+            "prayer",
+            "delta"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_habits",
+        "title": "List habits",
+        "description": "List the user's active habits with today's completion count and daily target.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "log_habit",
+        "title": "Log habit completion",
+        "description": "Set today's completion count for a habit (by id or exact name). Pass count=0 to clear today's entry.",
+        "annotations": {
+          "readOnlyHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "habit_id": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "habit_name": {
+              "type": "string"
+            },
+            "count": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "date": {
+              "type": "string",
+              "description": "ISO date YYYY-MM-DD. Defaults to today."
+            }
+          },
+          "required": [
+            "count"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_insights_summary",
+        "title": "Get insights summary",
+        "description": "Return a summary of the last 7 days: prayer status counts, habits completed, and total qadha remaining.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
