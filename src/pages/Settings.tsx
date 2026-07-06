@@ -1,9 +1,9 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { useDataBackup } from '@/hooks/useDataBackup';
-import { Download, Upload, Database, Shield, RotateCcw, Palette, Clock } from 'lucide-react';
+import { Download, Upload, Database, Shield, RotateCcw, Palette, Clock, User as UserIcon, LogOut, Plug } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { LanguageSelector } from '@/components/LanguageSelector';
@@ -11,6 +11,9 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { useTranslation } from '@/lib/i18n';
 import { useUserPrefs } from '@/hooks/useUserPrefs';
 import { resetOnboarding } from '@/components/Onboarding';
+import { useAuth } from '@/hooks/useAuth';
+import { syncLocalDataToCloud } from '@/lib/cloudSync';
+import { Link } from 'react-router-dom';
 
 export default function Settings() {
   const { t } = useTranslation();
