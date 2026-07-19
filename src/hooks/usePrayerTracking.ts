@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getDateString } from '@/lib/date';
+import { pushPrayerLog, pushQadhaCount } from '@/lib/cloudPush';
 import type {
   PrayerStatus,
   PrayerEntry,
@@ -175,6 +176,23 @@ export function usePrayerTracking(selectedDate?: Date) {
     localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
   }, [history]);
 
+  // Rehydrate from localStorage when useCloudSync patches it in the background
+  useEffect(() => {
+    const rehydrate = () => {
+      try {
+        const raw = localStorage.getItem(HISTORY_KEY);
+        if (raw) setHistory(JSON.parse(raw));
+      } catch {}
+    };
+    const onStorage = (e: StorageEvent) => { if (e.key === HISTORY_KEY) rehydrate(); };
+    window.addEventListener('prayer-history-updated', rehydrate);
+    window.addEventListener('storage', onStorage);
+    return () => {
+      window.removeEventListener('prayer-history-updated', rehydrate);
+      window.removeEventListener('storage', onStorage);
+    };
+  }, []);
+
   useEffect(() => {
     localStorage.setItem(STREAKS_KEY, JSON.stringify(streaks));
   }, [streaks]);
@@ -185,6 +203,7 @@ export function usePrayerTracking(selectedDate?: Date) {
     qadhaCounts[prayer] = Math.max(0, qadhaCounts[prayer] + delta);
     localStorage.setItem(QADHA_KEY, JSON.stringify(qadhaCounts));
     window.dispatchEvent(new Event('qadha-updated'));
+    void pushQadhaCount(prayer as string, qadhaCounts[prayer], delta, 'prayer status change');
   }, []);
 
   // Auto-mark pending past prayers as missed once the day's cutoff has passed.
