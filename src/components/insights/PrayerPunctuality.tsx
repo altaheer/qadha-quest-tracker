@@ -9,7 +9,7 @@ export function PrayerPunctuality({ data, getPrayerDisplayName }: PrayerPunctual
   const getStatusColor = (status: PrayerStatus) => {
     switch (status) {
       case 'jamaah': return 'bg-accent';
-      case 'on-time': return 'bg-primary';
+      case 'ontime': return 'bg-primary';
       case 'late': return 'bg-orange-400';
       case 'missed': return 'bg-rose-400';
       default: return 'bg-muted';

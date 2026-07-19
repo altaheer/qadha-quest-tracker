@@ -27,7 +27,7 @@ export function QuickActionsFAB() {
   }, []);
 
   const actions = [
-    { label: t('fab.markFajr'), icon: Moon, onClick: () => { markPrayer('fajr', 'on-time'); haptics.medium(); setOpen(false); } },
+    { label: t('fab.markFajr'), icon: Moon, onClick: () => { markPrayer('fajr', 'ontime'); haptics.medium(); setOpen(false); } },
     { label: t('fab.addQadha'), icon: RotateCcw, onClick: () => { setOpen(false); navigate('/qadha'); } },
     { label: t('fab.logHabit'), icon: BookOpen, onClick: () => { setOpen(false); navigate('/habits'); } },
   ];

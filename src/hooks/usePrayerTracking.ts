@@ -97,7 +97,7 @@ const createDefaultSunnah = (): PrayerSunnah => ({
   ],
 });
 
-// Combo multiplier: +0.1x per 10 consecutive on-time/jamaah prayers
+// Combo multiplier: +0.1x per 10 consecutive ontime/jamaah prayers
 export function getComboMultiplier(combo: number): number {
   return 1 + Math.floor(combo / 10) * 0.1;
 }
@@ -117,7 +117,7 @@ export function getComboLabel(combo: number): string | null {
 // Recalculate combo from full history: count consecutive good prayers
 // going backwards chronologically from today.
 // We iterate day by day (newest first), and within each day isha→fajr (reverse prayer order).
-// Only on-time/jamaah count. Late/missed/pending all break the combo.
+// Only ontime/jamaah count. Late/missed/pending all break the combo.
 function recalcComboFromHistory(hist: PrayerHistory): number {
   const prayerKeys: (keyof DailyPrayers)[] = ['isha', 'maghrib', 'asr', 'dhuhr', 'fajr'];
   
@@ -135,7 +135,7 @@ function recalcComboFromHistory(hist: PrayerHistory): number {
       const status = day[p]?.status;
       if (!status || status === 'pending') continue; // skip untracked within a day
       dayHasAnyData = true;
-      if (status === 'on-time' || status === 'jamaah') {
+      if (status === 'ontime' || status === 'jamaah') {
         combo++;
       } else {
         // late or missed breaks the combo
@@ -257,11 +257,11 @@ export function usePrayerTracking(selectedDate?: Date) {
     }
 
     // Combo is now derived from history automatically
-    const wasGood = previousStatus === 'on-time' || previousStatus === 'jamaah';
+    const wasGood = previousStatus === 'ontime' || previousStatus === 'jamaah';
 
     // Update per-prayer streaks only for today
     if (isToday) {
-      if ((newStatus === 'on-time' || newStatus === 'jamaah') && !wasGood) {
+      if ((newStatus === 'ontime' || newStatus === 'jamaah') && !wasGood) {
         setStreaks(prev => {
           const current = prev[prayer].current + 1;
           return {
@@ -318,7 +318,7 @@ export function usePrayerTracking(selectedDate?: Date) {
     
     let base = 0;
     if (status === 'jamaah') base = 25;
-    else if (status === 'on-time') base = 15;
+    else if (status === 'ontime') base = 15;
     else if (status === 'late') base = 5;
     
     return Math.round(base * comboMultiplier);

@@ -28,7 +28,7 @@ const localeMap: Record<string, string> = {
 type PrayerCellState = 'done' | 'missed' | 'none';
 
 function prayerCellState(s: PrayerStatus | undefined, isPast: boolean): PrayerCellState {
-  if (s === 'on-time' || s === 'jamaah' || s === 'late') return 'done';
+  if (s === 'ontime' || s === 'jamaah' || s === 'late') return 'done';
   if (s === 'missed') return 'missed';
   if (isPast) return 'missed';
   return 'none';
@@ -202,7 +202,7 @@ export default function Home() {
     if (todayData) {
       PRAYER_KEYS.forEach((p) => {
         const s = todayData.prayers[p]?.status;
-        if (s === 'on-time' || s === 'jamaah' || s === 'late') prayersDoneToday++;
+        if (s === 'ontime' || s === 'jamaah' || s === 'late') prayersDoneToday++;
       });
     }
 

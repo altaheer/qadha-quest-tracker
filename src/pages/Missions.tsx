@@ -42,7 +42,7 @@ export default function MissionsPage() {
   } = useMissions();
 
   const [actionValue, setActionValue] = useState('');
-  const [qualifier, setQualifier] = useState<MissionQualifier>('on-time');
+  const [qualifier, setQualifier] = useState<MissionQualifier>('ontime');
   const [daysValue, setDaysValue] = useState<string>('30');
   const [missesValue, setMissesValue] = useState<string>('3');
   const [celebrate, setCelebrate] = useState<{ sentence: string; bonus: number } | null>(null);
@@ -73,7 +73,7 @@ export default function MissionsPage() {
       missesAllowed: misses,
     });
     setActionValue('');
-    setQualifier('on-time');
+    setQualifier('ontime');
     setDaysValue('30');
     setMissesValue('3');
   };

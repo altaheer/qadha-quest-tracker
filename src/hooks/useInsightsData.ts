@@ -55,7 +55,7 @@ export function useInsightsData() {
       if (!dayData) break;
       
       const allOnTime = getPrayerNames().every(
-        prayer => dayData.prayers[prayer]?.status === 'on-time'
+        prayer => dayData.prayers[prayer]?.status === 'ontime'
       );
       
       if (!allOnTime) break;
@@ -82,7 +82,7 @@ export function useInsightsData() {
       let points = 0;
       getPrayerNames().forEach(prayer => {
         const status = data.prayers[prayer]?.status;
-        if (status === 'on-time') points += 10;
+        if (status === 'ontime') points += 10;
         else if (status === 'late') points += 6;
       });
       
@@ -124,7 +124,7 @@ export function useInsightsData() {
         hasData = true;
         getPrayerNames().forEach(prayer => {
           const status = dayData.prayers[prayer]?.status;
-          if (status === 'on-time') points += 10;
+          if (status === 'ontime') points += 10;
           else if (status === 'late') points += 6;
         });
       }
@@ -168,7 +168,7 @@ export function useInsightsData() {
         
         if (status !== 'pending') {
           totalCount++;
-          if (status === 'on-time') onTimeCount++;
+          if (status === 'ontime') onTimeCount++;
         }
       }
       
@@ -199,7 +199,7 @@ export function useInsightsData() {
       if (prayerData) {
         getPrayerNames().forEach(prayer => {
           const status = prayerData.prayers[prayer]?.status;
-          if (status === 'on-time' || status === 'late') completedCount++;
+          if (status === 'ontime' || status === 'late') completedCount++;
         });
       }
       
@@ -226,7 +226,7 @@ export function useInsightsData() {
     Object.values(prayerHistory).forEach(data => {
       getPrayerNames().forEach(prayer => {
         const status = data.prayers[prayer]?.status;
-        if (status === 'on-time') onTime++;
+        if (status === 'ontime') onTime++;
         else if (status === 'late') late++;
         else if (status === 'missed') missed++;
       });
