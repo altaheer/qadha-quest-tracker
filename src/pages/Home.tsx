@@ -272,7 +272,7 @@ export default function Home() {
           <div className="flex items-center gap-2 mb-3">
             <AlertCircle className="h-4 w-4 text-primary" />
             <h2 className="font-display text-sm font-semibold text-foreground/90">
-              {t('home.today') || 'Today'}
+              {(t as any)('home.today') || 'Today'}
             </h2>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -282,7 +282,7 @@ export default function Home() {
                 to="/prayers"
                 className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary/15 transition"
               >
-                {t(`prayers.${p}`)}
+                {(t as any)(`prayers.${p}`)}
               </Link>
             ))}
             {habitsRemaining > 0 && (
@@ -330,7 +330,7 @@ export default function Home() {
             return (
               <div key={p} className="flex items-center gap-2">
                 <span className="text-[10px] font-medium text-muted-foreground w-8 shrink-0">
-                  {t(`prayers.${p}`).slice(0, 3)}
+                  {(t as any)(`prayers.${p}`).slice(0, 3)}
                 </span>
                 <div className="flex-1 h-2 rounded-full bg-muted/70 overflow-hidden">
                   <div
