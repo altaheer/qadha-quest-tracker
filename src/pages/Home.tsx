@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Moon, Target, BookOpen, RotateCcw, ChevronRight } from 'lucide-react';
+import { Moon, Target, BookOpen, RotateCcw, ChevronRight, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { usePrayerTracking, type DailyPrayers } from '@/hooks/usePrayerTracking';
 import { useHabitsTracking, habitCategories, levelHabits } from '@/hooks/useHabitsTracking';
@@ -34,6 +34,7 @@ function prayerCellState(s: PrayerStatus | undefined, isPast: boolean): PrayerCe
   return 'none';
 }
 
+// ── Shared card shell used by all summary rows ────────────────────────────
 function CardShell({
   to,
   icon: Icon,
@@ -69,14 +70,16 @@ function CardShell({
   );
 }
 
-function DayColumns({
+// ── Shared 5-day strip primitive ──────────────────────────────────────────
+// Renders one cell per day (oldest → newest, today at the right).
+function DayStrip({
   days,
   lang,
-  renderBody,
+  renderCell,
 }: {
   days: string[];
   lang: string;
-  renderBody: (date: string, isToday: boolean) => React.ReactNode;
+  renderCell: (date: string, isToday: boolean) => React.ReactNode;
 }) {
   const todayKey = getDateString(new Date());
   return (
@@ -95,7 +98,7 @@ function DayColumns({
             >
               {weekday.slice(0, 3)}
             </span>
-            {renderBody(dk, isToday)}
+            {renderCell(dk, isToday)}
           </div>
         );
       })}
@@ -125,7 +128,6 @@ function PrayerHeatmap({
   return (
     <div className="px-0 py-0">
       <div className="grid grid-cols-[auto_repeat(5,1fr)] gap-0 items-center">
-        {/* Header row: empty + weekday labels */}
         <span />
         {days.map((dk) => {
           const d = new Date(dk);
@@ -144,7 +146,6 @@ function PrayerHeatmap({
           );
         })}
 
-        {/* One row per prayer */}
         {PRAYER_KEYS.map((_p, rowIdx) => (
           <div key={rowIdx} className="contents">
             <span className="text-[10px] font-medium text-muted-foreground/80 pr-2 text-right leading-none">
@@ -160,10 +161,8 @@ function PrayerHeatmap({
                     'h-8 w-full rounded-none transition-all border',
                     state === 'done' &&
                       'bg-primary border-primary/90 shadow-[inset_0_1px_0_hsl(var(--primary-foreground)/0.15)]',
-                    state === 'missed' &&
-                      'bg-destructive/40 border-destructive/60',
-                    state === 'none' &&
-                      'bg-muted/70 border-border/70',
+                    state === 'missed' && 'bg-destructive/40 border-destructive/60',
+                    state === 'none' && 'bg-muted/70 border-border/70',
                     isToday && state === 'none' && 'ring-1 ring-inset ring-primary/50',
                   )}
                 />
@@ -190,10 +189,11 @@ export default function Home() {
     });
 
     const todayKey = getDateString(new Date());
+    // Oldest → newest: today − 4 … today. Today sits on the right edge.
     const days: string[] = [];
-    for (let i = 0; i < 5; i++) {
+    for (let i = 4; i >= 0; i--) {
       const d = new Date();
-      d.setDate(d.getDate() + i);
+      d.setDate(d.getDate() - i);
       days.push(getDateString(d));
     }
 
@@ -206,17 +206,19 @@ export default function Home() {
       });
     }
 
-    // per day, per prayer state
+    // Prayers pending today (excludes missed)
+    const pendingPrayersToday: (keyof DailyPrayers)[] = PRAYER_KEYS.filter((p) => {
+      const s = todayData?.prayers[p]?.status;
+      return !s || s === 'pending';
+    });
+
     const prayerGrid: Record<string, PrayerCellState[]> = {};
     days.forEach((dk) => {
       const isPast = dk < todayKey;
       const day = prayerHistory[dk];
-      prayerGrid[dk] = PRAYER_KEYS.map((p) =>
-        prayerCellState(day?.prayers[p]?.status, isPast),
-      );
+      prayerGrid[dk] = PRAYER_KEYS.map((p) => prayerCellState(day?.prayers[p]?.status, isPast));
     });
 
-    // habits: per day done / total-active-that-day
     const allIds = habitCategories.flatMap((c) => c.habits.map((h) => h.id));
     const activeHabitIds = allIds.filter((id) => {
       if (pausedHabits.has(id)) return false;
@@ -228,16 +230,29 @@ export default function Home() {
     days.forEach((dk) => {
       const day = habitsHistory[dk] || {};
       let done = 0;
-      activeHabitIds.forEach((id) => {
-        if (day[id]) done++;
-      });
+      activeHabitIds.forEach((id) => { if (day[id]) done++; });
       habitGrid[dk] = { done, total: totalActive };
     });
 
     const qadhaRemaining = Object.values(qadhaCounts).reduce((a, b) => a + (b || 0), 0);
+    const qadhaMax = Math.max(1, ...Object.values(qadhaCounts));
 
-    return { days, prayersDoneToday, prayerGrid, habitGrid, qadhaRemaining };
-  }, [prayers, pausedHabits, level, missions]);
+    return {
+      days,
+      prayersDoneToday,
+      pendingPrayersToday,
+      prayerGrid,
+      habitGrid,
+      qadhaRemaining,
+      qadhaCounts,
+      qadhaMax,
+    };
+  }, [prayers, pausedHabits, level]);
+
+  const habitsDone = getCompletedCount();
+  const habitsTotal = getActiveCount();
+  const habitsRemaining = Math.max(0, habitsTotal - habitsDone);
+  const attentionCount = data.pendingPrayersToday.length + (habitsRemaining > 0 ? 1 : 0);
 
   return (
     <div className="container max-w-lg mx-auto px-4 py-6 space-y-4">
@@ -251,6 +266,37 @@ export default function Home() {
         <p className="text-muted-foreground text-sm">{t('home.subtitle')}</p>
       </div>
 
+      {/* ── Today: what needs attention ─────────────────────────────── */}
+      {attentionCount > 0 && (
+        <div className="rounded-2xl gradient-card shadow-card border border-border/50 p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <AlertCircle className="h-4 w-4 text-primary" />
+            <h2 className="font-display text-sm font-semibold text-foreground/90">
+              {t('home.today') || 'Today'}
+            </h2>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {data.pendingPrayersToday.map((p) => (
+              <Link
+                key={p}
+                to="/prayers"
+                className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary/15 transition"
+              >
+                {t(`prayers.${p}`)}
+              </Link>
+            ))}
+            {habitsRemaining > 0 && (
+              <Link
+                to="/habits"
+                className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary/15 transition"
+              >
+                {habitsRemaining} {t('nav.habits').toLowerCase()}
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between px-1">
         <h2 className="font-display text-sm font-semibold text-foreground/80">
           {t('home.summary')}
@@ -260,7 +306,7 @@ export default function Home() {
         </span>
       </div>
 
-      {/* Prayers — heatmap: rows=prayers, cols=days */}
+      {/* Prayers */}
       <CardShell
         to="/prayers"
         icon={Moon}
@@ -270,25 +316,51 @@ export default function Home() {
         <PrayerHeatmap days={data.days} grid={data.prayerGrid} lang={lang} t={t} />
       </CardShell>
 
-      {/* Qadha */}
+      {/* Qadha — now with a per-prayer visual */}
       <CardShell
         to="/qadha"
         icon={RotateCcw}
         label={t('nav.qadha')}
-        value={`${data.qadhaRemaining} ${t('home.remaining')}`}
-      />
+        value={`${data.qadhaRemaining}`}
+      >
+        <div className="px-2 py-1 space-y-1">
+          {PRAYER_KEYS.map((p) => {
+            const n = data.qadhaCounts[p] || 0;
+            const pct = Math.min(100, (n / data.qadhaMax) * 100);
+            return (
+              <div key={p} className="flex items-center gap-2">
+                <span className="text-[10px] font-medium text-muted-foreground w-8 shrink-0">
+                  {t(`prayers.${p}`).slice(0, 3)}
+                </span>
+                <div className="flex-1 h-2 rounded-full bg-muted/70 overflow-hidden">
+                  <div
+                    className={cn(
+                      'h-full transition-all',
+                      n === 0 ? 'bg-primary/30' : 'bg-primary',
+                    )}
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+                <span className="text-[10px] tabular-nums font-semibold text-foreground/80 w-8 text-right">
+                  {n}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </CardShell>
 
       {/* Habits */}
       <CardShell
         to="/habits"
         icon={BookOpen}
         label={t('nav.habits')}
-        value={`${getCompletedCount()}/${getActiveCount()}`}
+        value={`${habitsDone}/${habitsTotal}`}
       >
-        <DayColumns
+        <DayStrip
           days={data.days}
           lang={lang}
-          renderBody={(dk) => {
+          renderCell={(dk) => {
             const { done, total } = data.habitGrid[dk];
             const ratio = total > 0 ? done / total : 0;
             return (
@@ -308,7 +380,7 @@ export default function Home() {
         />
       </CardShell>
 
-      {/* Missions — simple list, no boxes */}
+      {/* Missions */}
       <div className="space-y-2 pt-2">
         <div className="flex items-center justify-between px-1">
           <h3 className="font-display text-sm font-semibold text-foreground/80">
