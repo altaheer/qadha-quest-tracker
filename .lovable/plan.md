@@ -1,66 +1,110 @@
-# Migrate to Lovable Cloud + add MCP server
+## Overview
 
-The app is fully local-first today (localStorage + JSON backups). To make MCP genuinely useful, user data must live server-side so an authenticated AI assistant can read and update it.
+Fix data-correctness bugs first (hooks writing only to localStorage, status string mismatch, wrong day direction), then redesign Home on top of the corrected data. Scope is large enough to lay out before touching code.
 
-## Phase 1 — Enable Cloud + Auth
+## Bug fixes (in order)
 
-- Enable Lovable Cloud.
-- Add email/password + Google sign-in.
-- Add a lightweight auth gate: on first launch, user signs in; existing localStorage data is offered as a one-time import into their Cloud account.
-- All existing UI keeps working — data hooks just switch source from localStorage to Cloud (with an offline cache).
+### 1. Unify prayer status vocabulary (Bug 2) — foundation
 
-## Phase 2 — Schema
+Pick `'ontime'` (already in DB + MCP) as canonical. Migrate the UI off `'on-time'`.
 
-One row per user per day per domain. Tables (all with RLS scoped to `auth.uid()`):
+- Add `src/types/prayer.ts` exporting `PrayerStatus = 'pending' | 'jamaah' | 'ontime' | 'late' | 'missed'` and re-export from `src/types/index.ts` (replacing the current hyphenated union).
+- Rewrite every occurrence of the string `'on-time'` in the codebase to `'ontime'`:
+  - `src/hooks/usePrayerTracking.ts` (writes + reads)
+  - `src/components/DailyPrayerCard.tsx` (button state + toast)
+  - `src/pages/Home.tsx` (`prayerCellState`)
+  - `src/components/insights/*` (Punctuality, Balance, Weekly, Heatmap)
+  - `src/hooks/useAchievements.ts`, `src/hooks/useMissions.ts`, `src/hooks/useInsightsData.ts`
+  - `src/lib/cloudSync.ts` normalizer already emits `'ontime'` — leave.
+- One-shot localStorage migration on app boot (in `main.tsx` or a tiny `migrateStatuses.ts`): walk `prayer-history` and rewrite `'on-time'` → `'ontime'` so existing users don't lose data.
 
-- `profiles` — display name, locale, day-reset cutoff, showArabic, autoMarkMissed prefs.
-- `prayer_logs` — `(user_id, date, prayer)` → status (`done_jamaah|done_ontime|done_late|missed|none`), timestamp.
-- `qadha_counts` — `(user_id, prayer)` → remaining count.
-- `qadha_events` — log of increments/decrements for burndown chart.
-- `habits` — user-defined habit templates.
-- `habit_logs` — `(user_id, habit_id, date)` → completed count / level.
-- `nafilah_logs` — `(user_id, date, type)` → count.
-- `time_bound_habits` + `time_bound_logs` — Ramadan/etc.
-- `missions` — active challenges with allowed misses, progress.
-- `achievements` — unlocked achievements per user.
+### 2. Make hooks Supabase-authoritative when signed in (Bug 1) — core refactor
 
-Each table gets `GRANT SELECT, INSERT, UPDATE, DELETE ... TO authenticated` and RLS policies `user_id = auth.uid()`.
+Approach: keep the hook APIs identical (same return shape) so callers don't change. Internally, branch on `useAuth().user`.
 
-## Phase 3 — Client refactor
+- `src/hooks/usePrayerTracking.ts`
+  - Signed out: current localStorage behavior.
+  - Signed in: initial load = `select * from prayer_logs where user_id=me` → build the same `PrayerHistory` shape in memory. Writes = `upsert` to `prayer_logs` on `(user_id,date,prayer)`. Sunnah items stay in localStorage for now (not in schema); note this in a comment.
+  - Realtime: `supabase.channel('prayer_logs:me').on('postgres_changes', { event:'*', schema:'public', table:'prayer_logs', filter:`user_id=eq.${uid}` }, ...)` → merge row into state. Teardown on unmount / user change.
+  - Also listen to `visibilitychange` → refetch when tab regains focus (belt + suspenders).
+  - Missed-prayer sweeper: when signed in, mutate via Supabase; qadha increments go through `qadha_counts` + `qadha_events` (already the MCP shape).
+- `src/hooks/useHabitsTracking.ts`
+  - Signed out: unchanged.
+  - Signed in: mirror completions to `habit_logs` (`habit_id` in the schema is a uuid FK to `habits`; our app uses string ids like `morning-adhkar`). Two options:
+    - (a) add a `slug text` column to `habits` and store our string ids there,
+    - (b) keep local ids and add a small `public.habit_slugs` mapping.
+  - Chosen: **add `slug text unique per user` to `habits`** via a migration; on first write, upsert the habits row for that slug, then insert/upsert `habit_logs`. This keeps the MCP `list_habits`/`log_habit` tools working (they already operate on the `habits` table).
+  - Realtime on `habit_logs` filtered by user.
+- `src/hooks/useQadhaPrayers.ts`
+  - Signed in: read/write `qadha_counts`; every delta also inserts a `qadha_events` row (matches MCP `adjust_qadha`).
+  - Realtime on `qadha_counts`.
+- Enable realtime for the three tables via migration (`ALTER PUBLICATION supabase_realtime ADD TABLE ...`).
 
-Rewrite the existing hooks to read/write Cloud instead of localStorage, keeping the same public API so page components don't change:
-- `usePrayerTracking`, `useQadhaPrayers`, `useHabitsTracking`, `useNafilahTracking`, `useTimeBoundHabits`, `useMissions`, `useAchievements`, `useUserPrefs`.
+Data-loss guardrail: `cloudSync.ts` already handles first-run legacy migration. Extend it to also migrate `habits-tracking` local history into `habit_logs` (currently missing).
 
-Use TanStack Query (already in the project) for caching + optimistic updates so the UI stays snappy.
+### 3. Home 5-day window direction (Bug 3) + dead dep (Bug 4)
 
-Keep JSON export/import in Settings (now exports from Cloud).
+- Build `days` as today back to 4 days ago, ordered oldest → newest (today rightmost).
+- Update label to `home.last5days` (i18n key already exists).
+- Remove unused `missions` from the `useMemo` deps in `prayerData`.
 
-## Phase 4 — MCP server
+### 4. OAuth consent trust hardening (Bug 5)
 
-Install `@lovable.dev/mcp-js` + `zod`, add `mcpPlugin()` to vite config, and expose tools under `src/lib/mcp/tools/`, each authenticated via Supabase OAuth so tool calls run as the connected user with RLS enforcement:
+`src/pages/OAuthConsent.tsx`:
+- Truncate client name to 60 chars with `line-clamp-2 break-words`.
+- Under the name, render `details.client?.redirect_uris?.[0]` (or `client.client_uri` / `client.origin` — whichever `getAuthorizationDetails` returns) in a monospace muted label with the origin highlighted. Fall back to "unverified client — no redirect URI on file" if absent.
+- Add a subtle warning row: "Anyone can register a client with this name. Verify the URL below matches what you expect."
 
-- `log_prayer` — mark a prayer done/missed for a date.
-- `get_prayer_day` — today's/any day's prayer statuses.
-- `get_prayer_streak` — current streak, per prayer.
-- `get_qadha_summary` — remaining qadha per prayer + burndown estimate.
-- `adjust_qadha` — increment/decrement qadha count.
-- `log_habit` — record a habit completion.
-- `list_habits` — list user's habits with today's status.
-- `get_mission_status` — active missions, progress, misses used.
-- `get_insights_summary` — this-week points, top prayer punctuality, active streaks.
+## Home redesign
 
-Plus the OAuth consent page at `/.lovable/oauth/consent` and Supabase OAuth server configured.
+New file `src/components/home/SummaryCard.tsx`: shared shell — title row (icon + label + right-aligned metric), body slot, consistent `rounded-2xl` + border + padding. All four sections use it.
 
-## Phase 5 — Deploy + validate
+Layout (top → bottom):
 
-- Deploy the `mcp` edge function.
-- Extract and validate the MCP manifest so Lovable's Agent Integrations panel lists the tools.
-- Add a small "Connect an AI assistant" card in Settings/More explaining how to connect ChatGPT/Claude/Cursor.
+1. **Today** (new, prioritized): a single card at the top listing what needs attention right now — remaining fard prayers today, remaining active-level habits today, active missions due today. Small chips, tap to route.
+2. **Prayers (last 5 days)**: 5×5 heatmap in `SummaryCard`, corrected direction, canonical `'ontime'` matching. Rightmost column = today, subtly highlighted.
+3. **Habits (last 5 days)**: same shell, same 5-column grid, weekday label above each column, `done/total` cell coloring by ratio.
+4. **Qadha**: `SummaryCard` with a horizontal row of 5 mini-bars (one per prayer type). Bar length = `remaining / max(remaining)` normalized, label under each bar shows count. Total remaining as the card's right-aligned metric.
+5. **Missions**: `SummaryCard` listing active missions, each with the same progress bar primitive used elsewhere (extracted into `SummaryCard`'s `<Progress/>` slot).
 
-## Notes / trade-offs
+Information density: "Today" section is visually heaviest (bigger type, accent color); history cards are compact, muted, equal weight to each other.
 
-- **Offline**: today the app works fully offline. After migration, initial load requires network; TanStack Query + localStorage cache keeps it usable offline for reads, but writes will queue and sync on reconnect (basic implementation, not full CRDT).
-- **Existing users**: on first sign-in we detect localStorage data and offer a one-click import so nothing is lost.
-- **Scope**: this is a multi-turn build. I'll do Phase 1 + 2 (Cloud, auth, schema) in the first pass so you can review before I refactor every hook.
+## Technical section
 
-Confirm and I'll start with enabling Cloud, adding auth, and creating the schema.
+Migration needed:
+
+```sql
+alter table public.habits add column if not exists slug text;
+create unique index if not exists habits_user_slug_idx on public.habits(user_id, slug) where slug is not null;
+alter publication supabase_realtime add table public.prayer_logs;
+alter publication supabase_realtime add table public.habit_logs;
+alter publication supabase_realtime add table public.qadha_counts;
+```
+
+Files created:
+- `src/types/prayer.ts`
+- `src/lib/migrateLocalStatuses.ts`
+- `src/hooks/useSupabasePrayerLogs.ts` (internal helper used by `usePrayerTracking`)
+- `src/hooks/useSupabaseHabitLogs.ts`
+- `src/hooks/useSupabaseQadha.ts`
+- `src/components/home/SummaryCard.tsx`
+- `src/components/home/TodayCard.tsx`
+
+Files edited:
+- `src/hooks/usePrayerTracking.ts`, `useHabitsTracking.ts`, `useQadhaPrayers.ts` — signed-in branch + realtime.
+- `src/lib/cloudSync.ts` — also migrate local habits history.
+- `src/pages/Home.tsx` — new layout, fixed day direction, removed dead dep.
+- `src/pages/OAuthConsent.tsx` — clamp + show verified URL.
+- `src/types/index.ts` — re-export from `types/prayer.ts`, drop `'on-time'`.
+- All UI files still using `'on-time'` string literal.
+
+Out of scope for this turn (call out but don't build): syncing sunnah checklist items and nafilah/timebound events to Supabase (no tables for them yet).
+
+## Order of execution
+
+1. Migration (schema + realtime publication).
+2. Status unification + localStorage migrator.
+3. Supabase-backed hook internals + realtime.
+4. `cloudSync.ts` habit backfill.
+5. Home page bugs 3–4 + redesign.
+6. OAuth consent hardening.
