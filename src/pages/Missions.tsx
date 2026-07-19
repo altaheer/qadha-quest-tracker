@@ -153,7 +153,7 @@ export default function MissionsPage() {
                 style={arabicStyle}
                 dir={isRTL ? 'rtl' : 'ltr'}
               >
-                <option value="on-time">{t('missions.onTime')}</option>
+                <option value="ontime">{t('missions.onTime')}</option>
                 <option value="jamaah">{t('missions.inJamaah')}</option>
               </select>
             </div>
