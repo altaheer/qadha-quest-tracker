@@ -254,6 +254,8 @@ export function usePrayerTracking(selectedDate?: Date) {
     // Toggle: if clicking same status, revert to pending
     const newStatus: PrayerStatus = previousStatus === status ? 'pending' : status;
 
+    void pushPrayerLog(dateKey, prayer as any, newStatus as any);
+
     setHistory(prev => {
       const existingDay = prev[dateKey] || { prayers: { ...defaultDailyPrayers }, sunnah: createDefaultSunnah() };
       return {
