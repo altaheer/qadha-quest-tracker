@@ -81,19 +81,34 @@ export default function OAuthConsent() {
     return <div className="min-h-screen flex items-center justify-center">Loading…</div>;
   }
 
-  const clientName = details.client?.name ?? details.client?.client_name ?? 'this app';
+  const rawName = details.client?.name ?? details.client?.client_name ?? '';
+  const clientName =
+    typeof rawName === 'string' && rawName.trim().length
+      ? rawName.trim().slice(0, 60)
+      : 'This app';
+  const rawRedirect = details.client?.redirect_uris?.[0] ?? details.redirect_url ?? details.redirect_to;
+  let redirectHost: string | null = null;
+  try { redirectHost = rawRedirect ? new URL(rawRedirect).host : null; } catch { redirectHost = null; }
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Connect {clientName} to Ibadah</CardTitle>
+          <CardTitle>Connect an app to your Ibadah data</CardTitle>
           <CardDescription>
-            {clientName} will be able to read and update your prayer, qadha, and habit data as you.
+            <span className="font-medium text-foreground">{clientName}</span> is requesting
+            permission to read and update your prayer, qadha, and habit data as you.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
+          {redirectHost && (
+            <p className="text-xs text-muted-foreground break-all">
+              After approval you'll return to <span className="font-mono">{redirectHost}</span>.
+            </p>
+          )}
           <p className="text-sm text-muted-foreground">
-            This does not bypass this app's permissions. You can disconnect anytime.
+            The client's name is provided by the app itself and is not verified. Only approve if you
+            recognize where the request is coming from. You can disconnect anytime.
           </p>
           <div className="flex gap-2">
             <Button className="flex-1" disabled={busy} onClick={() => decide(true)}>
