@@ -3,7 +3,7 @@
  */
 
 // ============ Prayer ============
-export type PrayerStatus = 'pending' | 'on-time' | 'jamaah' | 'late' | 'missed';
+export type PrayerStatus = 'pending' | 'ontime' | 'jamaah' | 'late' | 'missed';
 
 export interface PrayerEntry {
   status: PrayerStatus;

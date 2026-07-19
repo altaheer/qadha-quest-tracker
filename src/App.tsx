@@ -18,6 +18,8 @@ import NotFound from "./pages/NotFound";
 import Missions from "./pages/Missions";
 import Auth from "./pages/Auth";
 import OAuthConsent from "./pages/OAuthConsent";
+import { useCloudSync } from "@/hooks/useCloudSync";
+
 
 
 const queryClient = new QueryClient();
@@ -66,6 +68,8 @@ function AnimatedRoutes() {
 
 const App = () => {
   const [showOnboarding, setShowOnboarding] = useState(!hasCompletedOnboarding());
+  useCloudSync();
+
 
   return (
     <QueryClientProvider client={queryClient}>

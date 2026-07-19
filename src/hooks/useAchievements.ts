@@ -82,13 +82,13 @@ function computeStats(unlockedCountForMeta: number): AchievementStats {
       const status = day.prayers?.[p]?.status || 'pending';
       if (status !== 'pending') firstPrayerMarked = true;
       if (status === 'jamaah') { jamaahTotal++; totalPoints += 25; }
-      else if (status === 'on-time') { totalPoints += 15; }
+      else if (status === 'ontime') { totalPoints += 15; }
       else if (status === 'late') { totalPoints += 5; }
       else if (status === 'missed') { missedInHistory++; }
       if (status === 'pending') allMarked = false;
       if (status === 'pending' || status === 'missed') allGoodOrLate = false;
       // combo walk fajr → isha within day
-      if (status === 'on-time' || status === 'jamaah') {
+      if (status === 'ontime' || status === 'jamaah') {
         comboRun++;
         if (comboRun > comboMax) comboMax = comboRun;
       } else if (status === 'late' || status === 'missed') {
@@ -98,7 +98,7 @@ function computeStats(unlockedCountForMeta: number): AchievementStats {
     if (allMarked) anyAllFiveDay = true;
     if (allGoodOrLate) allFiveDates.push(date);
     const fajrStatus = day.prayers?.fajr?.status;
-    if (fajrStatus === 'on-time' || fajrStatus === 'jamaah') fajrOnTimeDates.push(date);
+    if (fajrStatus === 'ontime' || fajrStatus === 'jamaah') fajrOnTimeDates.push(date);
   }
 
   // Habit cumulative totals

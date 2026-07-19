@@ -5,7 +5,7 @@ import { nafilahPrayers } from '@/hooks/useNafilahTracking';
 import type { PrayerHistory, HabitsHistory, DailyNafilah, DailyPrayers, PrayerStatus } from '@/types';
 
 export type MissionActionType = 'prayer' | 'habit' | 'nafilah';
-export type MissionQualifier = 'on-time' | 'jamaah';
+export type MissionQualifier = 'ontime' | 'jamaah';
 export type MissionStatus = 'active' | 'completed' | 'ended';
 
 export interface Mission {
@@ -50,10 +50,10 @@ function readJSON<T>(key: string, fallback: T): T {
 }
 
 function statusSatisfies(actual: PrayerStatus | undefined, qualifier: MissionQualifier | undefined): boolean {
-  if (!qualifier) return actual === 'on-time' || actual === 'jamaah';
+  if (!qualifier) return actual === 'ontime' || actual === 'jamaah';
   if (qualifier === 'jamaah') return actual === 'jamaah';
   // on-time also accepts jamaah
-  return actual === 'on-time' || actual === 'jamaah';
+  return actual === 'ontime' || actual === 'jamaah';
 }
 
 export function getActionBasePoints(m: Pick<Mission, 'actionType' | 'actionId' | 'qualifier'>): number {

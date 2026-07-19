@@ -56,6 +56,7 @@ export type Database = {
           id: string
           name: string
           points: number
+          slug: string | null
           target_per_day: number
           updated_at: string
           user_id: string
@@ -66,6 +67,7 @@ export type Database = {
           id?: string
           name: string
           points?: number
+          slug?: string | null
           target_per_day?: number
           updated_at?: string
           user_id: string
@@ -76,6 +78,7 @@ export type Database = {
           id?: string
           name?: string
           points?: number
+          slug?: string | null
           target_per_day?: number
           updated_at?: string
           user_id?: string

@@ -39,7 +39,7 @@ interface DailyPrayerCardProps {
 
 const statusBg: Record<PrayerStatus, { bg: string; border: string; icon: any }> = {
   pending: { bg: 'bg-card', border: 'border-border/50', icon: null },
-  'on-time': { bg: 'bg-primary/10', border: 'border-primary/30', icon: Check },
+  'ontime': { bg: 'bg-primary/10', border: 'border-primary/30', icon: Check },
   jamaah: { bg: 'bg-accent/15', border: 'border-accent/40', icon: Users },
   late: { bg: 'bg-orange-500/10', border: 'border-orange-500/30', icon: Clock },
   missed: { bg: 'bg-rose-500/10', border: 'border-rose-500/20', icon: X },
@@ -64,7 +64,7 @@ export function DailyPrayerCard({
   const completedSunnah = sunnahItems.filter(s => s.completed).length;
 
   const StatusIcon = config.icon;
-  const isGood = status === 'on-time' || status === 'jamaah';
+  const isGood = status === 'ontime' || status === 'jamaah';
 
   const handleMark = (next: PrayerStatus) => {
     haptics.medium();
@@ -142,7 +142,7 @@ export function DailyPrayerCard({
               </div>
               {comboMultiplier > 1 && (
                 <span className="text-[10px] text-muted-foreground mt-0.5">
-                  {status === 'jamaah' ? '27' : status === 'on-time' ? '10' : '6'} × {comboMultiplier.toFixed(1)}x
+                  {status === 'jamaah' ? '27' : status === 'ontime' ? '10' : '6'} × {comboMultiplier.toFixed(1)}x
                 </span>
               )}
             </div>
@@ -153,12 +153,12 @@ export function DailyPrayerCard({
       {/* Status Buttons */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3 [&>button]:min-h-11">
         <Button
-          variant={status === 'on-time' ? 'default' : 'outline'}
+          variant={status === 'ontime' ? 'default' : 'outline'}
           size="sm"
-          onClick={() => handleMark('on-time')}
+          onClick={() => handleMark('ontime')}
           className={cn(
             'flex-1 gap-1.5',
-            status === 'on-time' && 'bg-primary hover:bg-primary/90'
+            status === 'ontime' && 'bg-primary hover:bg-primary/90'
           )}
         >
           <Check className="h-3.5 w-3.5" />
