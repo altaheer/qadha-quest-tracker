@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getDateString } from '@/lib/date';
+import { pushHabitLog } from '@/lib/cloudPush';
 import type {
   Habit,
   HabitCategory,
