@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getDateString } from '@/lib/date';
+import { pushHabitLog } from '@/lib/cloudPush';
 import type {
   Habit,
   HabitCategory,
@@ -191,6 +192,22 @@ export function useHabitsTracking(selectedDate?: Date) {
     localStorage.setItem(LEVEL_KEY, level);
   }, [level]);
 
+  // Refresh from localStorage when cloud sync (or another tab) updates it
+  useEffect(() => {
+    const refresh = () => {
+      const stored = localStorage.getItem(HABITS_KEY);
+      if (stored) {
+        try { setHistory(JSON.parse(stored)); } catch { /* ignore */ }
+      }
+    };
+    window.addEventListener('habits-tracking-updated', refresh);
+    window.addEventListener('storage', refresh);
+    return () => {
+      window.removeEventListener('habits-tracking-updated', refresh);
+      window.removeEventListener('storage', refresh);
+    };
+  }, []);
+
   // Get today's completions
   const completedHabits = new Set(
     Object.entries(history[dateKey] || {})
@@ -200,16 +217,26 @@ export function useHabitsTracking(selectedDate?: Date) {
 
   // Toggle habit completion
   const toggleHabit = useCallback((habitId: string) => {
+    let nextDone = false;
     setHistory(prev => {
       const dayData = prev[dateKey] || {};
+      nextDone = !dayData[habitId];
       return {
         ...prev,
         [dateKey]: {
           ...dayData,
-          [habitId]: !dayData[habitId]
+          [habitId]: nextDone,
         }
       };
     });
+    // Fire-and-forget cloud sync
+    for (const cat of habitCategories) {
+      const h = cat.habits.find(x => x.id === habitId);
+      if (h) {
+        void pushHabitLog(habitId, dateKey, nextDone, { name: h.name, points: h.points });
+        break;
+      }
+    }
   }, [dateKey]);
 
   // Toggle pause state
