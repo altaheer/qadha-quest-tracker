@@ -157,6 +157,19 @@ export function useCloudSync() {
             if (row?.prayer != null) applyQadhaRow(row.prayer, row.remaining ?? 0);
           },
         )
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'habit_logs', filter: `user_id=eq.${uid}` },
+          async (payload) => {
+            const row = (payload.new ?? payload.old) as any;
+            if (!row?.habit_id || !row?.date) return;
+            const { data: h } = await supabase
+              .from('habits').select('slug').eq('id', row.habit_id).maybeSingle();
+            if (!h?.slug) return;
+            const done = payload.eventType !== 'DELETE' && (row.count ?? 0) > 0;
+            applyHabitLog(row.date, h.slug, done);
+          },
+        )
         .subscribe();
 
       const onVisible = () => { if (document.visibilityState === 'visible') pullAll(uid); };
