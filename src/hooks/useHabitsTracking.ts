@@ -192,6 +192,22 @@ export function useHabitsTracking(selectedDate?: Date) {
     localStorage.setItem(LEVEL_KEY, level);
   }, [level]);
 
+  // Refresh from localStorage when cloud sync (or another tab) updates it
+  useEffect(() => {
+    const refresh = () => {
+      const stored = localStorage.getItem(HABITS_KEY);
+      if (stored) {
+        try { setHistory(JSON.parse(stored)); } catch { /* ignore */ }
+      }
+    };
+    window.addEventListener('habits-tracking-updated', refresh);
+    window.addEventListener('storage', refresh);
+    return () => {
+      window.removeEventListener('habits-tracking-updated', refresh);
+      window.removeEventListener('storage', refresh);
+    };
+  }, []);
+
   // Get today's completions
   const completedHabits = new Set(
     Object.entries(history[dateKey] || {})
