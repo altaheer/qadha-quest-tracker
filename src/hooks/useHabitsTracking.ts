@@ -201,16 +201,26 @@ export function useHabitsTracking(selectedDate?: Date) {
 
   // Toggle habit completion
   const toggleHabit = useCallback((habitId: string) => {
+    let nextDone = false;
     setHistory(prev => {
       const dayData = prev[dateKey] || {};
+      nextDone = !dayData[habitId];
       return {
         ...prev,
         [dateKey]: {
           ...dayData,
-          [habitId]: !dayData[habitId]
+          [habitId]: nextDone,
         }
       };
     });
+    // Fire-and-forget cloud sync
+    for (const cat of habitCategories) {
+      const h = cat.habits.find(x => x.id === habitId);
+      if (h) {
+        void pushHabitLog(habitId, dateKey, nextDone, { name: h.name, points: h.points });
+        break;
+      }
+    }
   }, [dateKey]);
 
   // Toggle pause state
