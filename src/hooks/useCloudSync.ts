@@ -47,6 +47,17 @@ function applyQadhaRow(prayer: string, remaining: number) {
   window.dispatchEvent(new Event('qadha-updated'));
 }
 
+const HABITS_KEY = 'habits-tracking';
+
+function applyHabitLog(date: string, slug: string, done: boolean) {
+  const hist = readJSON<Record<string, Record<string, boolean>>>(HABITS_KEY, {});
+  const day = { ...(hist[date] || {}) };
+  if (done) day[slug] = true; else delete day[slug];
+  hist[date] = day;
+  localStorage.setItem(HABITS_KEY, JSON.stringify(hist));
+  window.dispatchEvent(new Event('habits-tracking-updated'));
+}
+
 async function pullAll(userId: string) {
   // Prayers
   const { data: pr } = await supabase
@@ -90,6 +101,25 @@ async function pullAll(userId: string) {
     }
     localStorage.setItem(QADHA_KEY, JSON.stringify(cur));
     window.dispatchEvent(new Event('qadha-updated'));
+  }
+
+  // Habits: join habit_logs -> habits.slug
+  const { data: hl } = await supabase
+    .from('habit_logs')
+    .select('date,count,habits!inner(slug,user_id)')
+    .eq('user_id', userId);
+  if (hl) {
+    const hist = readJSON<Record<string, Record<string, boolean>>>(HABITS_KEY, {});
+    for (const row of hl as any[]) {
+      const slug = row.habits?.slug;
+      const date = row.date;
+      if (!slug || !date) continue;
+      const day = { ...(hist[date] || {}) };
+      if ((row.count ?? 0) > 0) day[slug] = true; else delete day[slug];
+      hist[date] = day;
+    }
+    localStorage.setItem(HABITS_KEY, JSON.stringify(hist));
+    window.dispatchEvent(new Event('habits-tracking-updated'));
   }
 }
 
