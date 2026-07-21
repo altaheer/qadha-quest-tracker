@@ -21,8 +21,8 @@ function normalizeStatus(v: unknown): PrayerStatus | null {
   return null;
 }
 
-export async function syncLocalDataToCloud(userId: string): Promise<{ prayers: number; qadha: number }> {
-  if (localStorage.getItem(SYNC_FLAG)) return { prayers: 0, qadha: 0 };
+export async function syncLocalDataToCloud(userId: string): Promise<{ prayers: number; qadha: number; habits: number }> {
+  if (localStorage.getItem(SYNC_FLAG)) return { prayers: 0, qadha: 0, habits: 0 };
 
   // Prayer history: { [date: 'YYYY-MM-DD']: { fajr: status, ... } }
   const history = readJSON<Record<string, Record<string, unknown>>>('prayer-history', {});
@@ -35,7 +35,6 @@ export async function syncLocalDataToCloud(userId: string): Promise<{ prayers: n
     }
   }
   if (prayerRows.length) {
-    // Chunk to avoid payload issues
     for (let i = 0; i < prayerRows.length; i += 500) {
       await supabase.from('prayer_logs').upsert(prayerRows.slice(i, i + 500), { onConflict: 'user_id,date,prayer' });
     }
@@ -50,6 +49,50 @@ export async function syncLocalDataToCloud(userId: string): Promise<{ prayers: n
     await supabase.from('qadha_counts').upsert(qadhaRows, { onConflict: 'user_id,prayer' });
   }
 
+  // Habits history: { [date]: { [habitSlug]: boolean } }
+  const habitsHistory = readJSON<Record<string, Record<string, boolean>>>('habits-tracking', {});
+  const slugsUsed = new Set<string>();
+  for (const dayObj of Object.values(habitsHistory)) {
+    if (!dayObj) continue;
+    for (const [slug, done] of Object.entries(dayObj)) if (done) slugsUsed.add(slug);
+  }
+  let habitCount = 0;
+  if (slugsUsed.size) {
+    // Lazy import to avoid circular deps
+    const { habitCategories } = await import('@/hooks/useHabitsTracking');
+    const meta = new Map<string, { name: string; points: number }>();
+    for (const cat of habitCategories) for (const h of cat.habits) meta.set(h.id, { name: h.name, points: h.points });
+
+    // Ensure habits rows exist and collect id map
+    const idBySlug = new Map<string, string>();
+    for (const slug of slugsUsed) {
+      const m = meta.get(slug);
+      if (!m) continue;
+      const { data: existing } = await supabase
+        .from('habits').select('id').eq('user_id', userId).eq('slug', slug).maybeSingle();
+      if (existing?.id) { idBySlug.set(slug, existing.id); continue; }
+      const { data: inserted } = await supabase
+        .from('habits').insert({ user_id: userId, slug, name: m.name, points: m.points })
+        .select('id').single();
+      if (inserted?.id) idBySlug.set(slug, inserted.id);
+    }
+
+    const logRows: Array<{ user_id: string; habit_id: string; date: string; count: number }> = [];
+    for (const [date, dayObj] of Object.entries(habitsHistory)) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !dayObj) continue;
+      for (const [slug, done] of Object.entries(dayObj)) {
+        if (!done) continue;
+        const hid = idBySlug.get(slug);
+        if (!hid) continue;
+        logRows.push({ user_id: userId, habit_id: hid, date, count: 1 });
+      }
+    }
+    for (let i = 0; i < logRows.length; i += 500) {
+      await supabase.from('habit_logs').upsert(logRows.slice(i, i + 500), { onConflict: 'habit_id,date' });
+    }
+    habitCount = logRows.length;
+  }
+
   localStorage.setItem(SYNC_FLAG, new Date().toISOString());
-  return { prayers: prayerRows.length, qadha: qadhaRows.length };
+  return { prayers: prayerRows.length, qadha: qadhaRows.length, habits: habitCount };
 }
