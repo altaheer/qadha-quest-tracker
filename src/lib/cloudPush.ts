@@ -107,7 +107,7 @@ export async function pushHabitLog(
         .from('habit_logs')
         .upsert(
           { user_id, habit_id, date, count: 1, updated_at: new Date().toISOString() },
-          { onConflict: 'user_id,habit_id,date' },
+          { onConflict: 'habit_id,date' },
         );
     }
   } catch { /* ignore */ }
