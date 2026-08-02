@@ -1,9 +1,40 @@
 import { useState } from 'react';
-import { Home, Moon, RotateCcw, BarChart3, MoreHorizontal, BookOpen, Calendar as CalendarIcon, Settings, Target } from 'lucide-react';
+import {
+  Home,
+  Moon,
+  RotateCcw,
+  BarChart3,
+  MoreHorizontal,
+  BookOpen,
+  Calendar as CalendarIcon,
+  Settings,
+  Target,
+  type LucideIcon,
+} from 'lucide-react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/lib/i18n';
+
+/**
+ * The active tab is marked by colour and a soft pill behind the icon — enough
+ * to locate yourself without the bar competing with the page above it.
+ */
+function TabContent({ icon: Icon, label, active }: { icon: LucideIcon; label: string; active: boolean }) {
+  return (
+    <>
+      <span
+        className={cn(
+          'flex h-7 w-12 items-center justify-center rounded-full transition-colors duration-base ease-brand',
+          active && 'bg-primary/[0.1]',
+        )}
+      >
+        <Icon className="h-[1.15rem] w-[1.15rem]" strokeWidth={active ? 2.25 : 1.75} />
+      </span>
+      <span className={cn('text-[0.6875rem] leading-none', active && 'font-medium')}>{label}</span>
+    </>
+  );
+}
 
 export function BottomNav() {
   const { t } = useTranslation();
@@ -25,16 +56,15 @@ export function BottomNav() {
     { titleKey: 'nav.settings' as const, url: '/settings', icon: Settings },
   ];
 
-
-  const moreActive = moreItems.some(i => i.url === pathname);
+  const moreActive = moreItems.some((i) => i.url === pathname);
 
   return (
     <>
       <nav
-        className="fixed bottom-0 inset-x-0 z-50 md:hidden bg-background/95 backdrop-blur-md border-t border-border/60 pb-safe"
+        className="fixed inset-x-0 bottom-0 z-50 border-t border-border/60 bg-background/90 pb-safe backdrop-blur-xl md:hidden"
         aria-label={t('nav.more')}
       >
-        <ul className="flex items-stretch justify-around">
+        <ul className="mx-auto flex max-w-lg items-stretch justify-around">
           {tabs.map((tab) => (
             <li key={tab.url} className="flex-1">
               <NavLink
@@ -42,50 +72,58 @@ export function BottomNav() {
                 end
                 className={({ isActive }) =>
                   cn(
-                    'tap-target flex flex-col items-center justify-center gap-1 py-2 text-[11px] font-medium transition-colors',
-                    isActive ? 'text-primary' : 'text-muted-foreground'
+                    'tap-target flex flex-col items-center justify-center gap-1 py-2 transition-colors duration-base ease-brand',
+                    isActive ? 'text-primary' : 'text-muted-foreground',
                   )
                 }
               >
-                <tab.icon className="h-5 w-5" />
-                <span>{t(tab.titleKey)}</span>
+                {({ isActive }) => (
+                  <TabContent icon={tab.icon} label={t(tab.titleKey)} active={isActive} />
+                )}
               </NavLink>
             </li>
           ))}
           <li className="flex-1">
             <button
+              type="button"
               onClick={() => setMoreOpen(true)}
               className={cn(
-                'tap-target w-full flex flex-col items-center justify-center gap-1 py-2 text-[11px] font-medium transition-colors',
-                moreActive ? 'text-primary' : 'text-muted-foreground'
+                'tap-target flex w-full flex-col items-center justify-center gap-1 py-2 transition-colors duration-base ease-brand',
+                moreActive ? 'text-primary' : 'text-muted-foreground',
               )}
             >
-              <MoreHorizontal className="h-5 w-5" />
-              <span>{t('nav.more')}</span>
+              <TabContent icon={MoreHorizontal} label={t('nav.more')} active={moreActive} />
             </button>
           </li>
         </ul>
       </nav>
 
       <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
-        <SheetContent side="bottom" className="rounded-t-2xl pb-safe">
+        <SheetContent side="bottom" className="rounded-t-3xl pb-safe">
           <SheetHeader>
-            <SheetTitle className="text-left">{t('nav.more')}</SheetTitle>
+            <SheetTitle className="text-start font-display text-lg">{t('nav.more')}</SheetTitle>
           </SheetHeader>
-          <ul className="mt-4 space-y-1">
+          <ul className="mt-3 space-y-0.5">
             {moreItems.map((item) => (
               <li key={item.url}>
                 <button
+                  type="button"
                   onClick={() => {
                     setMoreOpen(false);
                     navigate(item.url);
                   }}
-                  className="w-full flex items-center gap-3 px-3 py-3 rounded-xl tap-target hover:bg-muted transition-colors text-left"
+                  className={cn(
+                    'tap-target flex w-full items-center gap-3 rounded-xl px-2 py-2.5 text-start',
+                    'transition-colors duration-base ease-brand hover:bg-muted',
+                    item.url === pathname && 'bg-muted/60',
+                  )}
                 >
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <item.icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <span className="font-medium">{t(item.titleKey)}</span>
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/[0.08] text-primary">
+                    <item.icon className="h-[1.15rem] w-[1.15rem]" strokeWidth={1.75} />
+                  </span>
+                  <span className="text-[0.9375rem] font-medium text-foreground">
+                    {t(item.titleKey)}
+                  </span>
                 </button>
               </li>
             ))}

@@ -1,106 +1,140 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&family=Cairo:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&family=Cairo:wght@400;500;600;700&display=swap');
+
+/*
+ * Design foundation
+ * ─────────────────
+ * One surface treatment, one accent, one easing curve. Depth comes from a
+ * three-step elevation scale rather than from gradients, and hierarchy comes
+ * from size and spacing rather than from colour. Anything that wants to stand
+ * out has to earn it — if everything is emphasised, nothing reads as calm.
+ */
 
 @layer base {
   :root {
-    --background: 40 25% 96%;
-    --foreground: 160 18% 18%;
+    /* Warm paper background; surfaces sit slightly above it in lightness. */
+    --background: 42 28% 97%;
+    --foreground: 165 16% 15%;
 
-    --card: 40 20% 94%;
-    --card-foreground: 160 18% 18%;
+    --card: 40 40% 99%;
+    --card-foreground: 165 16% 15%;
 
-    --popover: 40 20% 94%;
-    --popover-foreground: 160 18% 18%;
+    --popover: 40 40% 99%;
+    --popover-foreground: 165 16% 15%;
 
-    --primary: 158 28% 32%;
-    --primary-foreground: 40 25% 97%;
+    /* Deep emerald. Used for actions and completion — never as decoration. */
+    --primary: 162 30% 30%;
+    --primary-foreground: 42 30% 98%;
 
-    --secondary: 40 22% 89%;
-    --secondary-foreground: 160 18% 22%;
+    --secondary: 40 20% 93%;
+    --secondary-foreground: 165 16% 22%;
 
-    --muted: 40 16% 90%;
-    --muted-foreground: 160 10% 46%;
+    --muted: 40 18% 94%;
+    --muted-foreground: 165 8% 47%;
 
-    --accent: 38 48% 58%;
-    --accent-foreground: 160 22% 16%;
+    /* Gold. Reserved for genuine highlights (streaks, achievements). */
+    --accent: 36 44% 54%;
+    --accent-foreground: 165 20% 14%;
 
-    --destructive: 4 50% 52%;
-    --destructive-foreground: 40 25% 97%;
+    --destructive: 6 48% 50%;
+    --destructive-foreground: 42 30% 98%;
 
-    --border: 40 16% 85%;
-    --input: 40 16% 85%;
-    --ring: 158 28% 32%;
+    --border: 40 16% 89%;
+    --input: 40 16% 87%;
+    --ring: 162 30% 30%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
-    /* Custom tokens */
-    --emerald-deep: 158 32% 26%;
-    --emerald-light: 158 22% 84%;
-    --gold: 38 48% 58%;
-    --gold-light: 38 38% 84%;
-    --cream: 40 25% 96%;
-    --cream-dark: 40 20% 90%;
-    --flame: 20 70% 56%;
+    --emerald-deep: 162 34% 24%;
+    --emerald-light: 162 24% 88%;
+    --gold: 36 44% 54%;
+    --gold-light: 36 40% 88%;
+    --cream: 42 28% 97%;
+    --cream-dark: 40 20% 92%;
+    --flame: 20 62% 54%;
 
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(158 32% 24%), hsl(158 28% 34%));
-    --gradient-gold: linear-gradient(135deg, hsl(38 48% 56%), hsl(38 52% 66%));
-    --gradient-card: linear-gradient(180deg, hsl(40 25% 97%), hsl(40 20% 94%));
+    /*
+     * Gradients are kept only where a large filled shape needs life (the app
+     * icon, a hero band). Surfaces use flat --card instead.
+     */
+    --gradient-primary: linear-gradient(140deg, hsl(162 34% 26%), hsl(162 28% 36%));
+    --gradient-gold: linear-gradient(140deg, hsl(36 46% 52%), hsl(36 50% 63%));
+    --gradient-card: none;
 
-    /* Shadows */
-    --shadow-soft: 0 4px 20px -4px hsl(158 30% 20% / 0.1);
-    --shadow-card: 0 2px 12px -2px hsl(158 30% 20% / 0.08);
-    --shadow-elevated: 0 8px 30px -6px hsl(158 30% 20% / 0.15);
+    /*
+     * Elevation: three steps, tinted with the foreground hue so shadows read
+     * as shade rather than as grey haze.
+     */
+    --shadow-sm: 0 1px 2px hsl(165 20% 15% / 0.04), 0 1px 3px hsl(165 20% 15% / 0.03);
+    --shadow-md: 0 2px 4px hsl(165 20% 15% / 0.04), 0 6px 16px -6px hsl(165 20% 15% / 0.08);
+    --shadow-lg: 0 4px 8px hsl(165 20% 15% / 0.05), 0 16px 32px -12px hsl(165 20% 15% / 0.12);
+
+    /* Legacy aliases so surfaces that still reference them stay consistent. */
+    --shadow-card: var(--shadow-sm);
+    --shadow-soft: var(--shadow-md);
+    --shadow-elevated: var(--shadow-lg);
+
+    /* Motion. One curve everywhere: quick to leave, gentle to settle. */
+    --ease-out: cubic-bezier(0.32, 0.72, 0, 1);
+    --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+    --duration-fast: 140ms;
+    --duration-base: 240ms;
+    --duration-slow: 420ms;
   }
 
   .dark {
-    --background: 220 22% 11%;
-    --foreground: 210 20% 92%;
+    /*
+     * A warm charcoal with a green undertone rather than a blue-grey — it sits
+     * under the same emerald accent without the surfaces looking cold.
+     */
+    --background: 168 12% 8%;
+    --foreground: 40 14% 92%;
 
-    --card: 220 18% 16%;
-    --card-foreground: 210 20% 92%;
+    --card: 168 10% 12%;
+    --card-foreground: 40 14% 92%;
 
-    --popover: 220 18% 16%;
-    --popover-foreground: 210 20% 92%;
+    --popover: 168 10% 13%;
+    --popover-foreground: 40 14% 92%;
 
-    --primary: 158 30% 46%;
-    --primary-foreground: 210 25% 96%;
+    --primary: 160 34% 52%;
+    --primary-foreground: 168 30% 8%;
 
-    --secondary: 220 14% 22%;
-    --secondary-foreground: 210 20% 88%;
+    --secondary: 168 8% 18%;
+    --secondary-foreground: 40 14% 88%;
 
-    --muted: 220 14% 20%;
-    --muted-foreground: 215 12% 66%;
+    --muted: 168 8% 16%;
+    --muted-foreground: 165 8% 62%;
 
-    --accent: 38 52% 58%;
-    --accent-foreground: 220 30% 12%;
+    --accent: 36 46% 58%;
+    --accent-foreground: 168 30% 10%;
 
-    --destructive: 4 55% 56%;
-    --destructive-foreground: 210 20% 92%;
+    --destructive: 6 52% 56%;
+    --destructive-foreground: 40 14% 94%;
 
-    --border: 220 14% 24%;
-    --input: 220 14% 24%;
-    --ring: 158 30% 46%;
+    --border: 168 8% 20%;
+    --input: 168 8% 22%;
+    --ring: 160 34% 52%;
 
-    --emerald-deep: 158 30% 42%;
-    --emerald-light: 158 24% 24%;
-    --gold: 38 52% 58%;
-    --gold-light: 38 36% 26%;
-    --cream: 220 18% 16%;
-    --cream-dark: 220 22% 11%;
-    --flame: 20 70% 60%;
+    --emerald-deep: 160 32% 44%;
+    --emerald-light: 162 20% 22%;
+    --gold: 36 46% 58%;
+    --gold-light: 36 30% 24%;
+    --cream: 168 10% 12%;
+    --cream-dark: 168 12% 8%;
+    --flame: 20 64% 58%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(158 30% 36%), hsl(158 28% 46%));
-    --gradient-gold: linear-gradient(135deg, hsl(38 52% 54%), hsl(38 56% 64%));
-    --gradient-card: linear-gradient(180deg, hsl(220 18% 17%), hsl(220 22% 13%));
+    --gradient-primary: linear-gradient(140deg, hsl(160 30% 34%), hsl(160 32% 46%));
+    --gradient-gold: linear-gradient(140deg, hsl(36 46% 50%), hsl(36 50% 60%));
+    --gradient-card: none;
 
-    /* Dark mode prefers borders over shadows */
-    --shadow-soft: 0 4px 20px -4px hsl(0 0% 0% / 0.4);
-    --shadow-card: 0 2px 12px -2px hsl(0 0% 0% / 0.3);
-    --shadow-elevated: 0 8px 30px -6px hsl(0 0% 0% / 0.5);
+    /* In the dark, depth reads through borders; shadows only anchor. */
+    --shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.3);
+    --shadow-md: 0 2px 6px hsl(0 0% 0% / 0.35), 0 8px 20px -8px hsl(0 0% 0% / 0.4);
+    --shadow-lg: 0 4px 10px hsl(0 0% 0% / 0.4), 0 20px 40px -16px hsl(0 0% 0% / 0.5);
   }
 }
 
@@ -112,20 +146,30 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Plus Jakarta Sans', sans-serif;
-    transition: background-color 0.3s ease, color 0.3s ease;
-  }
-
-  /* Smooth theme switching across the app */
-  html.theme-transition,
-  html.theme-transition *,
-  html.theme-transition *::before,
-  html.theme-transition *::after {
-    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, fill 0.3s ease, stroke 0.3s ease !important;
+    /* Slight negative tracking keeps body text from feeling loose at small sizes. */
+    letter-spacing: -0.006em;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Outfit', sans-serif;
     font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  /* Large numerals are the app's main readout — keep them even and aligned. */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  html.theme-transition,
+  html.theme-transition *,
+  html.theme-transition *::before,
+  html.theme-transition *::after {
+    transition: background-color var(--duration-base) var(--ease-out),
+                border-color var(--duration-base) var(--ease-out),
+                color var(--duration-base) var(--ease-out),
+                fill var(--duration-base) var(--ease-out),
+                stroke var(--duration-base) var(--ease-out) !important;
   }
 
   html[dir="rtl"] body,
@@ -133,93 +177,123 @@
   [dir="rtl"] {
     font-family: 'Cairo', 'Plus Jakarta Sans', sans-serif;
   }
-  
+
   html[dir="rtl"] h1, html[dir="rtl"] h2, html[dir="rtl"] h3,
   html[dir="rtl"] h4, html[dir="rtl"] h5, html[dir="rtl"] h6 {
     font-family: 'Cairo', 'Outfit', sans-serif;
   }
 
-  .dark .gradient-card {
-    border: 1px solid hsl(var(--border));
-    box-shadow: none;
+  /* Respect the OS setting rather than animating regardless. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
-  html[dir="rtl"] h1, html[dir="rtl"] h2, html[dir="rtl"] h3,
-  html[dir="rtl"] h4, html[dir="rtl"] h5, html[dir="rtl"] h6 {
-    font-family: 'Cairo', 'Outfit', sans-serif;
+}
+
+@layer components {
+  /*
+   * The single surface used across the app. Everything that is "a thing on the
+   * page" is a .surface — consistency here is most of what makes the app feel
+   * like one product rather than a set of screens.
+   */
+  .surface {
+    @apply rounded-2xl border border-border bg-card;
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* A surface that is also a link or button. */
+  .surface-interactive {
+    @apply surface;
+    transition: box-shadow var(--duration-base) var(--ease-out),
+                transform var(--duration-fast) var(--ease-out),
+                border-color var(--duration-base) var(--ease-out);
+  }
+  .surface-interactive:hover {
+    box-shadow: var(--shadow-md);
+    border-color: hsl(var(--border) / 0.7);
+  }
+  .surface-interactive:active {
+    transform: scale(0.994);
+  }
+
+  /* Legacy names, redefined so untouched screens inherit the calmer look. */
+  .gradient-card,
+  .glass-card {
+    @apply surface;
   }
 }
 
 @layer utilities {
-  .font-display {
-    font-family: 'Outfit', sans-serif;
-  }
-  
-  .font-body {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-  }
-  
-  .gradient-primary {
-    background: var(--gradient-primary);
-  }
-  
-  .gradient-gold {
-    background: var(--gradient-gold);
-  }
-  
-  .gradient-card {
-    background: var(--gradient-card);
-  }
-  
-  .shadow-soft {
-    box-shadow: var(--shadow-soft);
-  }
-  
-  .shadow-card {
-    box-shadow: var(--shadow-card);
-  }
-  
-  .shadow-elevated {
-    box-shadow: var(--shadow-elevated);
-  }
+  .font-display { font-family: 'Outfit', sans-serif; }
+  .font-body { font-family: 'Plus Jakarta Sans', sans-serif; }
 
-  /* Premium micro-interactions */
+  .gradient-primary { background: var(--gradient-primary); }
+  .gradient-gold { background: var(--gradient-gold); }
+
+  .shadow-sm-soft { box-shadow: var(--shadow-sm); }
+  .shadow-card { box-shadow: var(--shadow-sm); }
+  .shadow-soft { box-shadow: var(--shadow-md); }
+  .shadow-elevated { box-shadow: var(--shadow-lg); }
+
+  .ease-brand { transition-timing-function: var(--ease-out); }
+
   .card-lift {
-    @apply transition-all duration-200 ease-out;
+    transition: box-shadow var(--duration-base) var(--ease-out),
+                transform var(--duration-base) var(--ease-out);
   }
   .card-lift:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-elevated);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
   }
 
+  /* Press feedback: a hint of give, not a bounce. */
   .press-scale {
-    @apply transition-transform duration-150 ease-out active:scale-[0.96];
+    transition: transform var(--duration-fast) var(--ease-out);
   }
+  .press-scale:active { transform: scale(0.97); }
 
   .glow-primary {
-    box-shadow: 0 0 0 4px hsl(var(--primary) / 0.12), 0 8px 24px -8px hsl(var(--primary) / 0.35);
+    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.1), var(--shadow-md);
   }
 
-  /* Safe areas for iOS notch / home indicator */
+  /* Safe areas for notches and home indicators. */
   .pt-safe { padding-top: env(safe-area-inset-top); }
   .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
   .pl-safe { padding-left: env(safe-area-inset-left); }
   .pr-safe { padding-right: env(safe-area-inset-right); }
   .h-safe-bottom { height: env(safe-area-inset-bottom); }
-  .bottom-nav-offset { padding-bottom: calc(4.5rem + env(safe-area-inset-bottom)); }
+  .bottom-nav-offset { padding-bottom: calc(4.75rem + env(safe-area-inset-bottom)); }
 
-  /* Minimum 44px touch target (Apple HIG) */
+  /* Apple HIG minimum touch target. */
   .tap-target { min-height: 44px; min-width: 44px; }
 }
 
-/* Global button press feel — keep it subtle */
-button:not(:disabled) {
-  transition: transform 0.15s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+/*
+ * Global press feel. Scoped to real controls and kept small — an icon button
+ * shrinking as much as a full-width button is what makes an interface feel
+ * cheap.
+ */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]) {
+  transition: transform var(--duration-fast) var(--ease-out),
+              box-shadow var(--duration-base) var(--ease-out),
+              background-color var(--duration-base) var(--ease-out),
+              border-color var(--duration-base) var(--ease-out),
+              color var(--duration-base) var(--ease-out);
 }
-button:not(:disabled):active {
-  transform: scale(0.96);
+button:not(:disabled):active,
+[role="button"]:not([aria-disabled="true"]):active {
+  transform: scale(0.98);
 }
 
-/* Prevent iOS overscroll bounce on body but allow on scrollable regions */
+/* Keep focus rings for keyboard users without drawing them on every tap. */
+:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
 html, body { overscroll-behavior-y: none; }
-
-

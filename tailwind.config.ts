@@ -92,17 +92,32 @@ export default {
           "50%": { opacity: "0.7" },
         },
         "fade-in": {
-          "0%": { opacity: "0", transform: "translateY(10px)" },
+          "0%": { opacity: "0", transform: "translateY(6px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        /* Content settling into place — used for staggered lists. */
+        rise: {
+          "0%": { opacity: "0", transform: "translateY(8px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
       },
       animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
-        "count-up": "count-up 0.2s ease-out",
-        "count-down": "count-down 0.2s ease-out",
+        "accordion-down": "accordion-down 0.2s var(--ease-out)",
+        "accordion-up": "accordion-up 0.2s var(--ease-out)",
+        "count-up": "count-up 0.24s var(--ease-out)",
+        "count-down": "count-down 0.24s var(--ease-out)",
         "pulse-soft": "pulse-soft 2s ease-in-out infinite",
-        "fade-in": "fade-in 0.4s ease-out",
+        "fade-in": "fade-in 0.42s var(--ease-out) both",
+        rise: "rise 0.42s var(--ease-out) both",
+      },
+      transitionTimingFunction: {
+        brand: "var(--ease-out)",
+        "brand-in-out": "var(--ease-in-out)",
+      },
+      transitionDuration: {
+        fast: "var(--duration-fast)",
+        base: "var(--duration-base)",
+        slow: "var(--duration-slow)",
       },
     },
   },

@@ -1,16 +1,26 @@
 import { useMemo } from 'react';
-import { Moon, Target, BookOpen, RotateCcw, ChevronRight, AlertCircle } from 'lucide-react';
+import { BookOpen, Check, Moon, RotateCcw, Target } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { usePrayerTracking, type DailyPrayers } from '@/hooks/usePrayerTracking';
 import { useHabitsTracking, habitCategories, levelHabits } from '@/hooks/useHabitsTracking';
 import { useMissions, computeProgress, getActionLabel } from '@/hooks/useMissions';
-import { Progress } from '@/components/ui/progress';
 import { useTranslation } from '@/lib/i18n';
-import { getDateString } from '@/lib/date';
+import { getDateString, localeFor } from '@/lib/date';
 import { cn } from '@/lib/utils';
+import {
+  Chip,
+  Meter,
+  Page,
+  Panel,
+  PanelBody,
+  PanelHeader,
+  SectionLabel,
+  Stat,
+} from '@/components/common';
 import type { PrayerHistory, HabitsHistory, PrayerCounts, PrayerStatus } from '@/types';
 
 const PRAYER_KEYS: (keyof DailyPrayers)[] = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+const DAYS_SHOWN = 5;
 
 function readJSON<T>(key: string, fallback: T): T {
   try {
@@ -21,10 +31,6 @@ function readJSON<T>(key: string, fallback: T): T {
   }
 }
 
-const localeMap: Record<string, string> = {
-  en: 'en-US', sv: 'sv-SE', tr: 'tr-TR', ar: 'ar-EG',
-};
-
 type PrayerCellState = 'done' | 'missed' | 'none';
 
 function prayerCellState(s: PrayerStatus | undefined, isPast: boolean): PrayerCellState {
@@ -34,143 +40,63 @@ function prayerCellState(s: PrayerStatus | undefined, isPast: boolean): PrayerCe
   return 'none';
 }
 
-// ── Shared card shell used by all summary rows ────────────────────────────
-function CardShell({
-  to,
-  icon: Icon,
-  label,
-  value,
-  children,
-}: {
-  to: string;
-  icon: typeof Moon;
-  label: string;
-  value: string;
-  children?: React.ReactNode;
-}) {
-  return (
-    <Link
-      to={to}
-      className="block rounded-2xl gradient-card shadow-card border border-border/50 overflow-hidden hover:shadow-elevated transition-all"
-    >
-      <div className="flex items-center gap-3 px-4 py-3">
-        <span className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-          <Icon className="h-4 w-4 text-primary" />
-        </span>
-        <p className="flex-1 font-display text-sm font-semibold text-foreground/90 truncate">
-          {label}
-        </p>
-        <span className="text-base font-semibold text-foreground tabular-nums">{value}</span>
-        <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-      </div>
-      {children && (
-        <div className="border-t border-border/50 bg-background/30 px-2 py-2">{children}</div>
-      )}
-    </Link>
-  );
-}
-
-// ── Shared 5-day strip primitive ──────────────────────────────────────────
-// Renders one cell per day (oldest → newest, today at the right).
-function DayStrip({
-  days,
-  lang,
-  renderCell,
-}: {
-  days: string[];
-  lang: string;
-  renderCell: (date: string, isToday: boolean) => React.ReactNode;
-}) {
-  const todayKey = getDateString(new Date());
-  return (
-    <div className="grid grid-cols-5 gap-0">
-      {days.map((dk) => {
-        const d = new Date(dk);
-        const weekday = d.toLocaleDateString(localeMap[lang] || 'en-US', { weekday: 'short' });
-        const isToday = dk === todayKey;
-        return (
-          <div key={dk} className="flex flex-col items-center gap-1">
-            <span
-              className={cn(
-                'text-[10px] capitalize leading-none',
-                isToday ? 'text-primary font-semibold' : 'text-muted-foreground',
-              )}
-            >
-              {weekday.slice(0, 3)}
-            </span>
-            {renderCell(dk, isToday)}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function PrayerHeatmap({
+/**
+ * Five days of prayers as a compact grid — rows are prayers, columns are days,
+ * today on the right. Reads as texture rather than as data to be decoded.
+ */
+function PrayerGrid({
   days,
   grid,
   lang,
-  t,
+  labels,
 }: {
   days: string[];
   grid: Record<string, PrayerCellState[]>;
   lang: string;
-  t: (k: string) => string;
+  labels: string[];
 }) {
   const todayKey = getDateString(new Date());
-  const prayerLabels = [
-    t('prayers.fajr'),
-    t('prayers.dhuhr'),
-    t('prayers.asr'),
-    t('prayers.maghrib'),
-    t('prayers.isha'),
-  ];
   return (
-    <div className="px-0 py-0">
-      <div className="grid grid-cols-[auto_repeat(5,1fr)] gap-0 items-center">
-        <span />
-        {days.map((dk) => {
-          const d = new Date(dk);
-          const weekday = d.toLocaleDateString(localeMap[lang] || 'en-US', { weekday: 'short' });
-          const isToday = dk === todayKey;
-          return (
-            <span
-              key={dk}
-              className={cn(
-                'text-[10px] uppercase tracking-wide text-center leading-none py-1.5',
-                isToday ? 'text-primary font-bold' : 'text-muted-foreground',
-              )}
-            >
-              {weekday.slice(0, 2)}
-            </span>
-          );
-        })}
+    <div className="grid grid-cols-[2.25rem_repeat(5,1fr)] gap-x-1 gap-y-1">
+      <span aria-hidden />
+      {days.map((dk) => {
+        const isToday = dk === todayKey;
+        const weekday = new Date(dk).toLocaleDateString(localeFor(lang), { weekday: 'short' });
+        return (
+          <span
+            key={dk}
+            className={cn(
+              'pb-1 text-center text-[0.6875rem] font-medium leading-none',
+              isToday ? 'text-primary' : 'text-muted-foreground/70',
+            )}
+          >
+            {weekday.slice(0, 2)}
+          </span>
+        );
+      })}
 
-        {PRAYER_KEYS.map((_p, rowIdx) => (
-          <div key={rowIdx} className="contents">
-            <span className="text-[10px] font-medium text-muted-foreground/80 pr-2 text-right leading-none">
-              {prayerLabels[rowIdx].slice(0, 2)}
-            </span>
-            {days.map((dk) => {
-              const state = grid[dk][rowIdx];
-              const isToday = dk === todayKey;
-              return (
-                <div
-                  key={dk}
-                  className={cn(
-                    'h-8 w-full rounded-none transition-all border',
-                    state === 'done' &&
-                      'bg-primary border-primary/90 shadow-[inset_0_1px_0_hsl(var(--primary-foreground)/0.15)]',
-                    state === 'missed' && 'bg-destructive/40 border-destructive/60',
-                    state === 'none' && 'bg-muted/70 border-border/70',
-                    isToday && state === 'none' && 'ring-1 ring-inset ring-primary/50',
-                  )}
-                />
-              );
-            })}
-          </div>
-        ))}
-      </div>
+      {PRAYER_KEYS.map((prayer, row) => (
+        <div key={prayer} className="contents">
+          <span className="self-center pe-1 text-end text-[0.6875rem] leading-none text-muted-foreground/70">
+            {labels[row].slice(0, 3)}
+          </span>
+          {days.map((dk) => {
+            const state = grid[dk][row];
+            return (
+              <span
+                key={dk}
+                title={`${labels[row]} · ${dk}`}
+                className={cn(
+                  'h-6 rounded-[5px] transition-colors duration-base ease-brand',
+                  state === 'done' && 'bg-primary',
+                  state === 'missed' && 'bg-destructive/25',
+                  state === 'none' && 'bg-muted',
+                )}
+              />
+            );
+          })}
+        </div>
+      ))}
     </div>
   );
 }
@@ -181,6 +107,8 @@ export default function Home() {
   const { getActiveCount, getCompletedCount, pausedHabits, level } = useHabitsTracking();
   const { missions } = useMissions();
 
+  const prayerLabels = PRAYER_KEYS.map((p) => t(`prayerNames.${p}` as never));
+
   const data = useMemo(() => {
     const prayerHistory = readJSON<PrayerHistory>('prayer-history', {});
     const habitsHistory = readJSON<HabitsHistory>('habits-tracking', {});
@@ -189,34 +117,30 @@ export default function Home() {
     });
 
     const todayKey = getDateString(new Date());
-    // Oldest → newest: today − 4 … today. Today sits on the right edge.
+    // Oldest → newest, so today sits on the right edge where the eye ends up.
     const days: string[] = [];
-    for (let i = 4; i >= 0; i--) {
+    for (let i = DAYS_SHOWN - 1; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
       days.push(getDateString(d));
     }
 
-    let prayersDoneToday = 0;
     const todayData = prayerHistory[todayKey];
-    if (todayData) {
-      PRAYER_KEYS.forEach((p) => {
-        const s = todayData.prayers[p]?.status;
-        if (s === 'ontime' || s === 'jamaah' || s === 'late') prayersDoneToday++;
-      });
-    }
+    let prayersDoneToday = 0;
+    PRAYER_KEYS.forEach((p) => {
+      const s = todayData?.prayers[p]?.status;
+      if (s === 'ontime' || s === 'jamaah' || s === 'late') prayersDoneToday++;
+    });
 
-    // Prayers pending today (excludes missed)
-    const pendingPrayersToday: (keyof DailyPrayers)[] = PRAYER_KEYS.filter((p) => {
+    const pendingPrayersToday = PRAYER_KEYS.filter((p) => {
       const s = todayData?.prayers[p]?.status;
       return !s || s === 'pending';
     });
 
     const prayerGrid: Record<string, PrayerCellState[]> = {};
     days.forEach((dk) => {
-      const isPast = dk < todayKey;
       const day = prayerHistory[dk];
-      prayerGrid[dk] = PRAYER_KEYS.map((p) => prayerCellState(day?.prayers[p]?.status, isPast));
+      prayerGrid[dk] = PRAYER_KEYS.map((p) => prayerCellState(day?.prayers[p]?.status, dk < todayKey));
     });
 
     const allIds = habitCategories.flatMap((c) => c.habits.map((h) => h.id));
@@ -225,208 +149,159 @@ export default function Home() {
       if (level === 'custom') return true;
       return levelHabits[level].includes(id);
     });
-    const totalActive = activeHabitIds.length;
     const habitGrid: Record<string, { done: number; total: number }> = {};
     days.forEach((dk) => {
       const day = habitsHistory[dk] || {};
-      let done = 0;
-      activeHabitIds.forEach((id) => { if (day[id]) done++; });
-      habitGrid[dk] = { done, total: totalActive };
+      habitGrid[dk] = {
+        done: activeHabitIds.filter((id) => day[id]).length,
+        total: activeHabitIds.length,
+      };
     });
 
     const qadhaRemaining = Object.values(qadhaCounts).reduce((a, b) => a + (b || 0), 0);
-    const qadhaMax = Math.max(1, ...Object.values(qadhaCounts));
 
-    return {
-      days,
-      prayersDoneToday,
-      pendingPrayersToday,
-      prayerGrid,
-      habitGrid,
-      qadhaRemaining,
-      qadhaCounts,
-      qadhaMax,
-    };
+    return { days, prayersDoneToday, pendingPrayersToday, prayerGrid, habitGrid, qadhaRemaining };
   }, [prayers, pausedHabits, level]);
 
   const habitsDone = getCompletedCount();
   const habitsTotal = getActiveCount();
   const habitsRemaining = Math.max(0, habitsTotal - habitsDone);
-  const attentionCount = data.pendingPrayersToday.length + (habitsRemaining > 0 ? 1 : 0);
+  const dayComplete = data.pendingPrayersToday.length === 0 && habitsRemaining === 0;
 
   return (
-    <div className="container max-w-lg mx-auto px-4 py-6 space-y-4">
-      <div className="text-center animate-fade-in">
-        <div className="inline-flex items-center justify-center w-14 h-14 rounded-full gradient-primary shadow-elevated mb-3">
-          <Moon className="h-7 w-7 text-primary-foreground" />
+    <Page className="space-y-3">
+      <p className="pb-1 text-sm text-muted-foreground">{t('home.subtitle')}</p>
+
+      {/* The backlog — the reason the app exists, so it leads. */}
+      <Panel to="/qadha" className="animate-rise">
+        <div className="flex items-center gap-4 px-5 pb-5 pt-5">
+          <Stat
+            className="flex-1"
+            size="lg"
+            tone={data.qadhaRemaining === 0 ? 'muted' : 'primary'}
+            value={data.qadhaRemaining.toLocaleString(localeFor(lang))}
+            label={t('qadha.totalRemaining')}
+          />
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/[0.08] text-primary">
+            <RotateCcw className="h-5 w-5" strokeWidth={1.75} />
+          </span>
         </div>
-        <h1 className="font-display text-2xl font-bold text-foreground mb-1">
-          Assalamu Alaikum
-        </h1>
-        <p className="text-muted-foreground text-sm">{t('home.subtitle')}</p>
-      </div>
+      </Panel>
 
-      {/* ── Today: what needs attention ─────────────────────────────── */}
-      {attentionCount > 0 && (
-        <div className="rounded-2xl gradient-card shadow-card border border-border/50 p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <AlertCircle className="h-4 w-4 text-primary" />
-            <h2 className="font-display text-sm font-semibold text-foreground/90">
-              {(t as any)('home.today') || 'Today'}
-            </h2>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {data.pendingPrayersToday.map((p) => (
-              <Link
-                key={p}
-                to="/prayers"
-                className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary/15 transition"
-              >
-                {(t as any)(`prayers.${p}`)}
-              </Link>
-            ))}
-            {habitsRemaining > 0 && (
-              <Link
-                to="/habits"
-                className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary/15 transition"
-              >
-                {habitsRemaining} {t('nav.habits').toLowerCase()}
-              </Link>
-            )}
-          </div>
-        </div>
-      )}
-
-      <div className="flex items-center justify-between px-1">
-        <h2 className="font-display text-sm font-semibold text-foreground/80">
-          {t('home.summary')}
-        </h2>
-        <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
-          {t('home.last5days')}
-        </span>
-      </div>
-
-      {/* Prayers */}
-      <CardShell
-        to="/prayers"
-        icon={Moon}
-        label={t('nav.prayers')}
-        value={`${data.prayersDoneToday}/5`}
-      >
-        <PrayerHeatmap days={data.days} grid={data.prayerGrid} lang={lang} t={t} />
-      </CardShell>
-
-      {/* Qadha — now with a per-prayer visual */}
-      <CardShell
-        to="/qadha"
-        icon={RotateCcw}
-        label={t('nav.qadha')}
-        value={`${data.qadhaRemaining}`}
-      >
-        <div className="px-2 py-1 space-y-1">
-          {PRAYER_KEYS.map((p) => {
-            const n = data.qadhaCounts[p] || 0;
-            const pct = Math.min(100, (n / data.qadhaMax) * 100);
-            return (
-              <div key={p} className="flex items-center gap-2">
-                <span className="text-[10px] font-medium text-muted-foreground w-8 shrink-0">
-                  {(t as any)(`prayers.${p}`).slice(0, 3)}
-                </span>
-                <div className="flex-1 h-2 rounded-full bg-muted/70 overflow-hidden">
-                  <div
-                    className={cn(
-                      'h-full transition-all',
-                      n === 0 ? 'bg-primary/30' : 'bg-primary',
-                    )}
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
-                <span className="text-[10px] tabular-nums font-semibold text-foreground/80 w-8 text-right">
-                  {n}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </CardShell>
-
-      {/* Habits */}
-      <CardShell
-        to="/habits"
-        icon={BookOpen}
-        label={t('nav.habits')}
-        value={`${habitsDone}/${habitsTotal}`}
-      >
-        <DayStrip
-          days={data.days}
-          lang={lang}
-          renderCell={(dk) => {
-            const { done, total } = data.habitGrid[dk];
-            const ratio = total > 0 ? done / total : 0;
-            return (
-              <div
-                className={cn(
-                  'w-full h-8 rounded-md flex items-center justify-center text-[11px] font-semibold tabular-nums border',
-                  total === 0 && 'bg-muted/40 text-muted-foreground border-border',
-                  total > 0 && ratio === 0 && 'bg-destructive/10 text-destructive/80 border-destructive/20',
-                  total > 0 && ratio > 0 && ratio < 0.8 && 'bg-primary/15 text-primary border-primary/30',
-                  total > 0 && ratio >= 0.8 && 'bg-primary text-primary-foreground border-primary',
-                )}
-              >
-                {total > 0 ? `${done}/${total}` : '–'}
-              </div>
-            );
-          }}
+      {/* What is still open today. */}
+      <Panel className="animate-rise">
+        <PanelHeader
+          icon={dayComplete ? Check : Moon}
+          label={t('home.today')}
+          value={`${data.prayersDoneToday}/5`}
         />
-      </CardShell>
+        <PanelBody>
+          {dayComplete ? (
+            <p className="text-[0.8125rem] leading-relaxed text-muted-foreground">
+              {t('home.dayComplete')}
+            </p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {data.pendingPrayersToday.map((p) => (
+                <Chip key={p} to="/prayers" tone="accent">
+                  {t(`prayerNames.${p}` as never)}
+                </Chip>
+              ))}
+              {habitsRemaining > 0 && (
+                <Chip to="/habits">
+                  {habitsRemaining} {t('nav.habits').toLowerCase()}
+                </Chip>
+              )}
+            </div>
+          )}
+        </PanelBody>
+      </Panel>
 
-      {/* Missions */}
-      <div className="space-y-2 pt-2">
-        <div className="flex items-center justify-between px-1">
-          <h3 className="font-display text-sm font-semibold text-foreground/80">
-            {t('missions.title')}
-          </h3>
-          <Link to="/missions" className="text-xs text-primary hover:underline">
-            {t('missions.newMission')}
-          </Link>
-        </div>
+      <SectionLabel trailing={t('home.last5days')}>{t('home.summary')}</SectionLabel>
 
-        {missions.length === 0 ? (
-          <Link
-            to="/missions"
-            className="block p-4 rounded-2xl border border-dashed border-border bg-card/40 text-center text-sm text-muted-foreground hover:border-primary/40 transition"
-          >
-            <Target className="h-4 w-4 inline-block me-1.5 -mt-0.5" />
-            {t('missions.newMission')}
-          </Link>
-        ) : (
-          missions.map((m) => {
-            const p = computeProgress(m);
-            const pct = Math.min(100, (p.progress / m.days) * 100);
-            const label = getActionLabel(m, t, tHabit, lang);
-            return (
-              <Link
-                key={m.id}
-                to="/missions"
-                className="block rounded-2xl gradient-card shadow-card border border-border/50 px-4 py-3 hover:shadow-elevated transition-all"
-              >
-                <div className="flex items-start gap-2 mb-2">
-                  <Target className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
-                  <p className="text-sm text-foreground flex-1">
-                    {t('missions.iIntendTo')}{' '}
-                    <span className="text-primary font-medium">{label}</span>{' '}
-                    {t('missions.for')} {m.days} {t('missions.days')}
-                  </p>
-                  <span className="text-xs font-semibold tabular-nums text-foreground/80 shrink-0">
-                    {p.progress}/{m.days}
+      <Panel to="/prayers">
+        <PanelHeader icon={Moon} label={t('nav.prayers')} navigates />
+        <PanelBody>
+          <PrayerGrid days={data.days} grid={data.prayerGrid} lang={lang} labels={prayerLabels} />
+        </PanelBody>
+      </Panel>
+
+      <Panel to="/habits">
+        <PanelHeader
+          icon={BookOpen}
+          label={t('nav.habits')}
+          value={`${habitsDone}/${habitsTotal}`}
+          navigates
+        />
+        <PanelBody>
+          <div className="grid grid-cols-5 gap-1">
+            {data.days.map((dk) => {
+              const { done, total } = data.habitGrid[dk];
+              const ratio = total > 0 ? done / total : 0;
+              const weekday = new Date(dk).toLocaleDateString(localeFor(lang), { weekday: 'short' });
+              return (
+                <div key={dk} className="flex flex-col items-center gap-1">
+                  <span className="text-[0.6875rem] leading-none text-muted-foreground/70">
+                    {weekday.slice(0, 2)}
+                  </span>
+                  <span
+                    className={cn(
+                      'flex h-8 w-full items-center justify-center rounded-lg text-[0.6875rem] font-semibold tabular-nums transition-colors duration-base ease-brand',
+                      total === 0 && 'bg-muted text-muted-foreground/60',
+                      total > 0 && ratio === 0 && 'bg-muted text-muted-foreground',
+                      total > 0 && ratio > 0 && ratio < 0.8 && 'bg-primary/15 text-primary',
+                      total > 0 && ratio >= 0.8 && 'bg-primary text-primary-foreground',
+                    )}
+                  >
+                    {total > 0 ? done : '–'}
                   </span>
                 </div>
-                <Progress value={pct} className="h-1.5" />
-              </Link>
-            );
-          })
-        )}
-      </div>
-    </div>
+              );
+            })}
+          </div>
+        </PanelBody>
+      </Panel>
+
+      {missions.length > 0 && (
+        <>
+          <SectionLabel>{t('missions.title')}</SectionLabel>
+          <div className="space-y-3">
+            {missions.map((m) => {
+              const p = computeProgress(m);
+              const pct = Math.min(100, (p.progress / m.days) * 100);
+              const label = getActionLabel(m, t, tHabit, lang);
+              return (
+                <Panel key={m.id} to="/missions">
+                  <div className="px-4 py-3.5">
+                    <div className="mb-2.5 flex items-start gap-2.5">
+                      <Target className="mt-0.5 h-4 w-4 shrink-0 text-primary" strokeWidth={1.75} />
+                      <p className="flex-1 text-[0.8125rem] leading-snug text-foreground">
+                        {t('missions.iIntendTo')}{' '}
+                        <span className="font-medium text-primary">{label}</span>{' '}
+                        {t('missions.for')} {m.days} {t('missions.days')}
+                      </p>
+                      <span className="shrink-0 text-[0.8125rem] font-semibold tabular-nums text-muted-foreground">
+                        {p.progress}/{m.days}
+                      </span>
+                    </div>
+                    <Meter value={pct} aria-label={label} />
+                  </div>
+                </Panel>
+              );
+            })}
+          </div>
+        </>
+      )}
+
+      {missions.length === 0 && (
+        <Link
+          to="/missions"
+          className="mt-1 flex items-center justify-center gap-2 rounded-2xl border border-dashed border-border px-4 py-4 text-[0.8125rem] text-muted-foreground transition-colors duration-base ease-brand hover:border-primary/40 hover:text-foreground"
+        >
+          <Target className="h-4 w-4" strokeWidth={1.75} />
+          {t('missions.newMission')}
+        </Link>
+      )}
+    </Page>
   );
 }
