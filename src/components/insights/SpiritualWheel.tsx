@@ -1,4 +1,5 @@
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts';
+import { useTranslation } from '@/lib/i18n';
 
 interface SpiritualWheelProps {
   data: {
@@ -9,6 +10,7 @@ interface SpiritualWheelProps {
 }
 
 export function SpiritualWheel({ data }: SpiritualWheelProps) {
+  const { t } = useTranslation();
   return (
     <div className="gradient-card rounded-xl p-4 shadow-card border border-border/50">
       <div className="h-64">
@@ -23,7 +25,7 @@ export function SpiritualWheel({ data }: SpiritualWheelProps) {
               tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
             />
             <Radar
-              name="Din nivå"
+              name={t('insightsLabels.yourLevel')}
               dataKey="value"
               stroke="hsl(var(--primary))"
               fill="hsl(var(--primary))"
@@ -35,7 +37,7 @@ export function SpiritualWheel({ data }: SpiritualWheelProps) {
       </div>
       
       <p className="text-xs text-muted-foreground text-center mt-2">
-        Sträva efter en jämn, stor cirkel för balanserad ibadah
+        {t('insightsLabels.balanceHint')}
       </p>
     </div>
   );

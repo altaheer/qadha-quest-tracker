@@ -1,18 +1,24 @@
-import { Calendar, Clock, Pause, Play, Star } from 'lucide-react';
+import { Calendar, Check, Clock, Pause, Play, Star } from 'lucide-react';
 import { useTimeBoundHabits } from '@/hooks/useTimeBoundHabits';
 import { haptics } from '@/lib/haptics';
+import { useTranslation } from '@/lib/i18n';
+import { localeFor } from '@/lib/date';
+import { useUserPrefs } from '@/hooks/useUserPrefs';
+import { cn } from '@/lib/utils';
+import { Panel, PanelHeader } from '@/components/common';
 
 interface TimeBoundSectionProps {
   selectedDate?: Date;
 }
 
-const typeLabels: Record<string, { label: string; color: string }> = {
-  weekly: { label: 'Veckovis', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
-  monthly: { label: 'Månadsvis', color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
-  yearly: { label: 'Årligen', color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
-};
-
+/**
+ * Deeds tied to a date in the Hijri calendar — Jumuʿah, the sunnah fasts, the
+ * two Eids. Split into what is live today, what is coming, and what the user
+ * has paused, so the section stays short on an ordinary day.
+ */
 export function TimeBoundSection({ selectedDate }: TimeBoundSectionProps) {
+  const { t, lang } = useTranslation();
+  const { showArabic } = useUserPrefs();
   const {
     events,
     completedEvents,
@@ -23,159 +29,156 @@ export function TimeBoundSection({ selectedDate }: TimeBoundSectionProps) {
     hijriMonthName,
   } = useTimeBoundHabits(selectedDate);
 
-  // Separate active and upcoming events
-  const activeEvents = events.filter(e => e.isActive && !pausedEvents.has(e.id));
-  const upcomingEvents = events.filter(e => !e.isActive && !pausedEvents.has(e.id));
-  const pausedEventsList = events.filter(e => pausedEvents.has(e.id));
+  const active = events.filter((e) => e.isActive && !pausedEvents.has(e.id));
+  const upcoming = events.filter((e) => !e.isActive && !pausedEvents.has(e.id));
+  const paused = events.filter((e) => pausedEvents.has(e.id));
+
+  /**
+   * "in 5 days" / "om 5 dagar" / "5 gün sonra" — Intl already knows how every
+   * language phrases this, so no translated strings are needed.
+   */
+  const relativeDays = new Intl.RelativeTimeFormat(localeFor(lang), { numeric: 'auto' });
+
+  const nameOf = (id: string, fallback: string) => {
+    const translated = t(`timeBoundNames.${id}` as never);
+    return translated === `timeBoundNames.${id}` ? fallback : translated;
+  };
+
+  const GroupLabel = ({ icon: Icon, children }: { icon: typeof Star; children: string }) => (
+    <p className="flex items-center gap-1.5 px-4 pb-1.5 pt-3 text-[0.75rem] font-medium text-muted-foreground">
+      <Icon className="h-3 w-3" strokeWidth={2} />
+      {children}
+    </p>
+  );
 
   return (
-    <div className="rounded-2xl gradient-card shadow-card border border-border/50 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-3 p-4 border-b border-border/30">
-        <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center">
-          <Calendar className="h-5 w-5 text-accent" />
-        </div>
-        <div className="flex-1">
-          <h3 className="font-display font-semibold text-foreground">
-            Tidsbundna gärningar
-          </h3>
-          <p className="text-xs text-muted-foreground">
-            {hijriDate.day} {hijriMonthName?.ar} {hijriDate.year} AH
-          </p>
-        </div>
-      </div>
+    <Panel>
+      <PanelHeader
+        icon={Calendar}
+        label={t('timeBound.title')}
+        value={
+          <span className="text-[0.75rem] font-normal text-muted-foreground">
+            {hijriDate.day} {hijriMonthName?.ar} {hijriDate.year}
+          </span>
+        }
+      />
 
-      <div className="p-2">
-        {/* Active Today */}
-        {activeEvents.length > 0 && (
-          <div className="mb-3">
-            <p className="text-xs font-medium text-primary px-3 py-1 flex items-center gap-1">
-              <Star className="h-3 w-3" /> Aktiva idag
-            </p>
-            {activeEvents.map((event) => (
-              <div
-                key={event.id}
-                className={`flex items-center gap-2 p-3 rounded-xl transition-all ${
-                  completedEvents.has(event.id)
-                    ? 'bg-primary/10'
-                    : 'hover:bg-muted/50'
-                }`}
-              >
-                <button
-                  onClick={() => { haptics.light(); toggleEvent(event.id); }}
-                  className="flex-1 flex items-center gap-3 text-left"
-                >
-                  <div
-                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                      completedEvents.has(event.id)
-                        ? 'bg-primary border-primary'
-                        : 'border-muted-foreground/30'
-                    }`}
+      <div className="border-t border-border/70 pb-2">
+        {active.length > 0 && (
+          <>
+            <GroupLabel icon={Star}>{t('timeBound.today')}</GroupLabel>
+            {active.map((event) => {
+              const done = completedEvents.has(event.id);
+              return (
+                <div key={event.id} className="flex items-center gap-2 px-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      haptics.light();
+                      toggleEvent(event.id);
+                    }}
+                    aria-pressed={done}
+                    className="flex flex-1 items-center gap-3 rounded-xl px-2 py-2.5 text-start transition-colors duration-base ease-brand hover:bg-muted/50"
                   >
-                    {completedEvents.has(event.id) && (
-                      <svg className="w-3 h-3 text-primary-foreground" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <span className={`text-sm ${completedEvents.has(event.id) ? 'text-primary font-medium' : 'text-foreground'}`}>
-                      {event.name}
+                    <span
+                      className={cn(
+                        'flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors duration-base ease-brand',
+                        done ? 'border-primary bg-primary' : 'border-border',
+                      )}
+                    >
+                      {done && (
+                        <Check className="h-3 w-3 text-primary-foreground" strokeWidth={3} />
+                      )}
                     </span>
-                    <span className="text-xs text-muted-foreground block">{event.arabicName}</span>
-                  </div>
-                  <div className="text-right">
-                    <span className={`text-xs font-medium ${completedEvents.has(event.id) ? 'text-primary' : 'text-muted-foreground'}`}>
-                      +{event.points}p
-                    </span>
-                    <span className={`text-xs block ${typeLabels[event.type].color} px-1.5 py-0.5 rounded mt-0.5`}>
-                      {typeLabels[event.type].label}
-                    </span>
-                  </div>
-                </button>
-                <button
-                  onClick={() => togglePause(event.id)}
-                  className="p-1.5 rounded-lg hover:bg-muted/70 text-muted-foreground hover:text-foreground transition-colors"
-                  title="Pausa"
-                >
-                  <Pause className="h-4 w-4" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Upcoming Events */}
-        {upcomingEvents.length > 0 && (
-          <div className="mb-3">
-            <p className="text-xs font-medium text-muted-foreground px-3 py-1 flex items-center gap-1">
-              <Clock className="h-3 w-3" /> Kommande
-            </p>
-            {upcomingEvents.map((event) => (
-              <div
-                key={event.id}
-                className="flex items-center gap-2 p-3 rounded-xl opacity-60"
-              >
-                <div className="flex-1 flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full border-2 border-dashed border-muted-foreground/30" />
-                  <div className="flex-1">
-                    <span className="text-sm text-muted-foreground line-through">
-                      {event.name}
-                    </span>
-                    <span className="text-xs text-muted-foreground/70 block">{event.arabicName}</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-xs text-muted-foreground">
-                      {event.nextDate}
-                    </span>
-                    {event.hijriDate && (
-                      <span className="text-xs text-muted-foreground/70 block">
-                        {event.hijriDate}
+                    <span className="min-w-0 flex-1">
+                      <span
+                        className={cn(
+                          'block truncate text-[0.9375rem]',
+                          done ? 'font-medium text-primary' : 'text-foreground',
+                        )}
+                      >
+                        {nameOf(event.id, event.name)}
                       </span>
+                      {showArabic && (
+                        <span className="block truncate text-xs text-muted-foreground" dir="rtl">
+                          {event.arabicName}
+                        </span>
+                      )}
+                    </span>
+                    <span
+                      className={cn(
+                        'shrink-0 text-[0.8125rem] font-semibold tabular-nums',
+                        done ? 'text-primary' : 'text-muted-foreground/70',
+                      )}
+                    >
+                      +{event.points}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => togglePause(event.id)}
+                    aria-label={t('habits.pauseHint')}
+                    className="rounded-lg p-1.5 text-muted-foreground/50 transition-colors duration-base ease-brand hover:bg-muted hover:text-foreground"
+                  >
+                    <Pause className="h-4 w-4" />
+                  </button>
+                </div>
+              );
+            })}
+          </>
+        )}
+
+        {upcoming.length > 0 && (
+          <>
+            <GroupLabel icon={Clock}>{t('timeBound.upcoming')}</GroupLabel>
+            {upcoming.map((event) => (
+              <div key={event.id} className="flex items-center gap-2 px-2">
+                <div className="flex flex-1 items-center gap-3 px-2 py-2.5">
+                  <span className="h-5 w-5 shrink-0 rounded-full border-2 border-dashed border-border" />
+                  <span className="min-w-0 flex-1 truncate text-[0.9375rem] text-muted-foreground">
+                    {nameOf(event.id, event.name)}
+                  </span>
+                  <span className="shrink-0 text-end text-xs text-muted-foreground/80">
+                    {relativeDays.format(event.daysUntil, 'day')}
+                    {event.hijriDate && (
+                      <span className="block text-muted-foreground/60">{event.hijriDate}</span>
                     )}
-                  </div>
+                  </span>
                 </div>
                 <button
+                  type="button"
                   onClick={() => togglePause(event.id)}
-                  className="p-1.5 rounded-lg hover:bg-muted/70 text-muted-foreground hover:text-foreground transition-colors"
-                  title="Pausa"
+                  aria-label={t('habits.pauseHint')}
+                  className="rounded-lg p-1.5 text-muted-foreground/40 transition-colors duration-base ease-brand hover:bg-muted hover:text-foreground"
                 >
                   <Pause className="h-4 w-4" />
                 </button>
               </div>
             ))}
-          </div>
+          </>
         )}
 
-        {/* Paused Events */}
-        {pausedEventsList.length > 0 && (
-          <div className="mt-2 pt-2 border-t border-border/30">
-            <p className="text-xs text-muted-foreground px-3 mb-1">Pausade</p>
-            {pausedEventsList.map((event) => (
-              <div
-                key={event.id}
-                className="flex items-center gap-2 p-3 rounded-xl opacity-40"
-              >
-                <div className="flex-1 flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full border-2 border-dashed border-muted-foreground/30" />
-                  <div className="flex-1">
-                    <span className="text-sm text-muted-foreground line-through">
-                      {event.name}
-                    </span>
-                  </div>
-                </div>
+        {paused.length > 0 && (
+          <>
+            <GroupLabel icon={Pause}>{t('habits.paused')}</GroupLabel>
+            {paused.map((event) => (
+              <div key={event.id} className="flex items-center gap-2 px-2">
+                <span className="flex-1 truncate px-2 py-2.5 text-[0.9375rem] text-muted-foreground/60">
+                  {nameOf(event.id, event.name)}
+                </span>
                 <button
+                  type="button"
                   onClick={() => togglePause(event.id)}
-                  className="p-1.5 rounded-lg hover:bg-muted/70 text-muted-foreground hover:text-primary transition-colors"
-                  title="Aktivera"
+                  aria-label={t('habits.activateHint')}
+                  className="rounded-lg p-1.5 text-muted-foreground/50 transition-colors duration-base ease-brand hover:bg-muted hover:text-primary"
                 >
                   <Play className="h-4 w-4" />
                 </button>
               </div>
             ))}
-          </div>
+          </>
         )}
       </div>
-    </div>
+    </Panel>
   );
 }

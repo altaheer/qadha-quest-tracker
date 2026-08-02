@@ -86,7 +86,7 @@ export default function MissionsPage() {
 
   return (
     <div
-      className="container max-w-lg mx-auto px-4 py-6 space-y-6 bottom-nav-offset"
+      className="container mx-auto max-w-lg space-y-5 px-5 pb-8 pt-6"
       dir={isRTL ? 'rtl' : 'ltr'}
       style={arabicStyle}
     >

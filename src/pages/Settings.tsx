@@ -11,6 +11,7 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { useTranslation } from '@/lib/i18n';
 import { useUserPrefs } from '@/hooks/useUserPrefs';
 import { resetOnboarding } from '@/components/Onboarding';
+import { Page, PageHeader } from '@/components/common';
 
 export default function Settings() {
   const { t } = useTranslation();
@@ -59,13 +60,10 @@ export default function Settings() {
   };
 
   return (
-    <div className="container max-w-lg mx-auto px-4 py-6">
-      <div className="mb-6">
-        <h2 className="font-display text-2xl font-bold text-foreground mb-1">{t('settings.title')}</h2>
-        <p className="text-muted-foreground text-sm">{t('settings.subtitle')}</p>
-      </div>
+    <Page>
+      <PageHeader title={t('settings.title')} subtitle={t('settings.subtitle')} />
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         <LanguageSelector />
 
 
@@ -123,7 +121,7 @@ export default function Settings() {
                 value={autoMarkMissedTime}
                 onChange={(e) => setAutoMarkMissedTime(e.target.value || '00:00')}
                 disabled={!autoMarkMissed}
-                className="w-28"
+                className="w-[7.5rem] shrink-0"
               />
             </div>
           </CardContent>
@@ -183,6 +181,6 @@ export default function Settings() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </Page>
   );
 }

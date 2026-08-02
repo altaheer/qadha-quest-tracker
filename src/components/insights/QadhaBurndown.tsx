@@ -1,5 +1,7 @@
 import { TrendingDown, Calendar } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { useTranslation } from '@/lib/i18n';
+import { localeFor } from '@/lib/date';
 
 interface QadhaBurndownProps {
   totalQadha: number;
@@ -10,6 +12,12 @@ interface QadhaBurndownProps {
 }
 
 export function QadhaBurndown({ totalQadha, projection }: QadhaBurndownProps) {
+  const { t, lang } = useTranslation();
+
+  /** Intl already knows how each language pluralises "3 months" / "45 days". */
+  const duration = (value: number, unit: 'month' | 'day') =>
+    new Intl.NumberFormat(localeFor(lang), { style: 'unit', unit, unitDisplay: 'long' }).format(value);
+
   return (
     <div className="gradient-card rounded-xl p-4 shadow-card border border-border/50">
       <div className="flex items-center gap-3 mb-4">
@@ -18,9 +26,9 @@ export function QadhaBurndown({ totalQadha, projection }: QadhaBurndownProps) {
         </div>
         <div>
           <p className="font-display text-xl font-bold text-foreground">
-            {totalQadha} böner
+            {totalQadha.toLocaleString(localeFor(lang))}
           </p>
-          <p className="text-xs text-muted-foreground">Kvarstående Qadha</p>
+          <p className="text-xs text-muted-foreground">{t('insightsLabels.qadhaRemaining')}</p>
         </div>
       </div>
       
@@ -29,17 +37,19 @@ export function QadhaBurndown({ totalQadha, projection }: QadhaBurndownProps) {
           <div className="flex items-center gap-2 text-sm">
             <Calendar className="h-4 w-4 text-muted-foreground" />
             <span className="text-muted-foreground">
-              Skuldfri om ca{' '}
+              {t('insightsLabels.clearIn')}{' '}
               <span className="font-semibold text-foreground">
-                {projection.months > 1 ? `${projection.months} månader` : `${projection.daysToComplete} dagar`}
-              </span>
-              {' '}med nuvarande takt
+                {projection.months > 1
+                  ? duration(projection.months, 'month')
+                  : duration(projection.daysToComplete, 'day')}
+              </span>{' '}
+              {t('insightsLabels.atCurrentPace')}
             </span>
           </div>
           
           <div className="space-y-1">
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Framsteg</span>
+              <span>{t('insightsLabels.progress')}</span>
               <span>0 / {totalQadha}</span>
             </div>
             <Progress value={0} className="h-2" />
@@ -49,7 +59,7 @@ export function QadhaBurndown({ totalQadha, projection }: QadhaBurndownProps) {
       
       {!projection && (
         <p className="text-sm text-muted-foreground">
-          Ställ in ett dagligt Qadha-mål för att se prognos.
+          {t('insightsLabels.setGoal')}
         </p>
       )}
     </div>

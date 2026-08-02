@@ -113,7 +113,6 @@ export function useTimeBoundHabits(selectedDate?: Date) {
     points: 4,
     isActive: isFriday,
     daysUntil: isFriday ? 0 : daysToFriday,
-    nextDate: isFriday ? 'Idag!' : `om ${daysToFriday} dagar`,
   });
 
   // Fasta måndag
@@ -128,7 +127,6 @@ export function useTimeBoundHabits(selectedDate?: Date) {
     points: 12,
     isActive: isMonday,
     daysUntil: isMonday ? 0 : daysToMonday,
-    nextDate: isMonday ? 'Idag!' : `om ${daysToMonday} dagar`,
   });
 
   // Fasta torsdag
@@ -143,7 +141,6 @@ export function useTimeBoundHabits(selectedDate?: Date) {
     points: 12,
     isActive: isThursday,
     daysUntil: isThursday ? 0 : daysToThursday,
-    nextDate: isThursday ? 'Idag!' : `om ${daysToThursday} dagar`,
   });
 
   // === MONTHLY EVENTS (Ayyam al-Beed) ===
@@ -165,9 +162,6 @@ export function useTimeBoundHabits(selectedDate?: Date) {
     points: 12,
     isActive: isAyyamAlBeed,
     daysUntil: isAyyamAlBeed ? 0 : daysToAyyamAlBeed,
-    nextDate: isAyyamAlBeed 
-      ? `Idag! (${hijriDate.day} ${hijriMonths[hijriDate.month - 1]?.ar})`
-      : `om ${daysToAyyamAlBeed} dagar`,
     hijriDate: `13-15 ${hijriMonths[hijriDate.month - 1]?.ar || ''}`,
   });
 
@@ -185,9 +179,6 @@ export function useTimeBoundHabits(selectedDate?: Date) {
     points: 20,
     isActive: isRamadan,
     daysUntil: isRamadan ? 0 : daysToRamadan,
-    nextDate: isRamadan 
-      ? `Pågår! (dag ${hijriDate.day})` 
-      : `om ${daysToRamadan} dagar`,
     hijriDate: '1-29/30 Ramadan',
   });
 
@@ -203,7 +194,6 @@ export function useTimeBoundHabits(selectedDate?: Date) {
     points: 5,
     isActive: isEidFitr,
     daysUntil: isEidFitr ? 0 : daysToEidFitr,
-    nextDate: isEidFitr ? 'Idag!' : `om ${daysToEidFitr} dagar`,
     hijriDate: '1 Shawwāl',
   });
 
@@ -219,7 +209,6 @@ export function useTimeBoundHabits(selectedDate?: Date) {
     points: 15,
     isActive: isArafah,
     daysUntil: isArafah ? 0 : daysToArafah,
-    nextDate: isArafah ? 'Idag!' : `om ${daysToArafah} dagar`,
     hijriDate: '9 Dhul-Ḥijjah',
   });
 
@@ -235,7 +224,6 @@ export function useTimeBoundHabits(selectedDate?: Date) {
     points: 5,
     isActive: isEidAdha,
     daysUntil: isEidAdha ? 0 : daysToEidAdha,
-    nextDate: isEidAdha ? 'Idag!' : `om ${daysToEidAdha} dagar`,
     hijriDate: '10 Dhul-Ḥijjah',
   });
 
@@ -251,7 +239,6 @@ export function useTimeBoundHabits(selectedDate?: Date) {
     points: 10,
     isActive: isAshura,
     daysUntil: isAshura ? 0 : daysToAshura,
-    nextDate: isAshura ? 'Idag!' : `om ${daysToAshura} dagar`,
     hijriDate: '10 Muḥarram',
   });
 

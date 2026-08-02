@@ -9,8 +9,9 @@ import { SpiritualWheel } from '@/components/insights/SpiritualWheel';
 import { AchievementsSection } from '@/components/AchievementsSection';
 import { OneTimeTooltip } from '@/components/OneTimeTooltip';
 import { useMissions } from '@/hooks/useMissions';
-import { Target } from 'lucide-react';
+import { BarChart3, Target } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
+import { EmptyState, Page, PageHeader } from '@/components/common';
 
 export default function Insights() {
   const data = useInsightsData();
@@ -21,17 +22,10 @@ export default function Insights() {
   const hasData = data.currentStreak > 0 || data.weeklyData.some((d: any) => (d.points ?? d.value ?? 0) > 0);
 
   return (
-    <div className="container max-w-lg mx-auto px-4 py-6 space-y-6 bottom-nav-offset">
-      <div className="text-center mb-6">
-        <h1 className="font-display text-2xl font-bold text-foreground mb-1">{t('insights.title')}</h1>
-        <p className="text-sm text-muted-foreground">{t('insights.subtitle')}</p>
-      </div>
+    <Page className="space-y-5">
+      <PageHeader title={t('insights.title')} subtitle={t('insights.subtitle')} />
 
-      {!hasData && (
-        <div className="rounded-2xl border border-border bg-card p-6 text-center">
-          <p className="text-sm text-muted-foreground">{t('insights.empty')}</p>
-        </div>
-      )}
+      {!hasData && <EmptyState icon={BarChart3} title={t('insights.empty')} />}
 
       <HighlightCards streak={data.currentStreak} bestDay={data.bestDay} quranPages={0} />
 
@@ -88,6 +82,6 @@ export default function Insights() {
       </section>
 
       <AchievementsSection />
-    </div>
+    </Page>
   );
 }

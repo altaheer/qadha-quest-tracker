@@ -1,4 +1,5 @@
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { useTranslation } from '@/lib/i18n';
 
 interface PrayerBalanceChartProps {
   data: {
@@ -13,16 +14,17 @@ interface PrayerBalanceChartProps {
 }
 
 export function PrayerBalanceChart({ data }: PrayerBalanceChartProps) {
+  const { t } = useTranslation();
   const chartData = [
-    { name: 'I tid', value: data.onTime, color: 'hsl(var(--primary))' },
-    { name: 'Sen', value: data.late, color: 'hsl(var(--accent))' },
-    { name: 'Missad', value: data.missed, color: 'hsl(var(--destructive) / 0.7)' },
+    { name: t('status.onTime'), value: data.onTime, color: 'hsl(var(--primary))' },
+    { name: t('status.late'), value: data.late, color: 'hsl(var(--accent))' },
+    { name: t('status.missed'), value: data.missed, color: 'hsl(var(--destructive) / 0.7)' },
   ].filter(d => d.value > 0);
 
   if (data.total === 0) {
     return (
       <div className="gradient-card rounded-xl p-4 shadow-card border border-border/50 text-center">
-        <p className="text-muted-foreground text-sm">Ingen böndata tillgänglig</p>
+        <p className="text-muted-foreground text-sm">{t('insightsLabels.noPrayerData')}</p>
       </div>
     );
   }

@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { Check, Clock, X, ChevronDown, ChevronUp, Flame, Users, Info } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Check, Clock, X, ChevronDown, Flame, Users, Info, type LucideIcon } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { PrayerStatus, SunnahItem, PrayerStreak } from '@/hooks/usePrayerTracking';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -37,13 +36,22 @@ interface DailyPrayerCardProps {
   delay?: number;
 }
 
-const statusBg: Record<PrayerStatus, { bg: string; border: string; icon: any }> = {
-  pending: { bg: 'bg-card', border: 'border-border/50', icon: null },
-  'ontime': { bg: 'bg-primary/10', border: 'border-primary/30', icon: Check },
-  jamaah: { bg: 'bg-accent/15', border: 'border-accent/40', icon: Users },
-  late: { bg: 'bg-orange-500/10', border: 'border-orange-500/30', icon: Clock },
-  missed: { bg: 'bg-rose-500/10', border: 'border-rose-500/20', icon: X },
-};
+/**
+ * The four ways a prayer can be marked. Each carries its own selected colour,
+ * but only when chosen — the card itself stays neutral so a list of five does
+ * not turn into a patchwork.
+ */
+const OPTIONS: {
+  status: Exclude<PrayerStatus, 'pending'>;
+  labelKey: string;
+  icon: LucideIcon;
+  selected: string;
+}[] = [
+  { status: 'ontime', labelKey: 'status.onTime', icon: Check, selected: 'bg-primary text-primary-foreground border-primary' },
+  { status: 'jamaah', labelKey: 'status.jamaah', icon: Users, selected: 'bg-accent text-accent-foreground border-accent' },
+  { status: 'late', labelKey: 'status.late', icon: Clock, selected: 'bg-accent/20 text-accent-foreground border-accent/40' },
+  { status: 'missed', labelKey: 'status.missed', icon: X, selected: 'bg-muted-foreground/15 text-muted-foreground border-muted-foreground/25' },
+];
 
 export function DailyPrayerCard({
   name,
@@ -60,11 +68,8 @@ export function DailyPrayerCard({
   const { t, lang } = useTranslation();
   const { showArabic } = useUserPrefs();
   const [isOpen, setIsOpen] = useState(false);
-  const config = statusBg[status];
-  const completedSunnah = sunnahItems.filter(s => s.completed).length;
-
-  const StatusIcon = config.icon;
-  const isGood = status === 'ontime' || status === 'jamaah';
+  const completedSunnah = sunnahItems.filter((s) => s.completed).length;
+  const marked = status !== 'pending';
 
   const handleMark = (next: PrayerStatus) => {
     haptics.medium();
@@ -75,188 +80,153 @@ export function DailyPrayerCard({
     }
   };
 
-  const handleSunnah = (id: string) => {
-    haptics.light();
-    onToggleSunnah(id);
-  };
-
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{
-        opacity: 1,
-        y: 0,
-        scale: isGood ? [1, 1.015, 1] : 1,
-      }}
-      transition={{
-        opacity: { duration: 0.3, delay: delay / 1000 },
-        y: { duration: 0.3, delay: delay / 1000 },
-        scale: { duration: 0.45, ease: 'easeOut' },
-      }}
-      className={cn(
-        'rounded-2xl p-4 shadow-card border card-lift',
-        config.bg,
-        config.border,
-        isGood && 'glow-primary'
-      )}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.42, delay: delay / 1000, ease: [0.32, 0.72, 0, 1] }}
+      className="surface px-4 py-3.5"
     >
-      {/* Header */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-3">
-          <AnimatePresence mode="wait">
-            {StatusIcon && (
-              <motion.div
-                key={status}
-                initial={{ opacity: 0, y: 6, scale: 0.8 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -4, scale: 0.8 }}
-                transition={{ duration: 0.25, ease: 'easeOut' }}
-                className={cn(
-                  'p-1.5 rounded-full',
-                  isGood ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'
-                )}
-              >
-                <StatusIcon className="h-4 w-4" />
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <div>
-            <h3 className="font-display text-lg font-semibold text-foreground">{name}</h3>
-            {showArabic && (
-              <p className="text-muted-foreground text-sm" dir="rtl">{arabicName}</p>
-            )}
-          </div>
+      <div className="mb-3 flex items-center gap-3">
+        {/* A quiet dot rather than a badge — presence is the signal. */}
+        <span
+          className={cn(
+            'h-2 w-2 shrink-0 rounded-full transition-colors duration-base ease-brand',
+            status === 'ontime' && 'bg-primary',
+            status === 'jamaah' && 'bg-accent',
+            status === 'late' && 'bg-accent/50',
+            status === 'missed' && 'bg-muted-foreground/40',
+            !marked && 'bg-border',
+          )}
+        />
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate font-display text-[1.0625rem] font-semibold text-foreground">
+            {name}
+          </h3>
+          {showArabic && (
+            <p className="truncate text-[0.8125rem] text-muted-foreground" dir="rtl">
+              {arabicName}
+            </p>
+          )}
         </div>
-        
-        <div className="flex items-center gap-2">
+
+        <div className="flex shrink-0 items-center gap-2.5">
           {streak.current > 0 && (
-            <div className="flex items-center gap-1 text-accent">
-              <Flame className="h-4 w-4" />
-              <span className="text-sm font-medium">{streak.current}</span>
-            </div>
+            <span className="flex items-center gap-1 text-accent" title={t('prayers.streak')}>
+              <Flame className="h-3.5 w-3.5" strokeWidth={2} />
+              <span className="text-[0.8125rem] font-medium tabular-nums">{streak.current}</span>
+            </span>
           )}
           {points > 0 && (
-            <div className="flex flex-col items-end">
-              <div className="bg-primary/10 text-primary text-sm font-semibold px-2 py-1 rounded-lg">
-                +{points}p
-              </div>
-              {comboMultiplier > 1 && (
-                <span className="text-[10px] text-muted-foreground mt-0.5">
-                  {status === 'jamaah' ? '27' : status === 'ontime' ? '10' : '6'} × {comboMultiplier.toFixed(1)}x
-                </span>
-              )}
-            </div>
+            <span
+              className="text-[0.8125rem] font-semibold tabular-nums text-primary"
+              title={comboMultiplier > 1 ? `× ${comboMultiplier.toFixed(1)}` : undefined}
+            >
+              +{points}
+            </span>
           )}
         </div>
       </div>
 
-      {/* Status Buttons */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3 [&>button]:min-h-11">
-        <Button
-          variant={status === 'ontime' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => handleMark('ontime')}
-          className={cn(
-            'flex-1 gap-1.5',
-            status === 'ontime' && 'bg-primary hover:bg-primary/90'
-          )}
-        >
-          <Check className="h-3.5 w-3.5" />
-          {t('status.onTime')}
-        </Button>
-        <Button
-          variant={status === 'jamaah' ? 'gold' : 'outline'}
-          size="sm"
-          onClick={() => handleMark('jamaah')}
-          className="flex-1 gap-1.5"
-        >
-          <Users className="h-3.5 w-3.5" />
-          {t('status.jamaah')}
-        </Button>
-        <Button
-          variant={status === 'late' ? 'gold' : 'outline'}
-          size="sm"
-          onClick={() => handleMark('late')}
-          className="flex-1 gap-1.5"
-        >
-          <Clock className="h-3.5 w-3.5" />
-          {t('status.late')}
-        </Button>
-        <Button
-          variant={status === 'missed' ? 'secondary' : 'outline'}
-          size="sm"
-          onClick={() => handleMark('missed')}
-          className={cn(
-            'flex-1 gap-1.5',
-            status === 'missed' && 'bg-muted-foreground/20 text-muted-foreground'
-          )}
-        >
-          <X className="h-3.5 w-3.5" />
-          {t('status.missed')}
-        </Button>
+      <div role="group" aria-label={name} className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
+        {OPTIONS.map((option) => {
+          const active = status === option.status;
+          return (
+            <button
+              key={option.status}
+              type="button"
+              aria-pressed={active}
+              onClick={() => handleMark(option.status)}
+              className={cn(
+                'flex min-h-11 items-center justify-center gap-1.5 rounded-xl border px-2',
+                'text-[0.8125rem] font-medium transition-colors duration-base ease-brand',
+                active
+                  ? option.selected
+                  : 'border-border bg-transparent text-muted-foreground hover:bg-muted',
+              )}
+            >
+              <option.icon className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
+              <span className="truncate">{t(option.labelKey as never)}</span>
+            </button>
+          );
+        })}
       </div>
 
-      {/* Sunnah */}
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <CollapsibleTrigger asChild>
-          <button className="flex items-center justify-between w-full text-sm text-muted-foreground hover:text-foreground transition-colors py-2">
-            <span className="flex items-center gap-2">
-              Sunnah
-              <span className="text-xs bg-muted px-1.5 py-0.5 rounded-full">
-                {completedSunnah}/{sunnahItems.length}
-              </span>
-            </span>
-            {isOpen ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
-          </button>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="space-y-3 pt-3">
-          {sunnahItems.map((item) => (
-            <div
-              key={item.id}
-              className="flex items-center gap-2 p-3 rounded-lg hover:bg-muted/50 transition-colors tap-target"
+      {sunnahItems.length > 0 && (
+        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+          <CollapsibleTrigger asChild>
+            <button
+              type="button"
+              className="mt-1 flex w-full items-center justify-between py-2.5 text-[0.8125rem] text-muted-foreground transition-colors duration-base ease-brand hover:text-foreground"
             >
-              <label className="flex-1 flex items-center gap-4 cursor-pointer">
-                <Checkbox
-                  checked={item.completed}
-                  onCheckedChange={() => handleSunnah(item.id)}
-                  className="h-5 w-5"
-                />
-                <div className="flex-1 flex items-center justify-between gap-2">
-                  <span className={cn(
-                    'text-sm',
-                    item.completed && 'text-muted-foreground line-through'
-                  )}>
-                    {item.name}
-                  </span>
-                  {showArabic && (
-                    <span className="text-xs text-muted-foreground" dir="rtl">
-                      {item.arabicName}
+              <span className="flex items-center gap-2">
+                {t('home.sunnahLabel')}
+                <span className="tabular-nums text-muted-foreground/70">
+                  {completedSunnah}/{sunnahItems.length}
+                </span>
+              </span>
+              <ChevronDown
+                className={cn(
+                  'h-4 w-4 transition-transform duration-base ease-brand',
+                  isOpen && 'rotate-180',
+                )}
+              />
+            </button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-0.5 pb-1">
+            {sunnahItems.map((item) => (
+              <div
+                key={item.id}
+                className="flex items-center gap-2 rounded-xl px-1 py-1.5 transition-colors duration-base ease-brand hover:bg-muted/60"
+              >
+                <label className="tap-target flex flex-1 cursor-pointer items-center gap-3">
+                  <Checkbox
+                    checked={item.completed}
+                    onCheckedChange={() => {
+                      haptics.light();
+                      onToggleSunnah(item.id);
+                    }}
+                    className="h-[1.15rem] w-[1.15rem]"
+                  />
+                  <span className="flex flex-1 items-center justify-between gap-2">
+                    <span
+                      className={cn(
+                        'text-[0.8125rem] leading-snug',
+                        item.completed ? 'text-muted-foreground line-through' : 'text-foreground',
+                      )}
+                    >
+                      {item.name}
                     </span>
-                  )}
-                </div>
-              </label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); haptics.light(); }}
-                    className="p-1.5 rounded-lg text-muted-foreground/60 hover:text-foreground hover:bg-muted/70 transition-colors"
-                    aria-label="Info"
-                  >
-                    <Info className="h-4 w-4" />
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent side="top" className="w-72">
-                  <HadithInfoContent id={item.id} />
-                </PopoverContent>
-              </Popover>
-            </div>
-          ))}
-        </CollapsibleContent>
-      </Collapsible>
+                    {showArabic && (
+                      <span className="shrink-0 text-xs text-muted-foreground" dir="rtl">
+                        {item.arabicName}
+                      </span>
+                    )}
+                  </span>
+                </label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        haptics.light();
+                      }}
+                      className="rounded-lg p-1.5 text-muted-foreground/50 transition-colors duration-base ease-brand hover:bg-muted hover:text-foreground"
+                      aria-label={t('hadith.source')}
+                    >
+                      <Info className="h-4 w-4" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent side="top" className="w-72">
+                    <HadithInfoContent id={item.id} />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            ))}
+          </CollapsibleContent>
+        </Collapsible>
+      )}
     </motion.div>
   );
 }

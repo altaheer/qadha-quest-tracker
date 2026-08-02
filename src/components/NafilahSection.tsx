@@ -1,97 +1,104 @@
-import { Moon, Sun, Sunrise, Sparkles } from 'lucide-react';
+import { Moon, Sun, Sunrise } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
 import { NafilahPrayer, NafilahDifficulty } from '@/hooks/useNafilahTracking';
 import { haptics } from '@/lib/haptics';
+import { useTranslation } from '@/lib/i18n';
+import { useUserPrefs } from '@/hooks/useUserPrefs';
+import { Panel, SectionLabel } from '@/components/common';
 
 interface NafilahSectionProps {
   prayers: NafilahPrayer[];
   onToggle: (id: string) => void;
 }
 
-const difficultyConfig: Record<NafilahDifficulty, { label: string; color: string; bgColor: string; icon: typeof Moon }> = {
-  hard: { label: 'Svår', color: 'text-red-400', bgColor: 'bg-red-500/10', icon: Moon },
-  medium: { label: 'Medel', color: 'text-accent', bgColor: 'bg-accent/10', icon: Sunrise },
-  easy: { label: 'Lätt', color: 'text-primary', bgColor: 'bg-primary/10', icon: Sun },
-};
+/**
+ * Voluntary prayers, grouped by how demanding they are. Difficulty is carried
+ * by a single small icon rather than by tinting whole rows, so the list stays
+ * scannable as it grows.
+ */
+const GROUPS: { difficulty: NafilahDifficulty; labelKey: string; icon: typeof Moon; tone: string }[] = [
+  { difficulty: 'hard', labelKey: 'nafilah.hard', icon: Moon, tone: 'text-accent' },
+  { difficulty: 'medium', labelKey: 'nafilah.medium', icon: Sunrise, tone: 'text-accent/80' },
+  { difficulty: 'easy', labelKey: 'nafilah.easy', icon: Sun, tone: 'text-primary' },
+];
 
 export function NafilahSection({ prayers, onToggle }: NafilahSectionProps) {
-  const grouped: Record<NafilahDifficulty, NafilahPrayer[]> = {
-    hard: prayers.filter(p => p.difficulty === 'hard'),
-    medium: prayers.filter(p => p.difficulty === 'medium'),
-    easy: prayers.filter(p => p.difficulty === 'easy'),
-  };
-
-  const groups: { difficulty: NafilahDifficulty; title: string }[] = [
-    { difficulty: 'hard', title: 'Svåra – Kräver extra ansträngning' },
-    { difficulty: 'medium', title: 'Medel – Kräver planering' },
-    { difficulty: 'easy', title: 'Lätta – Vanebildande' },
-  ];
+  const { t } = useTranslation();
+  const { showArabic } = useUserPrefs();
 
   return (
-    <div className="mt-8">
-      <div className="flex items-center gap-2 mb-4">
-        <Sparkles className="h-5 w-5 text-accent" />
-        <h3 className="font-display text-xl font-bold text-foreground">Nafila-böner</h3>
-      </div>
-      <p className="text-muted-foreground text-sm mb-4">
-        Frivilliga böner – svårare böner ger fler poäng
+    <section className="pt-4">
+      <SectionLabel>{t('nafilah.title')}</SectionLabel>
+      <p className="px-1 pb-3 text-[0.8125rem] leading-relaxed text-muted-foreground">
+        {t('nafilah.subtitle')}
       </p>
 
-      <div className="space-y-6">
-        {groups.map(({ difficulty, title }) => {
-          const config = difficultyConfig[difficulty];
-          const Icon = config.icon;
+      <div className="space-y-5">
+        {GROUPS.map(({ difficulty, labelKey, icon: Icon, tone }) => {
+          const group = prayers.filter((p) => p.difficulty === difficulty);
+          if (group.length === 0) return null;
           return (
             <div key={difficulty}>
-              <div className="flex items-center gap-2 mb-3">
-                <Icon className={cn('h-4 w-4', config.color)} />
-                <h4 className={cn('text-sm font-semibold', config.color)}>{title}</h4>
+              <div className="flex items-center gap-2 px-1 pb-2">
+                <Icon className={cn('h-3.5 w-3.5', tone)} strokeWidth={2} />
+                <h3 className="text-[0.8125rem] font-medium text-muted-foreground">
+                  {t(labelKey as never)}
+                </h3>
               </div>
-              <div className="space-y-2">
-                {grouped[difficulty].map((prayer) => (
+
+              <Panel className="divide-y divide-border/70">
+                {group.map((prayer) => (
                   <label
                     key={prayer.id}
-                    className={cn(
-                      'flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all duration-200',
-                      prayer.completed
-                        ? cn(config.bgColor, 'border-transparent')
-                        : 'bg-card border-border/50 hover:bg-muted/50'
-                    )}
+                    className="flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors duration-base ease-brand hover:bg-muted/40"
                   >
                     <Checkbox
                       checked={prayer.completed}
-                      onCheckedChange={() => { haptics.light(); onToggle(prayer.id); }}
+                      onCheckedChange={() => {
+                        haptics.light();
+                        onToggle(prayer.id);
+                      }}
+                      className="h-[1.15rem] w-[1.15rem]"
                     />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className={cn(
-                          'text-sm font-medium',
-                          prayer.completed && 'line-through text-muted-foreground'
-                        )}>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-baseline gap-2">
+                        <span
+                          className={cn(
+                            'truncate text-[0.9375rem] font-medium',
+                            prayer.completed
+                              ? 'text-muted-foreground line-through'
+                              : 'text-foreground',
+                          )}
+                        >
                           {prayer.name}
                         </span>
-                        <span className="text-xs text-muted-foreground" dir="rtl">
-                          {prayer.arabicName}
-                        </span>
+                        {showArabic && (
+                          <span className="shrink-0 text-xs text-muted-foreground" dir="rtl">
+                            {prayer.arabicName}
+                          </span>
+                        )}
                       </div>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {prayer.description} · {prayer.rakaat}
+                      <p className="mt-0.5 text-[0.75rem] leading-snug text-muted-foreground">
+                        {t(`nafilahDesc.${prayer.id}` as never)}
+                        <span className="text-muted-foreground/70"> · {prayer.rakaat}</span>
                       </p>
                     </div>
-                    <div className={cn(
-                      'text-sm font-bold px-2 py-1 rounded-lg',
-                      config.bgColor, config.color
-                    )}>
-                      +{prayer.points}p
-                    </div>
+                    <span
+                      className={cn(
+                        'shrink-0 text-[0.8125rem] font-semibold tabular-nums',
+                        prayer.completed ? 'text-primary' : 'text-muted-foreground/70',
+                      )}
+                    >
+                      +{prayer.points}
+                    </span>
                   </label>
                 ))}
-              </div>
+              </Panel>
             </div>
           );
         })}
       </div>
-    </div>
+    </section>
   );
 }

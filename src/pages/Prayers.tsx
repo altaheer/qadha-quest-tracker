@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { addDays, isFuture, isToday as isTodayFn } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DailyPrayerCard } from '@/components/DailyPrayerCard';
-import { Progress } from '@/components/ui/progress';
 import { DateNavigator } from '@/components/DateNavigator';
 import { NafilahSection } from '@/components/NafilahSection';
 import { CompletionCelebration } from '@/components/CompletionCelebration';
@@ -15,6 +14,7 @@ import { haptics } from '@/lib/haptics';
 import { useTranslation } from '@/lib/i18n';
 import { AlertCircle, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Meter, Page, PageHeader } from '@/components/common';
 
 const COMBO_THRESHOLDS = [10, 30, 50, 100];
 
@@ -90,31 +90,21 @@ export default function Prayers() {
   const noneMarked = Object.values(prayers).every((p: any) => p.status === 'pending');
 
   return (
-    <div
-      className="container max-w-lg mx-auto px-4 py-6"
-      onTouchStart={swipe.onTouchStart}
-      onTouchEnd={swipe.onTouchEnd}
-    >
+    <Page>
+     <div onTouchStart={swipe.onTouchStart} onTouchEnd={swipe.onTouchEnd}>
       <CompletionCelebration show={celebrate} onDismiss={() => setCelebrate(false)} />
       <JumpToTodayButton show={!isToday} onClick={() => setSelectedDate(new Date())} />
 
-      <div className="mb-6">
-        <h2 className="font-display text-2xl font-bold text-foreground mb-1">
-          {t('prayers.title')}
-        </h2>
-        <p className="text-muted-foreground text-sm">
-          {t('prayers.subtitle')}
-        </p>
-      </div>
+      <PageHeader title={t('prayers.title')} subtitle={t('prayers.subtitle')} />
 
       <DateNavigator selectedDate={selectedDate} onDateChange={setSelectedDate} />
 
       {!isToday && (
-        <div className="flex items-start gap-3 p-3 rounded-xl bg-accent/10 border border-accent/30 mb-4">
-          <AlertCircle className="h-5 w-5 text-accent flex-shrink-0 mt-0.5" />
-          <div className="text-sm">
+        <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-accent/25 bg-accent/[0.07] px-3.5 py-3">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-accent" strokeWidth={2} />
+          <div className="text-[0.8125rem] leading-snug">
             <p className="font-medium text-foreground">{t('prayers.backfillMode')}</p>
-            <p className="text-muted-foreground">{t('prayers.backfillDesc')}</p>
+            <p className="mt-0.5 text-muted-foreground">{t('prayers.backfillDesc')}</p>
           </div>
         </div>
       )}
@@ -134,14 +124,14 @@ export default function Prayers() {
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.3 }}
             className={cn(
-              'flex items-center justify-between p-3 rounded-xl border mb-4 transition-colors duration-500',
-              comboFlash ? 'bg-primary/15 border-primary/50' : 'bg-accent/10 border-accent/30'
+              'mb-4 flex items-center justify-between rounded-xl border px-3.5 py-3 transition-colors duration-500',
+              comboFlash ? 'border-primary/40 bg-primary/[0.1]' : 'border-accent/25 bg-accent/[0.07]'
             )}
           >
-            <div className="flex items-center gap-2">
-              <Zap className={cn('h-5 w-5', comboFlash ? 'text-primary' : 'text-accent')} />
+            <div className="flex items-center gap-2.5">
+              <Zap className={cn('h-4 w-4', comboFlash ? 'text-primary' : 'text-accent')} strokeWidth={2} />
               <div>
-                <p className="text-sm font-bold text-foreground">{getComboLabel(combo)}</p>
+                <p className="text-[0.8125rem] font-semibold text-foreground">{getComboLabel(combo)}</p>
                 <p className="text-xs text-muted-foreground">{combo} {t('prayers.comboLabel')}</p>
               </div>
             </div>
@@ -151,8 +141,8 @@ export default function Prayers() {
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: 'spring', stiffness: 320, damping: 18 }}
               className={cn(
-                'text-sm font-bold px-2.5 py-1 rounded-lg',
-                comboFlash ? 'bg-primary/25 text-primary' : 'bg-accent/20 text-accent'
+                'rounded-lg px-2.5 py-1 text-[0.8125rem] font-semibold tabular-nums',
+                comboFlash ? 'bg-primary/20 text-primary' : 'bg-accent/15 text-accent'
               )}
             >
               {comboMultiplier.toFixed(1)}x
@@ -162,20 +152,20 @@ export default function Prayers() {
       </AnimatePresence>
 
       <div className="mb-4">
-        <div className="flex items-center justify-between mb-1.5 text-xs text-muted-foreground">
-          <span>{t('prayers.title')}</span>
-          <span className="font-medium text-foreground">{completedCount} / 5</span>
+        <div className="mb-2 flex items-baseline justify-between text-[0.8125rem]">
+          <span className="text-muted-foreground">{t('prayers.title')}</span>
+          <span className="font-semibold tabular-nums text-foreground">{completedCount} / 5</span>
         </div>
-        <Progress value={(completedCount / 5) * 100} className="h-1.5" />
+        <Meter value={(completedCount / 5) * 100} aria-label={t('prayers.title')} />
       </div>
 
       {isToday && noneMarked && (
-        <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 text-center mb-4">
-          <p className="text-sm text-foreground">{t('prayers.empty')}</p>
-        </div>
+        <p className="mb-4 rounded-xl bg-muted/60 px-4 py-3 text-center text-[0.8125rem] text-muted-foreground">
+          {t('prayers.empty')}
+        </p>
       )}
 
-      <div className="space-y-4">
+      <div className="space-y-2.5">
         {prayerInfo.map((prayer, index) => (
           <DailyPrayerCard
             key={prayer.key}
@@ -194,6 +184,7 @@ export default function Prayers() {
       </div>
 
       <NafilahSection prayers={nafilahPrayers} onToggle={toggleNafilah} />
-    </div>
+     </div>
+    </Page>
   );
 }

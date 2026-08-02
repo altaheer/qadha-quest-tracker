@@ -123,6 +123,5 @@ export interface TimeBoundEvent {
   points: number;
   isActive: boolean;
   daysUntil: number | null;
-  nextDate: string | null;
   hijriDate?: string;
 }

@@ -9,16 +9,15 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { HadithInfoContent } from '@/components/HadithInfoContent';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
+import { Page, PageHeader, Panel, SectionLabel, Stat } from '@/components/common';
 
 type HabitLevel = 'easy' | 'medium' | 'hard' | 'sahabah' | 'custom';
 
-const levelColors: Record<HabitLevel, string> = {
-  easy: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
-  medium: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  hard: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-  sahabah: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
-  custom: 'bg-accent/20 text-accent',
-};
+/**
+ * Levels read as one ascending scale rather than five unrelated colours: the
+ * selected level fills with the primary, the rest stay quiet.
+ */
+const SELECTED_LEVEL = 'bg-primary text-primary-foreground';
 
 const iconMap: Record<string, typeof Sun> = { Sun, Moon: MoonIcon, Bed, Utensils, Star };
 
@@ -69,55 +68,45 @@ export default function Habits() {
   const levels: HabitLevel[] = ['easy', 'medium', 'hard', 'sahabah', 'custom'];
 
   return (
-    <div className="container max-w-lg mx-auto px-4 py-6">
-      <div className="text-center mb-6 animate-fade-in">
-        <h1 className="font-display text-2xl font-bold text-foreground mb-1">
-          {t('habits.title')}
-        </h1>
-        <p className="text-muted-foreground text-sm">
-          {t('habits.subtitle')}
-        </p>
+    <Page>
+      <PageHeader title={t('habits.title')} subtitle={t('habits.subtitle')} />
+
+      <Panel>
+        <div className="flex items-center justify-between gap-4 px-5 py-4">
+          <Stat value={getCompletedCount() + '/' + getActiveCount()} label={t('habits.completed')} tone="primary" />
+          <Stat
+            className="text-end"
+            value={getTotalPoints()}
+            label={t('habits.pointsToday')}
+          />
+        </div>
+      </Panel>
+
+      <SectionLabel>
+        <span className="inline-flex items-center gap-2">
+          <Settings2 className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={2} />
+          {t('habits.selectLevel')}
+        </span>
+      </SectionLabel>
+      <div className="flex flex-wrap gap-2">
+        {levels.map((key) => (
+          <button
+            key={key}
+            type="button"
+            aria-pressed={level === key}
+            onClick={() => applyLevel(key)}
+            className={cn(
+              'rounded-full px-3.5 py-2 text-[0.8125rem] font-medium transition-colors duration-base ease-brand',
+              level === key ? SELECTED_LEVEL : 'bg-secondary text-muted-foreground hover:bg-secondary/70',
+            )}
+          >
+            {t(`habits.${key}` as never)}
+            <span className="ms-1.5 tabular-nums opacity-60">{levelCount(key)}</span>
+          </button>
+        ))}
       </div>
 
-      <div className="mb-6">
-        <div className="flex items-center gap-2 mb-3">
-          <Settings2 className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm font-medium text-muted-foreground">{t('habits.selectLevel')}</span>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {levels.map((key) => (
-            <button
-              key={key}
-              onClick={() => applyLevel(key)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                level === key
-                  ? levelColors[key] + ' ring-2 ring-offset-2 ring-primary/30'
-                  : 'bg-muted/50 text-muted-foreground hover:bg-muted'
-              }`}
-            >
-              {t(`habits.${key}` as any)}
-              <span className="ml-1.5 text-xs opacity-70">({levelCount(key)})</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-2xl p-4 mb-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <p className="text-sm text-muted-foreground">{t('habits.pointsToday')}</p>
-            <p className="text-2xl font-display font-bold text-foreground">{getTotalPoints()}</p>
-          </div>
-          <div className="text-right">
-            <p className="text-sm text-muted-foreground">{t('habits.completed')}</p>
-            <p className="text-2xl font-display font-bold text-primary">
-              {getCompletedCount()}/{getActiveCount()}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-4 mb-6">
+      <div className="mt-5 space-y-3">
         {habitCategories.filter(c => c.id !== 'misc' || level === 'custom').map((category) => {
           const IconComponent = iconMap[category.icon] || Sun;
           const activeHabits = category.habits.filter(h => !pausedHabits.has(h.id));
@@ -219,7 +208,9 @@ export default function Habits() {
         })}
       </div>
 
-      <TimeBoundSection />
-    </div>
+      <div className="pt-5">
+        <TimeBoundSection />
+      </div>
+    </Page>
   );
 }

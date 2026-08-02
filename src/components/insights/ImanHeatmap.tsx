@@ -1,10 +1,12 @@
 import { useMemo } from 'react';
+import { useTranslation } from '@/lib/i18n';
 
 interface ImanHeatmapProps {
   data: { date: string; level: number }[];
 }
 
 export function ImanHeatmap({ data }: ImanHeatmapProps) {
+  const { t } = useTranslation();
   const getLevelColor = (level: number) => {
     switch (level) {
       case 0: return 'bg-muted/50';
@@ -100,7 +102,7 @@ export function ImanHeatmap({ data }: ImanHeatmapProps) {
               <div
                 key={dayIndex}
                 className={`w-2.5 h-2.5 rounded-sm ${day.level >= 0 ? getLevelColor(day.level) : 'bg-transparent'}`}
-                title={day.date ? `${day.date}: Nivå ${day.level}` : ''}
+                title={day.date ? `${day.date}: ${t('insightsLabels.level')} ${day.level}` : ''}
               />
             ))}
           </div>
