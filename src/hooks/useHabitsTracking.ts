@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getDateString } from '@/lib/date';
-import { pushHabitLog } from '@/lib/cloudPush';
 import type {
   Habit,
   HabitCategory,
@@ -229,14 +228,6 @@ export function useHabitsTracking(selectedDate?: Date) {
         }
       };
     });
-    // Fire-and-forget cloud sync
-    for (const cat of habitCategories) {
-      const h = cat.habits.find(x => x.id === habitId);
-      if (h) {
-        void pushHabitLog(habitId, dateKey, nextDone, { name: h.name, points: h.points });
-        break;
-      }
-    }
   }, [dateKey]);
 
   // Toggle pause state

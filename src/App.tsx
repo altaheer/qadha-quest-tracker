@@ -16,10 +16,6 @@ import Calendar from "./pages/Calendar";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Missions from "./pages/Missions";
-import Auth from "./pages/Auth";
-import OAuthConsent from "./pages/OAuthConsent";
-import { useCloudSync } from "@/hooks/useCloudSync";
-
 
 
 const queryClient = new QueryClient();
@@ -68,8 +64,6 @@ function AnimatedRoutes() {
 
 const App = () => {
   const [showOnboarding, setShowOnboarding] = useState(!hasCompletedOnboarding());
-  useCloudSync();
-
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -77,21 +71,10 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
-            <Route
-              path="*"
-              element={
-                <>
-                  {showOnboarding && <Onboarding onComplete={() => setShowOnboarding(false)} />}
-                  <Layout>
-                    <AnimatedRoutes />
-                  </Layout>
-                </>
-              }
-            />
-          </Routes>
+          {showOnboarding && <Onboarding onComplete={() => setShowOnboarding(false)} />}
+          <Layout>
+            <AnimatedRoutes />
+          </Layout>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

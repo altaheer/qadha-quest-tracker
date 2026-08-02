@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getDateString } from '@/lib/date';
-import { pushPrayerLog, pushQadhaCount } from '@/lib/cloudPush';
 import type {
   PrayerStatus,
   PrayerEntry,
@@ -203,7 +202,6 @@ export function usePrayerTracking(selectedDate?: Date) {
     qadhaCounts[prayer] = Math.max(0, qadhaCounts[prayer] + delta);
     localStorage.setItem(QADHA_KEY, JSON.stringify(qadhaCounts));
     window.dispatchEvent(new Event('qadha-updated'));
-    void pushQadhaCount(prayer as string, qadhaCounts[prayer], delta, 'prayer status change');
   }, []);
 
   // Auto-mark pending past prayers as missed once the day's cutoff has passed.
@@ -253,8 +251,6 @@ export function usePrayerTracking(selectedDate?: Date) {
     
     // Toggle: if clicking same status, revert to pending
     const newStatus: PrayerStatus = previousStatus === status ? 'pending' : status;
-
-    void pushPrayerLog(dateKey, prayer as any, newStatus as any);
 
     setHistory(prev => {
       const existingDay = prev[dateKey] || { prayers: { ...defaultDailyPrayers }, sunnah: createDefaultSunnah() };

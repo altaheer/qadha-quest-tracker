@@ -1,73 +1,64 @@
-# Welcome to your Lovable project
+# Qadha Tracker
 
-## Project info
+An app for making up missed prayers — and for keeping the daily ones on track.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+Its one job is qadha: know how many prayers you owe, chip away at them, and see
+the backlog shrink. Prayer logging, sunnah checklists, habits and missions
+support that goal rather than compete with it.
 
-## How can I edit this code?
+## Your data stays on your device
 
-There are several ways of editing your application.
+There is no account, no sign-in, and no server holding your prayer history.
+Everything is stored in the browser's local storage on the device you use.
 
-**Use Lovable**
+That has one consequence worth stating plainly: **if you clear the app's data,
+lose the device, or uninstall, the data is gone unless you exported a backup.**
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+- **Settings → Export data** writes a single `.json` file containing everything
+  the app stores. Keep it somewhere safe (your own cloud drive, for example).
+- **Settings → Import data** restores such a file, replacing what is currently
+  on the device.
+- **Settings → Erase all data** wipes every trace of your data from the device.
 
-Changes made via Lovable will be committed automatically to this repo.
+Backups from older versions of the app are still restorable.
 
-**Use your preferred IDE**
+## Running it locally
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+Requires Node.js.
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+npm install
+npm run dev      # start the dev server
+npm test         # run the test suite
+npm run lint     # lint
+npm run build    # production build into dist/
 ```
 
-**Edit a file directly in GitHub**
+## How it is built
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- **Vite + React + TypeScript** — the app itself
+- **Tailwind CSS + shadcn/ui** — styling and components
+- **Framer Motion** — transitions
+- **Recharts** — the insights charts
+- **Vitest** — tests
 
-**Use GitHub Codespaces**
+Everything users see is translated into English, Swedish, Turkish and Arabic
+(`src/lib/i18n.ts`).
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Where things live
 
-## What technologies are used for this project?
+| Path | What it holds |
+| --- | --- |
+| `src/pages/` | One file per screen |
+| `src/hooks/` | The tracking logic (prayers, qadha, habits, missions, achievements) |
+| `src/lib/backup.ts` | Export/import/erase — the only safety net for user data |
+| `src/lib/qadhaEstimate.ts` | The "help me estimate my backlog" calculation |
+| `src/lib/i18n.ts` | All translated strings |
+| `src/components/insights/` | Charts |
 
-This project is built with:
+### Adding a new stored value
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+`src/lib/backup.ts` keeps the list of every storage key the app owns. A key
+that is missing from `APP_STORAGE_KEYS` will not be included in backups, so add
+it there at the same time you introduce it — `src/lib/backup.test.ts` covers the
+round trip.

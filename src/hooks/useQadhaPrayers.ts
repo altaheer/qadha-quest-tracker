@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { PrayerCounts } from '@/types';
-import { pushQadhaCount } from '@/lib/cloudPush';
 
 export type { PrayerCounts };
 
@@ -50,7 +49,6 @@ export function useQadhaPrayers() {
   const increment = useCallback((prayer: keyof PrayerCounts) => {
     setCounts(prev => {
       const next = prev[prayer] + 1;
-      void pushQadhaCount(prayer as string, next, 1, 'manual');
       return { ...prev, [prayer]: next };
     });
   }, []);
@@ -58,7 +56,6 @@ export function useQadhaPrayers() {
   const decrement = useCallback((prayer: keyof PrayerCounts) => {
     setCounts(prev => {
       const next = Math.max(0, prev[prayer] - 1);
-      void pushQadhaCount(prayer as string, next, -1, 'manual');
       return { ...prev, [prayer]: next };
     });
   }, []);
@@ -66,25 +63,18 @@ export function useQadhaPrayers() {
   const setCount = useCallback((prayer: keyof PrayerCounts, count: number) => {
     setCounts(prev => {
       const next = Math.max(0, count);
-      void pushQadhaCount(prayer as string, next, next - prev[prayer], 'manual set');
       return { ...prev, [prayer]: next };
     });
   }, []);
 
   const reset = useCallback((prayer: keyof PrayerCounts) => {
     setCounts(prev => {
-      void pushQadhaCount(prayer as string, 0, -prev[prayer], 'reset');
       return { ...prev, [prayer]: 0 };
     });
   }, []);
 
   const resetAll = useCallback(() => {
-    setCounts(prev => {
-      (Object.keys(prev) as (keyof PrayerCounts)[]).forEach((p) => {
-        void pushQadhaCount(p as string, 0, -prev[p], 'reset all');
-      });
-      return defaultCounts;
-    });
+    setCounts(defaultCounts);
   }, []);
 
   const totalPrayers = Object.values(counts).reduce((sum, count) => sum + count, 0);
