@@ -2,6 +2,57 @@ import { useSyncExternalStore, useCallback, useEffect } from 'react';
 
 export type Language = 'en' | 'sv' | 'tr' | 'ar';
 
+/**
+ * Everything that explains the app to a new user: the "what's inside" step in
+ * onboarding, the level descriptions, the one-time hint shown the first time a
+ * screen is opened, and the permanent guide in Settings. Kept in one block so
+ * the same sentence is never written twice in two different tones.
+ */
+type GuideStrings = {
+  insideTitle: string;
+  insideDesc: string;
+  areaPrayers: string;
+  areaPrayersDesc: string;
+  areaQadha: string;
+  areaQadhaDesc: string;
+  areaHabits: string;
+  areaHabitsDesc: string;
+  areaProgress: string;
+  areaProgressDesc: string;
+  levelWhat: string;
+  levelManual: string;
+  habitsCount: string;
+  levelEasyDesc: string;
+  levelMediumDesc: string;
+  levelHardDesc: string;
+  levelSahabahDesc: string;
+  levelCustomDesc: string;
+  hintHome: string;
+  hintHomeDesc: string;
+  hintPrayers: string;
+  hintPrayersDesc: string;
+  hintQadha: string;
+  hintQadhaDesc: string;
+  hintHabits: string;
+  hintHabitsDesc: string;
+  hintMissions: string;
+  hintMissionsDesc: string;
+  hintInsights: string;
+  hintInsightsDesc: string;
+  hintCalendar: string;
+  hintCalendarDesc: string;
+  title: string;
+  subtitle: string;
+  openGuide: string;
+  openGuideDesc: string;
+  replayHints: string;
+  replayHintsDone: string;
+  sectionScreens: string;
+  sectionLevels: string;
+  sectionData: string;
+  dataDesc: string;
+};
+
 export type Translations = {
   nav: { home: string; prayers: string; qadha: string; habits: string; insights: string; calendar: string; settings: string; more: string };
   home: { subtitle: string; today: string; rightNow: string; dayComplete: string; moreItems: string; sunnahLabel: string; last5days: string; summary: string; remaining: string; active: string };
@@ -27,6 +78,7 @@ export type Translations = {
   combo: { onFire: string; firstTimeTitle: string; firstTimeDesc: string };
   hadith: { source: string; fadl: string; comingSoon: string };
   missions: { title: string; subtitle: string; newMission: string; iIntendTo: string; for: string; days: string; begin: string; active: string; completed: string; endedTitle: string; accepted: string; endedEarly: string; tryAgain: string; bonus: string; missesUsed: string; remaining: string; allFive: string; onTime: string; inJamaah: string; custom: string; allowingUpTo: string; misses: string; verbPray: string; verbDo: string; verbRead: string; verbGive: string; verbSay: string; missedBeforeLose: string; mayMiss: string };
+  guide: GuideStrings;
 };
 
 
@@ -72,6 +124,50 @@ const en: Translations = {
   combo: { onFire: 'On fire!', firstTimeTitle: 'Combo started!', firstTimeDesc: 'Pray on time or in jamaah in a row to grow your combo and earn bonus points.' },
   hadith: { source: 'Source', fadl: 'Benefit', comingSoon: 'More info coming soon' },
   missions: { title: 'Missions', subtitle: 'A personal commitment, written and witnessed', newMission: 'New mission', iIntendTo: 'I intend to', for: 'for', days: 'days', begin: 'Begin — Bismillah', active: 'Active missions', completed: 'Completed', endedTitle: 'Ended', accepted: 'May Allah accept it', endedEarly: 'Ended early — your intention was written', tryAgain: 'Try again', bonus: 'Bonus', missesUsed: 'misses used', remaining: 'remaining', allFive: 'all 5 prayers', onTime: 'on time', inJamaah: 'in jamaah', custom: 'custom', allowingUpTo: 'allowing up to', misses: 'misses', verbPray: 'pray', verbDo: 'complete', verbRead: 'read', verbGive: 'give', verbSay: 'say', missedBeforeLose: 'Missed {used} of {allowed} before losing', mayMiss: 'and may miss' },
+  guide: {
+    insideTitle: "What's inside",
+    insideDesc: 'Four things the app keeps track of. You can ignore any of them.',
+    areaPrayers: 'The five daily prayers',
+    areaPrayersDesc: 'Mark each one as you pray it — on time, in jamaah, late, or missed. Anything marked missed is added to your qadha on its own.',
+    areaQadha: 'Qadha, counted down',
+    areaQadhaDesc: 'Your outstanding prayers, one counter each. Set how many you make up per day and the app works out when you will be finished.',
+    areaHabits: 'Sunnah habits',
+    areaHabitsDesc: "Adhkar, du'as, Quran and the small sunnahs of manner. A level decides which ones are switched on.",
+    areaProgress: 'Streaks, missions and charts',
+    areaProgressDesc: 'Missions are short commitments you write yourself. Insights draws everything you have marked into charts as the weeks pass.',
+    levelWhat: 'A level is simply which sunnah habits are switched on — nothing more.',
+    levelManual: 'Levels never change on their own, and nothing is locked. Switch whenever you like; your history is kept either way.',
+    habitsCount: '{n} habits',
+    levelEasyDesc: "The core adhkar and du'as — morning, evening, and before sleep.",
+    levelMediumDesc: "Adds du'as through the day and the Duha prayer.",
+    levelHardDesc: 'Adds wudu before sleep and the finer sunnahs of manner.',
+    levelSahabahDesc: 'Adds daily Quran, istighfar, salawat and sadaqah.',
+    levelCustomDesc: 'Nothing preset — switch on exactly what you want.',
+    hintHome: 'Your day at a glance',
+    hintHomeDesc: 'The large number is your remaining qadha. Below it is whatever is still open today, then how the last five days went.',
+    hintPrayers: 'Marking prayers',
+    hintPrayersDesc: 'Tap a status for each prayer. Marking one missed adds it to your qadha. Use the arrows above to fill in an earlier day.',
+    hintQadha: 'Paying it back',
+    hintQadhaDesc: 'Set a daily goal and the completion date updates as you go. Use +/− on a prayer to log what you have made up.',
+    hintHabits: 'Levels are just presets',
+    hintHabitsDesc: 'A level switches a set of habits on. To drop a single one, tap its pause icon — the level itself stays as it is.',
+    hintMissions: 'Missions',
+    hintMissionsDesc: 'A short commitment you write yourself — "all five on time for 7 days". It tracks itself from what you already mark.',
+    hintInsights: 'Reading the charts',
+    hintInsightsDesc: 'Everything here comes from what you have marked, so it fills out as the weeks pass. An empty chart just means an early week.',
+    hintCalendar: 'Both calendars',
+    hintCalendarDesc: 'Hijri and Gregorian side by side, with the sunnah fasting days and the two Eids marked.',
+    title: 'How it works',
+    subtitle: 'Every screen, and what it is for.',
+    openGuide: 'How it works',
+    openGuideDesc: 'A short guide to every screen',
+    replayHints: 'Show the first-time hints again',
+    replayHintsDone: 'Hints reset — they will appear as you visit each screen',
+    sectionScreens: 'The screens',
+    sectionLevels: 'Habit levels',
+    sectionData: 'Your data',
+    dataDesc: 'Everything stays on this device. There is no account and nothing is uploaded. Export a backup from Settings if you want a copy — that file is the only way your data moves to another device.',
+  },
 };
 
 
@@ -117,6 +213,50 @@ const sv: Translations = {
   combo: { onFire: 'On fire!', firstTimeTitle: 'Combo startad!', firstTimeDesc: 'Be i tid eller i jamaah i rad för att öka din combo och få bonuspoäng.' },
   hadith: { source: 'Källa', fadl: 'Förtjänst', comingSoon: 'Mer info kommer snart' },
   missions: { title: 'Uppdrag', subtitle: 'Ett personligt åtagande, nedskrivet och bevittnat', newMission: 'Nytt uppdrag', iIntendTo: 'Jag har för avsikt att', for: 'i', days: 'dagar', begin: 'Börja — Bismillah', active: 'Aktiva uppdrag', completed: 'Avklarade', endedTitle: 'Avslutade', accepted: 'Må Allah acceptera det', endedEarly: 'Avslutades tidigt — din avsikt skrevs', tryAgain: 'Försök igen', bonus: 'Bonus', missesUsed: 'missar använda', remaining: 'kvar', allFive: 'alla 5 böner', onTime: 'i tid', inJamaah: 'i jamaah', custom: 'eget', allowingUpTo: 'med upp till', misses: 'missar', verbPray: 'be', verbDo: 'göra', verbRead: 'läsa', verbGive: 'ge', verbSay: 'säga', missedBeforeLose: 'Missat {used} av {allowed} innan du förlorar', mayMiss: 'och får missa' },
+  guide: {
+    insideTitle: 'Vad som finns här',
+    insideDesc: 'Fyra saker appen håller reda på. Du kan strunta i vilken som helst.',
+    areaPrayers: 'De fem dagliga bönerna',
+    areaPrayersDesc: 'Markera varje bön när du bett den — i tid, i jamaah, sent eller missad. Det du markerar som missat läggs till i din qadha automatiskt.',
+    areaQadha: 'Qadha, nedräknad',
+    areaQadhaDesc: 'Dina obetalda böner, en räknare per bön. Ange hur många du tar igen per dag så räknar appen ut när du är klar.',
+    areaHabits: 'Sunnah-vanor',
+    areaHabitsDesc: "Adhkār, du'a, Quran och de små sunnah i uppförande. En nivå avgör vilka som är påslagna.",
+    areaProgress: 'Streaks, uppdrag och diagram',
+    areaProgressDesc: 'Uppdrag är korta åtaganden du skriver själv. Insikter ritar upp allt du markerat vartefter veckorna går.',
+    levelWhat: 'En nivå är helt enkelt vilka sunnah-vanor som är påslagna — inget mer.',
+    levelManual: 'Nivåer ändras aldrig av sig själva, och inget är låst. Byt när du vill; historiken sparas oavsett.',
+    habitsCount: '{n} vanor',
+    levelEasyDesc: "Grundläggande adhkār och du'a — morgon, kväll och före sömn.",
+    levelMediumDesc: "Lägger till du'a under dagen och Duha-bönen.",
+    levelHardDesc: 'Lägger till wudu före sömn och de finare sunnah i uppförande.',
+    levelSahabahDesc: 'Lägger till daglig Quran, istighfār, salawāt och sadaqah.',
+    levelCustomDesc: 'Inget förvalt — slå på exakt det du vill.',
+    hintHome: 'Dagen i överblick',
+    hintHomeDesc: 'Den stora siffran är din återstående qadha. Under den ligger det som är kvar idag, och sedan hur de senaste fem dagarna gick.',
+    hintPrayers: 'Att markera böner',
+    hintPrayersDesc: 'Tryck på en status för varje bön. Markerar du en som missad hamnar den i din qadha. Använd pilarna ovanför för att fylla i en tidigare dag.',
+    hintQadha: 'Att ta igen',
+    hintQadhaDesc: 'Sätt ett dagligt mål så uppdateras slutdatumet efterhand. Använd +/− på en bön för att logga det du tagit igen.',
+    hintHabits: 'Nivåer är bara mallar',
+    hintHabitsDesc: 'En nivå slår på en uppsättning vanor. Vill du plocka bort en enskild, tryck på dess paus-ikon — nivån ligger kvar som den är.',
+    hintMissions: 'Uppdrag',
+    hintMissionsDesc: 'Ett kort åtagande du skriver själv — "alla fem i tid i 7 dagar". Det följs upp automatiskt från det du redan markerar.',
+    hintInsights: 'Att läsa diagrammen',
+    hintInsightsDesc: 'Allt här kommer från det du markerat, så det fylls på vartefter veckorna går. Ett tomt diagram betyder bara en tidig vecka.',
+    hintCalendar: 'Båda kalendrarna',
+    hintCalendarDesc: 'Hijri och gregoriansk sida vid sida, med sunnah-fastedagarna och de två Eid utmarkerade.',
+    title: 'Så fungerar appen',
+    subtitle: 'Varje skärm, och vad den är till för.',
+    openGuide: 'Så fungerar appen',
+    openGuideDesc: 'En kort guide till varje skärm',
+    replayHints: 'Visa förstagångstipsen igen',
+    replayHintsDone: 'Tipsen återställda — de dyker upp när du besöker varje skärm',
+    sectionScreens: 'Skärmarna',
+    sectionLevels: 'Vanenivåer',
+    sectionData: 'Din data',
+    dataDesc: 'Allt stannar på den här enheten. Det finns inget konto och inget laddas upp. Exportera en säkerhetskopia i Inställningar om du vill ha en kopia — den filen är enda sättet din data flyttas till en annan enhet.',
+  },
 };
 
 
@@ -162,6 +302,50 @@ const tr: Translations = {
   combo: { onFire: 'Ateş gibi!', firstTimeTitle: 'Kombo başladı!', firstTimeDesc: 'Vaktinde ya da cemaatle arka arkaya kıl, kombo büyüsün, bonus puan kazan.' },
   hadith: { source: 'Kaynak', fadl: 'Faydası', comingSoon: 'Yakında daha fazla bilgi' },
   missions: { title: 'Görevler', subtitle: 'Yazıya dökülmüş kişisel bir niyet', newMission: 'Yeni görev', iIntendTo: 'Niyet ediyorum', for: 'boyunca', days: 'gün', begin: 'Başla — Bismillah', active: 'Aktif görevler', completed: 'Tamamlanan', endedTitle: 'Sonlandı', accepted: 'Allah kabul etsin', endedEarly: 'Erken bitti — niyetin yazıldı', tryAgain: 'Tekrar dene', bonus: 'Bonus', missesUsed: 'kaçırma hakkı', remaining: 'kaldı', allFive: '5 vakit namaz', onTime: 'vaktinde', inJamaah: 'cemaatle', custom: 'özel', allowingUpTo: 'en fazla', misses: 'kaçırma hakkı ile', verbPray: 'kılmaya', verbDo: 'yapmaya', verbRead: 'okumaya', verbGive: 'vermeye', verbSay: 'söylemeye', missedBeforeLose: 'Kaybetmeden önce {allowed} kaçırma hakkından {used} kullanıldı', mayMiss: 've kaçırabilir' },
+  guide: {
+    insideTitle: 'Neler var',
+    insideDesc: 'Uygulamanın takip ettiği dört şey. Hepsini kullanmak zorunda değilsin.',
+    areaPrayers: 'Beş vakit namaz',
+    areaPrayersDesc: 'Her namazı kıldıkça işaretle — vaktinde, cemaatle, geç ya da kaçırılmış. Kaçırılmış işaretlediğin kazana kendiliğinden eklenir.',
+    areaQadha: 'Kaza, geriye sayarak',
+    areaQadhaDesc: 'Borçlu olduğun namazlar, her vakit için ayrı sayaç. Günde kaç tane kaza edeceğini gir, uygulama ne zaman biteceğini hesaplasın.',
+    areaHabits: 'Sünnet alışkanlıkları',
+    areaHabitsDesc: "Ezkâr, dualar, Kur'an ve edebe dair küçük sünnetler. Hangilerinin açık olacağına seviye karar verir.",
+    areaProgress: 'Seriler, görevler ve grafikler',
+    areaProgressDesc: 'Görevler kendi yazdığın kısa niyetlerdir. Analizler, işaretlediğin her şeyi haftalar geçtikçe grafiklere döker.',
+    levelWhat: 'Seviye, sadece hangi sünnet alışkanlıklarının açık olduğudur — başka bir şey değil.',
+    levelManual: 'Seviyeler kendiliğinden değişmez ve hiçbiri kilitli değildir. İstediğin zaman değiştir; geçmişin her hâlükârda korunur.',
+    habitsCount: '{n} alışkanlık',
+    levelEasyDesc: 'Temel ezkâr ve dualar — sabah, akşam ve uykudan önce.',
+    levelMediumDesc: 'Gün içindeki duaları ve Duha namazını ekler.',
+    levelHardDesc: 'Uykudan önce abdesti ve edebe dair ince sünnetleri ekler.',
+    levelSahabahDesc: "Günlük Kur'an, istiğfar, salavat ve sadakayı ekler.",
+    levelCustomDesc: 'Hazır liste yok — tam olarak istediğini aç.',
+    hintHome: 'Güne bakış',
+    hintHomeDesc: 'Büyük sayı kalan kazandır. Altında bugün hâlâ açık olanlar, sonra son beş günün nasıl geçtiği var.',
+    hintPrayers: 'Namazları işaretlemek',
+    hintPrayersDesc: 'Her namaz için bir durum seç. Kaçırılmış işaretlediğin kazana eklenir. Önceki bir günü doldurmak için yukarıdaki okları kullan.',
+    hintQadha: 'Kaza etmek',
+    hintQadhaDesc: 'Günlük bir hedef koy, bitiş tarihi kendiliğinden güncellensin. Kaza ettiklerini işlemek için bir namazın +/− tuşlarını kullan.',
+    hintHabits: 'Seviyeler sadece şablondur',
+    hintHabitsDesc: 'Seviye bir grup alışkanlığı açar. Tek birini çıkarmak istersen duraklat simgesine bas — seviyen olduğu gibi kalır.',
+    hintMissions: 'Görevler',
+    hintMissionsDesc: 'Kendi yazdığın kısa bir niyet — "7 gün boyunca beş vakit vaktinde". Zaten işaretlediklerinden kendi kendine takip edilir.',
+    hintInsights: 'Grafikleri okumak',
+    hintInsightsDesc: 'Buradaki her şey işaretlediklerinden gelir, haftalar geçtikçe dolar. Boş bir grafik sadece haftanın erken olduğu anlamına gelir.',
+    hintCalendar: 'İki takvim',
+    hintCalendarDesc: 'Hicri ve miladi yan yana, sünnet oruç günleri ve iki bayram işaretli.',
+    title: 'Nasıl çalışır',
+    subtitle: 'Her ekran ve ne işe yaradığı.',
+    openGuide: 'Nasıl çalışır',
+    openGuideDesc: 'Her ekran için kısa bir rehber',
+    replayHints: 'İlk kullanım ipuçlarını tekrar göster',
+    replayHintsDone: 'İpuçları sıfırlandı — her ekrana girdiğinde görünecekler',
+    sectionScreens: 'Ekranlar',
+    sectionLevels: 'Alışkanlık seviyeleri',
+    sectionData: 'Verilerin',
+    dataDesc: "Her şey bu cihazda kalır. Hesap yok, hiçbir şey yüklenmez. Bir kopya istiyorsan Ayarlar'dan yedek al — verilerinin başka bir cihaza taşınmasının tek yolu o dosyadır.",
+  },
 };
 
 
@@ -207,6 +391,50 @@ const ar: Translations = {
   combo: { onFire: 'مشتعل!', firstTimeTitle: 'بدأت السلسلة!', firstTimeDesc: 'صلّ في الوقت أو في جماعة على التوالي لتنمو سلسلتك وتحصل على نقاط إضافية.' },
   hadith: { source: 'المصدر', fadl: 'الفضل', comingSoon: 'قريباً' },
   missions: { title: 'المهمات', subtitle: 'عهد شخصي مكتوب', newMission: 'مهمة جديدة', iIntendTo: 'نويت أن', for: 'لمدة', days: 'يوماً', begin: 'ابدأ — بسم الله', active: 'المهمات النشطة', completed: 'المكتملة', endedTitle: 'منتهية', accepted: 'تقبل الله', endedEarly: 'انتهت مبكراً — نيتك كُتبت', tryAgain: 'حاول مجدداً', bonus: 'مكافأة', missesUsed: 'أيام فائتة', remaining: 'متبقي', allFive: 'الصلوات الخمس', onTime: 'في الوقت', inJamaah: 'في جماعة', custom: 'مخصص', allowingUpTo: 'بحد أقصى', misses: 'أيام فائتة', verbPray: 'أصلي', verbDo: 'أؤدي', verbRead: 'أقرأ', verbGive: 'أتصدق بـ', verbSay: 'أقول', missedBeforeLose: 'فاتك {used} من {allowed} قبل الخسارة', mayMiss: 'ويمكنك تفويت' },
+  guide: {
+    insideTitle: 'ما في التطبيق',
+    insideDesc: 'أربعة أمور يتابعها التطبيق. يمكنك تجاهل أيٍّ منها.',
+    areaPrayers: 'الصلوات الخمس',
+    areaPrayersDesc: 'علّم كل صلاة بعد أدائها — في الوقت، في جماعة، متأخرة، أو فائتة. وما تعلّمه فائتاً يُضاف إلى القضاء تلقائياً.',
+    areaQadha: 'القضاء، بالعدّ التنازلي',
+    areaQadhaDesc: 'صلواتك الفائتة، عدّاد لكل صلاة. حدّد كم تقضي في اليوم ليحسب التطبيق موعد انتهائك.',
+    areaHabits: 'عادات السنّة',
+    areaHabitsDesc: 'الأذكار والأدعية والقرآن وسنن الأدب الصغيرة. والمستوى يحدّد أيّها مفعّل.',
+    areaProgress: 'السلاسل والمهمات والرسوم',
+    areaProgressDesc: 'المهمات عهود قصيرة تكتبها بنفسك. والتحليلات ترسم كل ما علّمته مع مرور الأسابيع.',
+    levelWhat: 'المستوى ببساطة هو أي عادات السنّة مفعّلة — لا أكثر.',
+    levelManual: 'المستويات لا تتغيّر من تلقاء نفسها، ولا شيء مقفل. بدّل متى شئت؛ سجلّك محفوظ في الحالتين.',
+    habitsCount: '{n} عادة',
+    levelEasyDesc: 'الأذكار والأدعية الأساسية — الصباح والمساء وقبل النوم.',
+    levelMediumDesc: 'يضيف أدعية اليوم وصلاة الضحى.',
+    levelHardDesc: 'يضيف الوضوء قبل النوم وسنن الأدب الدقيقة.',
+    levelSahabahDesc: 'يضيف القرآن اليومي والاستغفار والصلاة على النبي والصدقة.',
+    levelCustomDesc: 'لا شيء جاهز — فعّل ما تريده بالضبط.',
+    hintHome: 'يومك في لمحة',
+    hintHomeDesc: 'الرقم الكبير هو ما تبقّى من القضاء. تحته ما لم يكتمل اليوم، ثم كيف مرّت الأيام الخمسة الماضية.',
+    hintPrayers: 'تعليم الصلوات',
+    hintPrayersDesc: 'اختر حالة لكل صلاة. وما تعلّمه فائتاً يُضاف إلى القضاء. استخدم الأسهم في الأعلى لتعبئة يوم سابق.',
+    hintQadha: 'قضاء ما فات',
+    hintQadhaDesc: 'حدّد هدفاً يومياً ليتحدّث تاريخ الانتهاء تبعاً له. استخدم +/− على أي صلاة لتسجيل ما قضيته.',
+    hintHabits: 'المستويات مجرّد قوالب',
+    hintHabitsDesc: 'المستوى يفعّل مجموعة عادات. ولإسقاط عادة واحدة اضغط أيقونة الإيقاف — ويبقى مستواك كما هو.',
+    hintMissions: 'المهمات',
+    hintMissionsDesc: 'عهد قصير تكتبه بنفسك — «الخمس في وقتها سبعة أيام». يُتابَع تلقائياً مما تعلّمه أصلاً.',
+    hintInsights: 'قراءة الرسوم',
+    hintInsightsDesc: 'كل ما هنا مأخوذ مما علّمته، فيمتلئ مع مرور الأسابيع. والرسم الفارغ يعني ببساطة أن الأسبوع في أوّله.',
+    hintCalendar: 'التقويمان معاً',
+    hintCalendarDesc: 'الهجري والميلادي جنباً إلى جنب، مع أيام صيام السنّة والعيدين.',
+    title: 'كيف يعمل التطبيق',
+    subtitle: 'كل شاشة، وما الغرض منها.',
+    openGuide: 'كيف يعمل التطبيق',
+    openGuideDesc: 'دليل قصير لكل شاشة',
+    replayHints: 'إظهار تلميحات البداية من جديد',
+    replayHintsDone: 'أُعيد ضبط التلميحات — ستظهر عند زيارة كل شاشة',
+    sectionScreens: 'الشاشات',
+    sectionLevels: 'مستويات العادات',
+    sectionData: 'بياناتك',
+    dataDesc: 'كل شيء يبقى على هذا الجهاز. لا حساب ولا رفع لأي بيانات. صدّر نسخة احتياطية من الإعدادات إن أردت نسخة — ذلك الملف هو الطريقة الوحيدة لنقل بياناتك إلى جهاز آخر.',
+  },
 };
 
 

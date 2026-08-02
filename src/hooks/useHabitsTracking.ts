@@ -151,6 +151,15 @@ export const habitCategories: HabitCategory[] = [
 // Get all habit IDs
 const allHabitIds = habitCategories.flatMap(c => c.habits.map(h => h.id));
 
+/**
+ * How many habits a level switches on. Shown wherever a level is offered, so
+ * the choice is a known quantity rather than four unexplained words. "Custom"
+ * presets nothing, so every habit is available under it.
+ */
+export function levelHabitCount(level: HabitLevel) {
+  return level === 'custom' ? allHabitIds.length : levelHabits[level].length;
+}
+
 
 
 export function useHabitsTracking(selectedDate?: Date) {

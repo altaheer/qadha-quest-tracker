@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Moon, Sparkles, Target } from 'lucide-react';
+import { BarChart3, BookOpen, Moon, RotateCcw, Sparkles, Target, type LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useTranslation, languageLabels, Language } from '@/lib/i18n';
+import { useTranslation, languageLabels, Language, type TKey } from '@/lib/i18n';
 import { useQadhaPrayers } from '@/hooks/useQadhaPrayers';
-import { useHabitsTracking } from '@/hooks/useHabitsTracking';
+import { useHabitsTracking, levelHabitCount } from '@/hooks/useHabitsTracking';
 import { useUserPrefs } from '@/hooks/useUserPrefs';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
@@ -28,9 +28,34 @@ interface Props {
   onComplete: () => void;
 }
 
-type Level = 'easy' | 'medium' | 'hard' | 'sahabah';
+type Level = 'easy' | 'medium' | 'hard' | 'sahabah' | 'custom';
 
 const prayerKeys = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'] as const;
+
+const STEPS = [0, 1, 2, 3];
+
+/**
+ * The four things the app tracks, in the order they appear in the nav. Icons
+ * match the nav icons so the mapping is learnable rather than decorative.
+ */
+const AREAS: { icon: LucideIcon; title: TKey; desc: TKey }[] = [
+  { icon: Moon, title: 'guide.areaPrayers', desc: 'guide.areaPrayersDesc' },
+  { icon: RotateCcw, title: 'guide.areaQadha', desc: 'guide.areaQadhaDesc' },
+  { icon: BookOpen, title: 'guide.areaHabits', desc: 'guide.areaHabitsDesc' },
+  { icon: BarChart3, title: 'guide.areaProgress', desc: 'guide.areaProgressDesc' },
+];
+
+/**
+ * Levels are presets, not ranks — each one says what it switches on so the
+ * choice is informed rather than a guess between four unexplained words.
+ */
+const LEVELS: { key: Level; desc: TKey }[] = [
+  { key: 'easy', desc: 'guide.levelEasyDesc' },
+  { key: 'medium', desc: 'guide.levelMediumDesc' },
+  { key: 'hard', desc: 'guide.levelHardDesc' },
+  { key: 'sahabah', desc: 'guide.levelSahabahDesc' },
+  { key: 'custom', desc: 'guide.levelCustomDesc' },
+];
 
 export function Onboarding({ onComplete }: Props) {
   const { t, lang, setLanguage } = useTranslation();
@@ -41,13 +66,6 @@ export function Onboarding({ onComplete }: Props) {
   const { setCount } = useQadhaPrayers();
   const { applyLevel } = useHabitsTracking();
   const { autoMarkMissed, setAutoMarkMissed, autoMarkMissedTime, setAutoMarkMissedTime } = useUserPrefs();
-
-  const levels: { key: Level; descKey: any }[] = [
-    { key: 'easy', descKey: 'habits.easy' },
-    { key: 'medium', descKey: 'habits.medium' },
-    { key: 'hard', descKey: 'habits.hard' },
-    { key: 'sahabah', descKey: 'habits.sahabah' },
-  ];
 
   const finish = (level: Level) => {
     // Write directly to localStorage so values persist even though this
@@ -67,7 +85,7 @@ export function Onboarding({ onComplete }: Props) {
     onComplete();
   };
 
-  const skipQadha = () => setStep(2);
+  const skipQadha = () => setStep(3);
   const goNext = () => setStep((s) => s + 1);
 
   return (
@@ -75,11 +93,11 @@ export function Onboarding({ onComplete }: Props) {
       <div className="flex-1 overflow-y-auto px-6 py-10 flex items-center justify-center">
         <div className="w-full max-w-md">
           <div className="flex justify-center gap-1.5 mb-8">
-            {[0, 1, 2].map((i) => (
+            {STEPS.map((i) => (
               <div
                 key={i}
                 className={cn(
-                  'h-1.5 rounded-full transition-all',
+                  'h-1.5 rounded-full transition-all duration-base ease-brand',
                   i === step ? 'w-8 bg-primary' : 'w-4 bg-muted'
                 )}
               />
@@ -111,7 +129,7 @@ export function Onboarding({ onComplete }: Props) {
                       key={l}
                       onClick={() => setLanguage(l)}
                       className={cn(
-                        'flex flex-col items-center justify-center gap-1 p-3 rounded-2xl border tap-target transition-all',
+                        'flex flex-col items-center justify-center gap-1 p-3 rounded-2xl border tap-target transition-colors duration-base ease-brand',
                         lang === l
                           ? 'border-primary bg-primary/10 ring-2 ring-primary/20'
                           : 'border-border bg-card hover:border-primary/40 hover:bg-primary/5'
@@ -138,6 +156,46 @@ export function Onboarding({ onComplete }: Props) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -12 }}
               >
+                <div className="mb-6">
+                  <h2 className="font-display text-2xl font-bold mb-2">
+                    {t('guide.insideTitle')}
+                  </h2>
+                  <p className="text-muted-foreground text-sm">
+                    {t('guide.insideDesc')}
+                  </p>
+                </div>
+
+                <ul className="space-y-5 mb-8">
+                  {AREAS.map(({ icon: Icon, title, desc }) => (
+                    <li key={title} className="flex gap-3.5">
+                      <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/[0.08] text-primary">
+                        <Icon className="h-[1.15rem] w-[1.15rem]" strokeWidth={1.75} />
+                      </span>
+                      <div className="min-w-0">
+                        <p className="font-display text-[0.9375rem] font-semibold text-foreground">
+                          {t(title)}
+                        </p>
+                        <p className="mt-0.5 text-[0.8125rem] leading-relaxed text-muted-foreground">
+                          {t(desc)}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+
+                <Button size="lg" className="w-full" onClick={goNext}>
+                  {t('common.next')}
+                </Button>
+              </motion.div>
+            )}
+
+            {step === 2 && (
+              <motion.div
+                key="s3"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+              >
                 <div className="text-center mb-6">
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/15 mb-4">
                     <Target className="h-7 w-7 text-accent" />
@@ -154,7 +212,7 @@ export function Onboarding({ onComplete }: Props) {
                   {prayerKeys.map((k) => (
                     <div key={k} className="flex items-center gap-3">
                       <Label htmlFor={k} className="w-24 capitalize">
-                        {t(`prayerNames.${k}` as any)}
+                        {t(`prayerNames.${k}` as TKey)}
                       </Label>
                       <Input
                         id={k}
@@ -204,14 +262,14 @@ export function Onboarding({ onComplete }: Props) {
               </motion.div>
             )}
 
-            {step === 2 && (
+            {step === 3 && (
               <motion.div
-                key="s3"
+                key="s4"
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -12 }}
               >
-                <div className="text-center mb-6">
+                <div className="text-center mb-5">
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/15 mb-4">
                     <Sparkles className="h-7 w-7 text-primary" />
                   </div>
@@ -219,37 +277,35 @@ export function Onboarding({ onComplete }: Props) {
                     {t('onboarding.step3Title')}
                   </h2>
                   <p className="text-muted-foreground text-sm">
-                    {t('onboarding.step3Desc')}
+                    {t('guide.levelWhat')}
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  {levels.map((l) => (
+                <div className="space-y-2">
+                  {LEVELS.map(({ key, desc }) => (
                     <button
-                      key={l.key}
-                      onClick={() => finish(l.key)}
-                      className="p-4 rounded-2xl border border-border bg-card hover:border-primary/50 hover:bg-primary/5 transition-all text-left tap-target"
+                      key={key}
+                      onClick={() => finish(key)}
+                      className="surface-interactive w-full px-4 py-3.5 text-start"
                     >
-                      <p className="font-display font-semibold mb-1">
-                        {t(`habits.${l.key}` as any)}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {l.key === 'easy' && '✦'}
-                        {l.key === 'medium' && '✦✦'}
-                        {l.key === 'hard' && '✦✦✦'}
-                        {l.key === 'sahabah' && '✦✦✦✦'}
+                      <div className="flex items-baseline justify-between gap-3">
+                        <p className="font-display text-[0.9375rem] font-semibold text-foreground">
+                          {t(`habits.${key}` as TKey)}
+                        </p>
+                        <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+                          {t('guide.habitsCount').replace('{n}', String(levelHabitCount(key)))}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-[0.8125rem] leading-snug text-muted-foreground">
+                        {t(desc)}
                       </p>
                     </button>
                   ))}
                 </div>
 
-                <Button
-                  variant="ghost"
-                  className="w-full mt-4"
-                  onClick={() => finish('easy')}
-                >
-                  {t('common.skip')}
-                </Button>
+                <p className="mt-4 px-1 text-xs leading-relaxed text-muted-foreground">
+                  {t('guide.levelManual')}
+                </p>
               </motion.div>
             )}
           </AnimatePresence>

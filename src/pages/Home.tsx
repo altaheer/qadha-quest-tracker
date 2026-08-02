@@ -6,6 +6,7 @@ import { useHabitsTracking, habitCategories, levelHabits } from '@/hooks/useHabi
 import { useMissions, computeProgress, getActionLabel } from '@/hooks/useMissions';
 import { useTranslation } from '@/lib/i18n';
 import { getDateString, localeFor } from '@/lib/date';
+import { PageHint } from '@/components/PageHint';
 import { cn } from '@/lib/utils';
 import {
   Chip,
@@ -171,6 +172,8 @@ export default function Home() {
   return (
     <Page className="space-y-3">
       <p className="pb-1 text-sm text-muted-foreground">{t('home.subtitle')}</p>
+
+      <PageHint id="home" />
 
       {/* The backlog — the reason the app exists, so it leads. */}
       <Panel to="/qadha" className="animate-rise">

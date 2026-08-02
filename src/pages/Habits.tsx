@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Sun, Moon as MoonIcon, Bed, Utensils, Star, Settings2, Pause, Play, Info, ChevronDown } from 'lucide-react';
-import { useHabitsTracking, habitCategories, levelHabits } from '@/hooks/useHabitsTracking';
+import { useHabitsTracking, habitCategories, levelHabitCount } from '@/hooks/useHabitsTracking';
 import { TimeBoundSection } from '@/components/TimeBoundSection';
 import { haptics } from '@/lib/haptics';
 import { useTranslation } from '@/lib/i18n';
@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { HadithInfoContent } from '@/components/HadithInfoContent';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
+import { PageHint } from '@/components/PageHint';
 import { Page, PageHeader, Panel, SectionLabel, Stat } from '@/components/common';
 
 type HabitLevel = 'easy' | 'medium' | 'hard' | 'sahabah' | 'custom';
@@ -20,12 +21,6 @@ type HabitLevel = 'easy' | 'medium' | 'hard' | 'sahabah' | 'custom';
 const SELECTED_LEVEL = 'bg-primary text-primary-foreground';
 
 const iconMap: Record<string, typeof Sun> = { Sun, Moon: MoonIcon, Bed, Utensils, Star };
-
-const allHabitsCount = habitCategories.reduce((n, c) => n + c.habits.length, 0);
-
-function levelCount(key: HabitLevel) {
-  return key === 'custom' ? allHabitsCount : levelHabits[key].length;
-}
 
 function InfoButton({ id }: { id: string }) {
   return (
@@ -71,6 +66,8 @@ export default function Habits() {
     <Page>
       <PageHeader title={t('habits.title')} subtitle={t('habits.subtitle')} />
 
+      <PageHint id="habits" />
+
       <Panel>
         <div className="flex items-center justify-between gap-4 px-5 py-4">
           <Stat value={getCompletedCount() + '/' + getActiveCount()} label={t('habits.completed')} tone="primary" />
@@ -101,7 +98,7 @@ export default function Habits() {
             )}
           >
             {t(`habits.${key}` as never)}
-            <span className="ms-1.5 tabular-nums opacity-60">{levelCount(key)}</span>
+            <span className="ms-1.5 tabular-nums opacity-60">{levelHabitCount(key)}</span>
           </button>
         ))}
       </div>

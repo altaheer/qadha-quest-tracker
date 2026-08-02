@@ -6,6 +6,7 @@ import { useQadhaPrayers, PrayerCounts } from '@/hooks/useQadhaPrayers';
 import { useUserPrefs } from '@/hooks/useUserPrefs';
 import { useTranslation } from '@/lib/i18n';
 import { localeFor } from '@/lib/date';
+import { PageHint } from '@/components/PageHint';
 import { EmptyState, Page, PageHeader, Panel, SectionLabel, Stat } from '@/components/common';
 
 const PRAYERS: { key: keyof PrayerCounts; nameKey: string; arabicName: string }[] = [
@@ -57,6 +58,8 @@ export default function Qadha() {
   return (
     <Page>
       <PageHeader title={t('qadha.title')} subtitle={t('qadha.subtitle')} />
+
+      <PageHint id="qadha" />
 
       {totalPrayers === 0 ? (
         <EmptyState icon={Sparkles} title={t('qadha.empty')} description={t('qadha.emptyDesc')} />

@@ -18,6 +18,11 @@ export function markTooltipSeen(id: string) {
   try { localStorage.setItem(KEY, JSON.stringify(seen)); } catch {}
 }
 
+/** Forgets every dismissed hint, so each screen introduces itself once more. */
+export function resetTooltips() {
+  try { localStorage.removeItem(KEY); } catch {}
+}
+
 interface Props {
   id: string;
   show: boolean;

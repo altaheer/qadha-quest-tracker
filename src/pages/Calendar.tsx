@@ -18,6 +18,7 @@ import {
 } from 'date-fns';
 import { sv, enUS, tr, arSA, type Locale } from 'date-fns/locale';
 import { useTranslation } from '@/lib/i18n';
+import { PageHint } from '@/components/PageHint';
 
 const localeMap: Record<string, Locale> = { en: enUS, sv, tr, ar: arSA };
 
@@ -56,6 +57,8 @@ export default function Calendar() {
   return (
     <div className="p-4 pb-24">
       <div className="max-w-lg mx-auto">
+        <PageHint id="calendar" />
+
         <div className="flex items-center justify-between mb-6">
           <Button variant="ghost" size="icon" onClick={prevMonth}><ChevronLeft className="h-5 w-5" /></Button>
           <div className="text-center">

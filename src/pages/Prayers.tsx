@@ -14,6 +14,7 @@ import { haptics } from '@/lib/haptics';
 import { useTranslation } from '@/lib/i18n';
 import { AlertCircle, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { PageHint } from '@/components/PageHint';
 import { Meter, Page, PageHeader } from '@/components/common';
 
 const COMBO_THRESHOLDS = [10, 30, 50, 100];
@@ -96,6 +97,8 @@ export default function Prayers() {
       <JumpToTodayButton show={!isToday} onClick={() => setSelectedDate(new Date())} />
 
       <PageHeader title={t('prayers.title')} subtitle={t('prayers.subtitle')} />
+
+      <PageHint id="prayers" />
 
       <DateNavigator selectedDate={selectedDate} onDateChange={setSelectedDate} />
 

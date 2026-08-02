@@ -1,9 +1,10 @@
 import { useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { useDataBackup } from '@/hooks/useDataBackup';
-import { Download, Upload, Database, Shield, RotateCcw, Palette, Clock, Trash2 } from 'lucide-react';
+import { ChevronRight, Download, Upload, Database, HelpCircle, Shield, RotateCcw, Palette, Clock, Trash2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { LanguageSelector } from '@/components/LanguageSelector';
@@ -64,6 +65,22 @@ export default function Settings() {
       <PageHeader title={t('settings.title')} subtitle={t('settings.subtitle')} />
 
       <div className="space-y-3">
+        <Link
+          to="/guide"
+          className="surface-interactive flex items-center gap-3 px-4 py-4"
+        >
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <HelpCircle className="h-5 w-5" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="font-display text-lg font-semibold text-foreground">
+              {t('guide.openGuide')}
+            </p>
+            <p className="text-sm text-muted-foreground">{t('guide.openGuideDesc')}</p>
+          </div>
+          <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/60 rtl:rotate-180" />
+        </Link>
+
         <LanguageSelector />
 
 

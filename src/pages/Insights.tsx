@@ -11,6 +11,7 @@ import { OneTimeTooltip } from '@/components/OneTimeTooltip';
 import { useMissions } from '@/hooks/useMissions';
 import { BarChart3, Target } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
+import { PageHint } from '@/components/PageHint';
 import { EmptyState, Page, PageHeader } from '@/components/common';
 
 export default function Insights() {
@@ -24,6 +25,8 @@ export default function Insights() {
   return (
     <Page className="space-y-5">
       <PageHeader title={t('insights.title')} subtitle={t('insights.subtitle')} />
+
+      <PageHint id="insights" />
 
       {!hasData && <EmptyState icon={BarChart3} title={t('insights.empty')} />}
 

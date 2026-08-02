@@ -14,6 +14,7 @@ import Habits from "./pages/Habits";
 import Insights from "./pages/Insights";
 import Calendar from "./pages/Calendar";
 import Settings from "./pages/Settings";
+import Guide from "./pages/Guide";
 import NotFound from "./pages/NotFound";
 import Missions from "./pages/Missions";
 
@@ -54,6 +55,7 @@ function AnimatedRoutes() {
         <Route path="/insights" element={wrap(<Insights />)} />
         <Route path="/calendar" element={wrap(<Calendar />)} />
         <Route path="/settings" element={wrap(<Settings />)} />
+        <Route path="/guide" element={wrap(<Guide />)} />
         <Route path="/missions" element={wrap(<Missions />)} />
         <Route path="*" element={wrap(<NotFound />)} />
 

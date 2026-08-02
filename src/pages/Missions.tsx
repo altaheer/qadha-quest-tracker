@@ -14,6 +14,7 @@ import {
   type MissionQualifier,
 } from '@/hooks/useMissions';
 import { CompletionCelebration } from '@/components/CompletionCelebration';
+import { PageHint } from '@/components/PageHint';
 
 const PRAYERS = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'] as const;
 
@@ -90,6 +91,8 @@ export default function MissionsPage() {
       dir={isRTL ? 'rtl' : 'ltr'}
       style={arabicStyle}
     >
+      <PageHint id="missions" />
+
       <div className="text-center mb-2">
         <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/10 mb-3">
           <Target className="h-7 w-7 text-primary" />
