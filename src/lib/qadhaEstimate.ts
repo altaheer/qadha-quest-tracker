@@ -1,142 +1,86 @@
 /**
  * Qadha estimation helper.
  *
- * Lets a user estimate how many prayers they owe (qadha) based on:
- *   - the age they became accountable (bulugh)
- *   - the age they began praying consistently
- *   - their current age
+ * Works out roughly how many prayers a person owes from two rough dates: when
+ * they reached accountability (bulugh), and when they began praying regularly —
+ * or today, if they are starting now.
  *
- * The gap between bulugh and "started praying consistently" is treated as
- * the period of missed prayers. We deliberately count the full gap (we do
- * NOT subtract scattered prayers the user may have prayed) because the
- * scholarly safer position is to over-estimate qadha rather than under-count.
- * The user can always adjust the numbers down manually afterwards.
+ * Dates rather than ages, because "March 2015" is something people can actually
+ * recall, and because the "I have not started yet" case cannot be expressed as a
+ * pair of ages at all.
+ *
+ * The full gap is counted. We deliberately do NOT subtract scattered prayers the
+ * user may have prayed during the period: the safer position is to over-estimate
+ * qadha rather than under-count, and the counters can always be adjusted down by
+ * hand afterwards.
+ *
+ * Menstruation is the one deduction offered, because prayers missed during
+ * menses are not made up at all — that is agreed across the madhhabs, unlike
+ * fasts, which are. Excluding those days therefore gives the correct figure, not
+ * a lenient one. It is off by default and the user opts in.
  *
  * This is an ESTIMATE, not a religious ruling. The UI shows a disclaimer.
- *
- * Language handling mirrors hadith.ts:
- *   'en' and 'sv' → English text (sv falls back to en)
- *   'tr'          → Turkish text
- *   'ar'          → Arabic text
  */
 
+/** A rough point in time. `month` is 0–11, matching `Date`. */
+export interface YearMonth {
+  year: number;
+  month: number;
+}
+
 export interface QadhaEstimateInput {
-  bulughAge: number;        // age of accountability, e.g. 13
-  startedPrayingAge: number; // age they began praying consistently
-  currentAge: number;        // their age now
+  /** When they reached accountability. */
+  from: YearMonth;
+  /** When they began praying regularly, or `'today'` if they are starting now. */
+  to: YearMonth | 'today';
+  /** Days per month to exclude for menstruation. Omitted or 0 applies nothing. */
+  menstrualDaysPerMonth?: number;
 }
 
 export interface QadhaEstimateResult {
-  years: number;             // estimated years of missed prayers
-  totalPrayers: number;      // years * 365 * 5 (all five daily prayers)
-  perPrayer: number;         // totalPrayers / 5 (count for each prayer type)
+  /** Calendar days in the gap, before any deduction. */
+  days: number;
+  /** Days removed for menstruation. */
+  excludedDays: number;
+  /** Payable days — each contributes one Fajr, one Dhuhr, and so on. */
+  perPrayer: number;
+  /** perPrayer × 5. */
+  totalPrayers: number;
 }
 
-/**
- * Core calculation.
- * The missed period is from bulugh until they started praying consistently.
- * If startedPrayingAge <= bulughAge, there is no missed period (returns 0).
- */
-export function estimateQadha(input: QadhaEstimateInput): QadhaEstimateResult {
-  const { bulughAge, startedPrayingAge } = input;
+const MS_PER_DAY = 86_400_000;
 
-  const missedYears = Math.max(0, startedPrayingAge - bulughAge);
-  const daysPerYear = 365;
-  const perPrayer = Math.round(missedYears * daysPerYear);
-  const totalPrayers = perPrayer * 5;
+/** Mean length of a Gregorian month, used to turn a day span into months. */
+const DAYS_PER_MONTH = 30.4375;
+
+/**
+ * A rough month is anchored to its middle rather than its first day, so neither
+ * endpoint claims precision the answer does not have. Picking the 1st would bias
+ * every estimate upward by half a month at each end.
+ */
+function anchor(point: YearMonth | 'today'): Date {
+  if (point === 'today') return new Date();
+  return new Date(point.year, point.month, 15);
+}
+
+export function estimateQadha(input: QadhaEstimateInput): QadhaEstimateResult {
+  const { from, to, menstrualDaysPerMonth = 0 } = input;
+
+  const spanMs = anchor(to).getTime() - anchor(from).getTime();
+  const days = Math.max(0, Math.round(spanMs / MS_PER_DAY));
+
+  // Clamped so an implausible days-per-month can never drive the count negative.
+  const excludedDays = Math.min(
+    days,
+    Math.round((days / DAYS_PER_MONTH) * Math.max(0, menstrualDaysPerMonth)),
+  );
+
+  const perPrayer = days - excludedDays;
 
   return {
-    years: missedYears,
-    totalPrayers,
+    days,
+    excludedDays,
     perPrayer,
+    totalPrayers: perPrayer * 5,
   };
-}
-
-/**
- * UI text for all four languages.
- * sv intentionally falls back to en (same decision as hadith content).
- */
-export interface QadhaEstimateStrings {
-  title: string;
-  intro: string;
-  bulughLabel: string;
-  bulughHint: string;
-  startedLabel: string;
-  startedHint: string;
-  currentAgeLabel: string;
-  calculate: string;
-  resultPrefix: string;     // shown before the number, e.g. "Estimated missed prayers:"
-  resultPerPrayer: string;  // e.g. "per prayer (Fajr, Dhuhr, ...)"
-  applyButton: string;      // "Use this estimate"
-  cancelButton: string;
-  saferNote: string;        // the "count it all, safer to over-estimate" note
-  disclaimer: string;       // "this is an estimate, not a ruling"
-}
-
-type Lang = 'en' | 'sv' | 'tr' | 'ar';
-
-const STRINGS: Record<'en' | 'tr' | 'ar', QadhaEstimateStrings> = {
-  en: {
-    title: 'Help me estimate',
-    intro:
-      'Not sure how many prayers you owe? Answer a few questions and we will estimate it for you.',
-    bulughLabel: 'Age you became accountable (bulugh)',
-    bulughHint:
-      'The age you reached religious maturity. If unsure, many estimate around 12–15.',
-    startedLabel: 'Age you began praying consistently',
-    startedHint: 'Roughly when praying became a regular daily habit.',
-    currentAgeLabel: 'Your age now',
-    calculate: 'Calculate estimate',
-    resultPrefix: 'Estimated missed prayers',
-    resultPerPrayer: 'for each prayer (Fajr, Dhuhr, Asr, Maghrib, Isha)',
-    applyButton: 'Use this estimate',
-    cancelButton: 'Cancel',
-    saferNote:
-      'You likely prayed some prayers during this time. You can estimate and subtract them yourself — but many choose to count it all, to be safe. It is better to pray a few extra than to miss some.',
-    disclaimer:
-      'This is only an estimate, not a religious ruling. If in doubt, ask a knowledgeable person.',
-  },
-  tr: {
-    title: 'Tahmin etmeme yardım et',
-    intro:
-      'Kaç namaz borcun olduğundan emin değil misin? Birkaç soruyu yanıtla, senin için tahmin edelim.',
-    bulughLabel: 'Sorumlu olduğun yaş (bulûğ)',
-    bulughHint:
-      'Dinî olarak ergenliğe (bulûğa) eriştiğin yaş. Emin değilsen birçok kişi 12–15 civarı tahmin eder.',
-    startedLabel: 'Düzenli namaz kılmaya başladığın yaş',
-    startedHint: 'Namazın günlük düzenli bir alışkanlık hâline geldiği yaklaşık yaş.',
-    currentAgeLabel: 'Şu anki yaşın',
-    calculate: 'Tahmini hesapla',
-    resultPrefix: 'Tahmini kaçırılan namaz',
-    resultPerPrayer: 'her namaz için (Sabah, Öğle, İkindi, Akşam, Yatsı)',
-    applyButton: 'Bu tahmini kullan',
-    cancelButton: 'İptal',
-    saferNote:
-      'Bu süre zarfında muhtemelen bazı namazları kıldın. Bunları kendin tahmin edip çıkarabilirsin — ancak birçok kişi, ihtiyaten hepsini saymayı tercih eder. Birkaç fazla namaz kılmak, bazılarını eksik bırakmaktan daha iyidir.',
-    disclaimer:
-      'Bu yalnızca bir tahmindir, dinî bir hüküm değildir. Şüphen varsa bilen birine danış.',
-  },
-  ar: {
-    title: 'ساعدني في التقدير',
-    intro: 'لست متأكداً من عدد الصلوات التي عليك قضاؤها؟ أجب عن بعض الأسئلة وسنقدّرها لك.',
-    bulughLabel: 'سن التكليف (البلوغ)',
-    bulughHint: 'السن الذي بلغت فيه. إن لم تكن متأكداً، يقدّره الكثيرون بين 12 و15 عاماً.',
-    startedLabel: 'السن الذي بدأت فيه الصلاة بانتظام',
-    startedHint: 'تقريباً عندما أصبحت الصلاة عادة يومية منتظمة.',
-    currentAgeLabel: 'عمرك الآن',
-    calculate: 'احسب التقدير',
-    resultPrefix: 'الصلوات الفائتة المقدّرة',
-    resultPerPrayer: 'لكل صلاة (الفجر، الظهر، العصر، المغرب، العشاء)',
-    applyButton: 'استخدم هذا التقدير',
-    cancelButton: 'إلغاء',
-    saferNote:
-      'من المرجّح أنك صلّيت بعض الصلوات خلال هذه الفترة. يمكنك تقديرها وطرحها بنفسك — لكن كثيرين يختارون عدّها كاملة احتياطاً. أن تصلّي بضع صلوات زائدة خير من أن تفوتك بعضها.',
-    disclaimer: 'هذا تقدير فقط وليس فتوى. إن كنت في شك فاسأل أهل العلم.',
-  },
-};
-
-export function getQadhaStrings(lang: string): QadhaEstimateStrings {
-  if (lang === 'tr') return STRINGS.tr;
-  if (lang === 'ar') return STRINGS.ar;
-  return STRINGS.en; // 'en' and 'sv'
 }

@@ -53,6 +53,37 @@ type GuideStrings = {
   dataDesc: string;
 };
 
+/**
+ * The guided "work out my qadha" flow. These used to live in a private string
+ * table inside qadhaEstimate.ts, where Swedish silently fell back to English.
+ */
+type QadhaSetupStrings = {
+  open: string;
+  intro: string;
+  pubertyQ: string;
+  pubertyHint: string;
+  startedQ: string;
+  startedYes: string;
+  startedYesDesc: string;
+  startedNo: string;
+  startedNoDesc: string;
+  whenQ: string;
+  whenHint: string;
+  resultLabel: string;
+  perPrayer: string;
+  totalLabel: string;
+  menstrualToggle: string;
+  menstrualDesc: string;
+  menstrualPerMonth: string;
+  excludedNote: string;
+  saferNote: string;
+  disclaimer: string;
+  apply: string;
+  manual: string;
+  month: string;
+  year: string;
+};
+
 export type Translations = {
   nav: { home: string; prayers: string; qadha: string; habits: string; insights: string; calendar: string; settings: string; more: string };
   home: { subtitle: string; today: string; rightNow: string; dayComplete: string; moreItems: string; sunnahLabel: string; last5days: string; summary: string; remaining: string; active: string };
@@ -79,6 +110,7 @@ export type Translations = {
   hadith: { source: string; fadl: string; comingSoon: string };
   missions: { title: string; subtitle: string; newMission: string; iIntendTo: string; for: string; days: string; begin: string; active: string; completed: string; endedTitle: string; accepted: string; endedEarly: string; tryAgain: string; bonus: string; missesUsed: string; remaining: string; allFive: string; onTime: string; inJamaah: string; custom: string; allowingUpTo: string; misses: string; verbPray: string; verbDo: string; verbRead: string; verbGive: string; verbSay: string; missedBeforeLose: string; mayMiss: string };
   guide: GuideStrings;
+  qadhaSetup: QadhaSetupStrings;
 };
 
 
@@ -167,6 +199,32 @@ const en: Translations = {
     sectionLevels: 'Habit levels',
     sectionData: 'Your data',
     dataDesc: 'Everything stays on this device. There is no account and nothing is uploaded. Export a backup from Settings if you want a copy — that file is the only way your data moves to another device.',
+  },
+  qadhaSetup: {
+    open: 'Help me work it out',
+    intro: 'Two rough dates are enough. Nothing here has to be exact.',
+    pubertyQ: 'Roughly when did you reach puberty?',
+    pubertyHint: 'The age you became accountable. If you are unsure, most estimate somewhere between 12 and 15.',
+    startedQ: 'Have you started praying regularly?',
+    startedYes: 'Yes',
+    startedYesDesc: 'Praying is a regular habit now',
+    startedNo: 'Not yet',
+    startedNoDesc: 'I am starting today',
+    whenQ: 'Roughly when did you start?',
+    whenHint: 'About when praying became a daily habit.',
+    resultLabel: 'Estimated missed prayers',
+    perPrayer: 'for each prayer — Fajr, Dhuhr, Asr, Maghrib and Isha',
+    totalLabel: '{n} prayers in total',
+    menstrualToggle: 'Account for menstrual days',
+    menstrualDesc: 'Prayers missed during menstruation are not made up, so those days can be left out.',
+    menstrualPerMonth: 'Days per month',
+    excludedNote: '{n} days left out',
+    saferNote: 'You likely prayed some prayers during this time. You can estimate and subtract them yourself — but many choose to count it all, to be safe. It is better to pray a few extra than to miss some.',
+    disclaimer: 'This is only an estimate, not a religious ruling. If in doubt, ask a knowledgeable person.',
+    apply: 'Use this estimate',
+    manual: 'I already know my numbers',
+    month: 'Month',
+    year: 'Year',
   },
 };
 
@@ -257,6 +315,32 @@ const sv: Translations = {
     sectionData: 'Din data',
     dataDesc: 'Allt stannar på den här enheten. Det finns inget konto och inget laddas upp. Exportera en säkerhetskopia i Inställningar om du vill ha en kopia — den filen är enda sättet din data flyttas till en annan enhet.',
   },
+  qadhaSetup: {
+    open: 'Hjälp mig räkna ut det',
+    intro: 'Två ungefärliga datum räcker. Inget här behöver vara exakt.',
+    pubertyQ: 'Ungefär när kom du i puberteten?',
+    pubertyHint: 'Åldern då du blev ansvarig (bulugh). Är du osäker uppskattar de flesta någonstans mellan 12 och 15.',
+    startedQ: 'Har du börjat be regelbundet?',
+    startedYes: 'Ja',
+    startedYesDesc: 'Bönen är en regelbunden vana nu',
+    startedNo: 'Inte än',
+    startedNoDesc: 'Jag börjar idag',
+    whenQ: 'Ungefär när började du?',
+    whenHint: 'Ungefär när bönen blev en daglig vana.',
+    resultLabel: 'Uppskattat antal missade böner',
+    perPrayer: 'för varje bön — Fajr, Dhuhr, Asr, Maghrib och Isha',
+    totalLabel: '{n} böner totalt',
+    menstrualToggle: 'Ta hänsyn till menstruation',
+    menstrualDesc: 'Böner som missas under menstruation tas inte igen, så de dagarna kan räknas bort.',
+    menstrualPerMonth: 'Dagar per månad',
+    excludedNote: '{n} dagar borträknade',
+    saferNote: 'Du bad förmodligen några böner under den här tiden. Du kan uppskatta och dra av dem själv — men många väljer att räkna allt, för säkerhets skull. Det är bättre att be några extra än att missa några.',
+    disclaimer: 'Detta är endast en uppskattning, inte ett religiöst utlåtande. Är du osäker, fråga någon kunnig.',
+    apply: 'Använd uppskattningen',
+    manual: 'Jag vet redan mina siffror',
+    month: 'Månad',
+    year: 'År',
+  },
 };
 
 
@@ -346,6 +430,32 @@ const tr: Translations = {
     sectionData: 'Verilerin',
     dataDesc: "Her şey bu cihazda kalır. Hesap yok, hiçbir şey yüklenmez. Bir kopya istiyorsan Ayarlar'dan yedek al — verilerinin başka bir cihaza taşınmasının tek yolu o dosyadır.",
   },
+  qadhaSetup: {
+    open: 'Hesaplamama yardım et',
+    intro: 'İki yaklaşık tarih yeterli. Buradaki hiçbir şeyin kesin olması gerekmiyor.',
+    pubertyQ: 'Yaklaşık olarak ne zaman ergenliğe girdin?',
+    pubertyHint: 'Dinen sorumlu olduğun yaş (bulûğ). Emin değilsen çoğu kişi 12 ile 15 arasını tahmin eder.',
+    startedQ: 'Düzenli namaz kılmaya başladın mı?',
+    startedYes: 'Evet',
+    startedYesDesc: 'Namaz artık düzenli bir alışkanlık',
+    startedNo: 'Henüz değil',
+    startedNoDesc: 'Bugün başlıyorum',
+    whenQ: 'Yaklaşık olarak ne zaman başladın?',
+    whenHint: 'Namazın günlük bir alışkanlık hâline geldiği zaman.',
+    resultLabel: 'Tahmini kaçırılan namaz',
+    perPrayer: 'her namaz için — Sabah, Öğle, İkindi, Akşam ve Yatsı',
+    totalLabel: 'toplam {n} namaz',
+    menstrualToggle: 'Âdet günlerini hesaba kat',
+    menstrualDesc: 'Âdet döneminde kaçan namazlar kaza edilmez, bu yüzden o günler çıkarılabilir.',
+    menstrualPerMonth: 'Ayda kaç gün',
+    excludedNote: '{n} gün çıkarıldı',
+    saferNote: 'Bu süre zarfında muhtemelen bazı namazları kıldın. Bunları kendin tahmin edip çıkarabilirsin — ancak birçok kişi, ihtiyaten hepsini saymayı tercih eder. Birkaç fazla namaz kılmak, bazılarını eksik bırakmaktan daha iyidir.',
+    disclaimer: 'Bu yalnızca bir tahmindir, dinî bir hüküm değildir. Şüphen varsa bilen birine danış.',
+    apply: 'Bu tahmini kullan',
+    manual: 'Sayılarımı zaten biliyorum',
+    month: 'Ay',
+    year: 'Yıl',
+  },
 };
 
 
@@ -434,6 +544,32 @@ const ar: Translations = {
     sectionLevels: 'مستويات العادات',
     sectionData: 'بياناتك',
     dataDesc: 'كل شيء يبقى على هذا الجهاز. لا حساب ولا رفع لأي بيانات. صدّر نسخة احتياطية من الإعدادات إن أردت نسخة — ذلك الملف هو الطريقة الوحيدة لنقل بياناتك إلى جهاز آخر.',
+  },
+  qadhaSetup: {
+    open: 'ساعدني في الحساب',
+    intro: 'تاريخان تقريبيان يكفيان. لا شيء هنا يحتاج إلى دقة.',
+    pubertyQ: 'متى بلغت تقريباً؟',
+    pubertyHint: 'السن الذي صرت فيه مكلَّفاً. إن لم تكن متأكداً، يقدّره الكثيرون بين 12 و15 عاماً.',
+    startedQ: 'هل بدأت الصلاة بانتظام؟',
+    startedYes: 'نعم',
+    startedYesDesc: 'الصلاة الآن عادة منتظمة',
+    startedNo: 'ليس بعد',
+    startedNoDesc: 'أبدأ اليوم',
+    whenQ: 'متى بدأت تقريباً؟',
+    whenHint: 'تقريباً حين صارت الصلاة عادة يومية.',
+    resultLabel: 'الصلوات الفائتة المقدّرة',
+    perPrayer: 'لكل صلاة — الفجر والظهر والعصر والمغرب والعشاء',
+    totalLabel: '{n} صلاة في المجموع',
+    menstrualToggle: 'احتساب أيام الحيض',
+    menstrualDesc: 'الصلوات التي تفوت في الحيض لا تُقضى، فيمكن استثناء تلك الأيام.',
+    menstrualPerMonth: 'أيام في الشهر',
+    excludedNote: 'استُثنيت {n} يوماً',
+    saferNote: 'من المرجّح أنك صلّيت بعض الصلوات خلال هذه الفترة. يمكنك تقديرها وطرحها بنفسك — لكن كثيرين يختارون عدّها كاملة احتياطاً. أن تصلّي بضع صلوات زائدة خير من أن تفوتك بعضها.',
+    disclaimer: 'هذا تقدير فقط وليس فتوى. إن كنت في شك فاسأل أهل العلم.',
+    apply: 'استخدم هذا التقدير',
+    manual: 'أعرف أرقامي بالفعل',
+    month: 'الشهر',
+    year: 'السنة',
   },
 };
 

@@ -9,6 +9,7 @@ import { useQadhaPrayers } from '@/hooks/useQadhaPrayers';
 import { useHabitsTracking, levelHabitCount } from '@/hooks/useHabitsTracking';
 import { useUserPrefs } from '@/hooks/useUserPrefs';
 import { Switch } from '@/components/ui/switch';
+import { QadhaSetupFlow } from '@/components/QadhaSetupFlow';
 import { cn } from '@/lib/utils';
 
 const languageFlags: Record<Language, string> = { en: '🇬🇧', sv: '🇸🇪', tr: '🇹🇷', ar: '🇸🇦' };
@@ -63,6 +64,8 @@ export function Onboarding({ onComplete }: Props) {
   const [counts, setCounts] = useState<Record<string, string>>({
     fajr: '', dhuhr: '', asr: '', maghrib: '', isha: '',
   });
+  /** False while the guided flow is running; true once there are numbers to show. */
+  const [manualEntry, setManualEntry] = useState(false);
   const { setCount } = useQadhaPrayers();
   const { applyLevel } = useHabitsTracking();
   const { autoMarkMissed, setAutoMarkMissed, autoMarkMissedTime, setAutoMarkMissedTime } = useUserPrefs();
@@ -204,61 +207,86 @@ export function Onboarding({ onComplete }: Props) {
                     {t('onboarding.step2Title')}
                   </h2>
                   <p className="text-muted-foreground text-sm">
-                    {t('onboarding.step2Desc')}
+                    {manualEntry ? t('onboarding.step2Desc') : t('qadhaSetup.intro')}
                   </p>
                 </div>
 
-                <div className="space-y-3 mb-6">
-                  {prayerKeys.map((k) => (
-                    <div key={k} className="flex items-center gap-3">
-                      <Label htmlFor={k} className="w-24 capitalize">
-                        {t(`prayerNames.${k}` as TKey)}
-                      </Label>
-                      <Input
-                        id={k}
-                        type="number"
-                        min={0}
-                        inputMode="numeric"
-                        placeholder="0"
-                        value={counts[k]}
-                        onChange={(e) => setCounts((c) => ({ ...c, [k]: e.target.value }))}
-                      />
-                    </div>
-                  ))}
-                </div>
-
-                <div className="rounded-2xl border border-border bg-card p-4 mb-4 space-y-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-foreground">{t('settings.autoMissed')}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{t('onboarding.autoMissedNote')}</p>
-                    </div>
-                    <Switch checked={autoMarkMissed} onCheckedChange={setAutoMarkMissed} />
+                {/*
+                  The guided flow leads, because not knowing these five numbers is
+                  usually the reason someone installed the app. Typing them stays
+                  available for anyone who already has them.
+                */}
+                {!manualEntry ? (
+                  <QadhaSetupFlow
+                    onApply={(perPrayer) => {
+                      setCounts(
+                        Object.fromEntries(prayerKeys.map((k) => [k, String(perPrayer)])),
+                      );
+                      setManualEntry(true);
+                    }}
+                    onManual={() => setManualEntry(true)}
+                  />
+                ) : (
+                  <div className="space-y-3 mb-6">
+                    {prayerKeys.map((k) => (
+                      <div key={k} className="flex items-center gap-3">
+                        <Label htmlFor={k} className="w-24 capitalize">
+                          {t(`prayerNames.${k}` as TKey)}
+                        </Label>
+                        <Input
+                          id={k}
+                          type="number"
+                          min={0}
+                          inputMode="numeric"
+                          placeholder="0"
+                          value={counts[k]}
+                          onChange={(e) => setCounts((c) => ({ ...c, [k]: e.target.value }))}
+                        />
+                      </div>
+                    ))}
                   </div>
-                  {autoMarkMissed && (
-                    <div className="flex items-center justify-between gap-3 pt-1 border-t border-border/50">
-                      <span className="text-sm text-foreground">{t('settings.autoMissedTime')}</span>
-                      <Input
-                        type="time"
-                        value={autoMarkMissedTime}
-                        onChange={(e) => setAutoMarkMissedTime(e.target.value || '00:00')}
-                        className="w-28"
-                      />
-                    </div>
-                  )}
-                  <p className="text-xs text-muted-foreground italic">
-                    {t('onboarding.editLaterNote')}
-                  </p>
-                </div>
+                )}
 
-                <div className="space-y-2">
-                  <Button size="lg" className="w-full" onClick={goNext}>
-                    {t('common.next')}
-                  </Button>
-                  <Button variant="ghost" className="w-full" onClick={skipQadha}>
-                    {t('onboarding.dontKnow')}
-                  </Button>
-                </div>
+                {/*
+                  Held back while the guided flow is running — it carries its own
+                  buttons, and a second set below them reads as two ways forward.
+                */}
+                {manualEntry && (
+                  <>
+                    <div className="rounded-2xl border border-border bg-card p-4 mb-4 space-y-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-foreground">{t('settings.autoMissed')}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">{t('onboarding.autoMissedNote')}</p>
+                        </div>
+                        <Switch checked={autoMarkMissed} onCheckedChange={setAutoMarkMissed} />
+                      </div>
+                      {autoMarkMissed && (
+                        <div className="flex items-center justify-between gap-3 pt-1 border-t border-border/50">
+                          <span className="text-sm text-foreground">{t('settings.autoMissedTime')}</span>
+                          <Input
+                            type="time"
+                            value={autoMarkMissedTime}
+                            onChange={(e) => setAutoMarkMissedTime(e.target.value || '00:00')}
+                            className="w-28"
+                          />
+                        </div>
+                      )}
+                      <p className="text-xs text-muted-foreground italic">
+                        {t('onboarding.editLaterNote')}
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Button size="lg" className="w-full" onClick={goNext}>
+                        {t('common.next')}
+                      </Button>
+                      <Button variant="ghost" className="w-full" onClick={skipQadha}>
+                        {t('onboarding.dontKnow')}
+                      </Button>
+                    </div>
+                  </>
+                )}
               </motion.div>
             )}
 

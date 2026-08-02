@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Minus, Plus, Sparkles } from 'lucide-react';
-import { QadhaEstimateDialog } from '@/components/QadhaEstimateDialog';
+import { QadhaSetupDialog } from '@/components/QadhaSetupDialog';
 import { QadhaPrayerRow } from '@/components/QadhaPrayerRow';
 import { useQadhaPrayers, PrayerCounts } from '@/hooks/useQadhaPrayers';
 import { useUserPrefs } from '@/hooks/useUserPrefs';
@@ -136,7 +136,7 @@ export default function Qadha() {
       </Panel>
 
       <div className="pt-4">
-        <QadhaEstimateDialog />
+        <QadhaSetupDialog />
       </div>
 
       {totalPrayers > 0 && (
