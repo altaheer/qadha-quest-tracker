@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getDateString } from '@/lib/date';
+import { safeReadJSON } from '@/lib/storage';
 import type {
   PrayerStatus,
   PrayerEntry,
@@ -156,15 +157,13 @@ export function usePrayerTracking(selectedDate?: Date) {
   const dateKey = getDateString(currentDate);
   const isToday = dateKey === getDateString(today);
 
-  const [history, setHistory] = useState<PrayerHistory>(() => {
-    const stored = localStorage.getItem(HISTORY_KEY);
-    return stored ? JSON.parse(stored) : {};
-  });
+  const [history, setHistory] = useState<PrayerHistory>(() =>
+    safeReadJSON(HISTORY_KEY, {} as PrayerHistory),
+  );
 
-  const [streaks, setStreaks] = useState<PrayerStreaks>(() => {
-    const stored = localStorage.getItem(STREAKS_KEY);
-    return stored ? JSON.parse(stored) : defaultStreaks;
-  });
+  const [streaks, setStreaks] = useState<PrayerStreaks>(() =>
+    safeReadJSON(STREAKS_KEY, defaultStreaks),
+  );
 
   const combo = recalcComboFromHistory(history);
 
@@ -178,10 +177,8 @@ export function usePrayerTracking(selectedDate?: Date) {
   // Rehydrate from localStorage when useCloudSync patches it in the background
   useEffect(() => {
     const rehydrate = () => {
-      try {
-        const raw = localStorage.getItem(HISTORY_KEY);
-        if (raw) setHistory(JSON.parse(raw));
-      } catch {}
+      if (localStorage.getItem(HISTORY_KEY) === null) return;
+      setHistory(safeReadJSON(HISTORY_KEY, {} as PrayerHistory));
     };
     const onStorage = (e: StorageEvent) => { if (e.key === HISTORY_KEY) rehydrate(); };
     window.addEventListener('prayer-history-updated', rehydrate);
@@ -197,8 +194,7 @@ export function usePrayerTracking(selectedDate?: Date) {
   }, [streaks]);
 
   const updateQadhaCount = useCallback((prayer: keyof DailyPrayers, delta: number) => {
-    const stored = localStorage.getItem(QADHA_KEY);
-    const qadhaCounts = stored ? JSON.parse(stored) : { fajr: 0, dhuhr: 0, asr: 0, maghrib: 0, isha: 0 };
+    const qadhaCounts = safeReadJSON(QADHA_KEY, { fajr: 0, dhuhr: 0, asr: 0, maghrib: 0, isha: 0 });
     qadhaCounts[prayer] = Math.max(0, qadhaCounts[prayer] + delta);
     localStorage.setItem(QADHA_KEY, JSON.stringify(qadhaCounts));
     window.dispatchEvent(new Event('qadha-updated'));
@@ -207,14 +203,22 @@ export function usePrayerTracking(selectedDate?: Date) {
   // Auto-mark pending past prayers as missed once the day's cutoff has passed.
   useEffect(() => {
     const sweep = () => {
-      let prefs: { autoMarkMissed?: boolean; autoMarkMissedTime?: string } = {};
-      try { prefs = JSON.parse(localStorage.getItem('app-prefs') || '{}'); } catch {}
+      const prefs = safeReadJSON<{ autoMarkMissed?: boolean; autoMarkMissedTime?: string }>(
+        'app-prefs',
+        {},
+      );
       if (prefs.autoMarkMissed === false) return;
       const [hh, mm] = (prefs.autoMarkMissedTime || '00:00').split(':').map((n) => parseInt(n, 10));
       const cutoffMin = (isNaN(hh) ? 0 : hh) * 60 + (isNaN(mm) ? 0 : mm);
       const now = new Date();
 
+      // Updaters must stay pure — React may replay them — so the qadha
+      // increments are collected here and applied once, after setHistory
+      // returns, rather than fired from inside the updater itself.
+      const toIncrement: (keyof DailyPrayers)[] = [];
+
       setHistory((prev) => {
+        toIncrement.length = 0;
         let changed = false;
         const next = { ...prev };
         for (const key of Object.keys(prev)) {
@@ -229,7 +233,7 @@ export function usePrayerTracking(selectedDate?: Date) {
           (['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'] as const).forEach((p) => {
             if (newPrayers[p]?.status === 'pending') {
               newPrayers[p] = { status: 'missed', timestamp: closeAt.getTime() };
-              updateQadhaCount(p, 1);
+              toIncrement.push(p);
               dayChanged = true;
             }
           });
@@ -240,6 +244,8 @@ export function usePrayerTracking(selectedDate?: Date) {
         }
         return changed ? next : prev;
       });
+
+      toIncrement.forEach((p) => updateQadhaCount(p, 1));
     };
     sweep();
     const id = window.setInterval(sweep, 60_000);

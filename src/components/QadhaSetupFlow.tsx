@@ -56,31 +56,37 @@ function Question({ title, hint }: { title: string; hint?: string }) {
  * inside another is a fresh type on every render, which would tear down and
  * rebuild both dropdowns each time a value changed.
  */
+/**
+ * Month and year are tracked as independent nullable fields, not a single
+ * YearMonth — a YearMonth cannot represent "month chosen, year not yet",
+ * and defaulting the missing half to a guessed year let Next enable before
+ * the user had actually chosen one (the estimate then ran off a year picked
+ * for them, silently).
+ */
 function MonthYearPicker({
-  value,
-  onChange,
+  month,
+  year,
+  onMonthChange,
+  onYearChange,
   months,
   years,
   monthLabel,
   yearLabel,
-  fallbackYear,
 }: {
-  value: YearMonth | null;
-  onChange: (v: YearMonth) => void;
+  month: number | null;
+  year: number | null;
+  onMonthChange: (m: number) => void;
+  onYearChange: (y: number) => void;
   months: string[];
   years: number[];
   monthLabel: string;
   yearLabel: string;
-  fallbackYear: number;
 }) {
   return (
     <div className="grid grid-cols-2 gap-2.5">
       <div className="space-y-1.5">
         <label className="px-1 text-xs font-medium text-muted-foreground">{monthLabel}</label>
-        <Select
-          value={value ? String(value.month) : undefined}
-          onValueChange={(m) => onChange({ month: Number(m), year: value?.year ?? fallbackYear })}
-        >
+        <Select value={month !== null ? String(month) : undefined} onValueChange={(m) => onMonthChange(Number(m))}>
           <SelectTrigger className="h-11">
             <SelectValue placeholder="—" />
           </SelectTrigger>
@@ -96,10 +102,7 @@ function MonthYearPicker({
 
       <div className="space-y-1.5">
         <label className="px-1 text-xs font-medium text-muted-foreground">{yearLabel}</label>
-        <Select
-          value={value ? String(value.year) : undefined}
-          onValueChange={(y) => onChange({ month: value?.month ?? 0, year: Number(y) })}
-        >
+        <Select value={year !== null ? String(year) : undefined} onValueChange={(y) => onYearChange(Number(y))}>
           <SelectTrigger className="h-11">
             <SelectValue placeholder="—" />
           </SelectTrigger>
@@ -119,8 +122,22 @@ function MonthYearPicker({
 export function QadhaSetupFlow({ onApply, onManual }: Props) {
   const { t, lang } = useTranslation();
   const [step, setStep] = useState<Step>('puberty');
-  const [puberty, setPuberty] = useState<YearMonth | null>(null);
-  const [startedAt, setStartedAt] = useState<YearMonth | 'today' | null>(null);
+
+  const [pubertyMonth, setPubertyMonth] = useState<number | null>(null);
+  const [pubertyYear, setPubertyYear] = useState<number | null>(null);
+  const puberty: YearMonth | null = useMemo(
+    () => (pubertyMonth !== null && pubertyYear !== null ? { month: pubertyMonth, year: pubertyYear } : null),
+    [pubertyMonth, pubertyYear],
+  );
+
+  const [startedToday, setStartedToday] = useState(false);
+  const [startedMonth, setStartedMonth] = useState<number | null>(null);
+  const [startedYear, setStartedYear] = useState<number | null>(null);
+  const startedAt: YearMonth | 'today' | null = useMemo(() => {
+    if (startedToday) return 'today';
+    return startedMonth !== null && startedYear !== null ? { month: startedMonth, year: startedYear } : null;
+  }, [startedToday, startedMonth, startedYear]);
+
   const [deductMenstrual, setDeductMenstrual] = useState(false);
   const [menstrualDays, setMenstrualDays] = useState(DEFAULT_MENSTRUAL_DAYS);
 
@@ -163,7 +180,6 @@ export function QadhaSetupFlow({ onApply, onManual }: Props) {
     years,
     monthLabel: t('qadhaSetup.month'),
     yearLabel: t('qadhaSetup.year'),
-    fallbackYear: thisYear - 20,
   };
 
   const pubertyComplete = puberty !== null;
@@ -193,7 +209,13 @@ export function QadhaSetupFlow({ onApply, onManual }: Props) {
           {step === 'puberty' && (
             <>
               <Question title={t('qadhaSetup.pubertyQ')} hint={t('qadhaSetup.pubertyHint')} />
-              <MonthYearPicker value={puberty} onChange={setPuberty} {...pickerProps} />
+              <MonthYearPicker
+                month={pubertyMonth}
+                year={pubertyYear}
+                onMonthChange={setPubertyMonth}
+                onYearChange={setPubertyYear}
+                {...pickerProps}
+              />
               <Button
                 size="lg"
                 className="mt-6 w-full"
@@ -216,7 +238,13 @@ export function QadhaSetupFlow({ onApply, onManual }: Props) {
               <div className="space-y-2">
                 <button
                   type="button"
-                  onClick={() => setStep('when')}
+                  onClick={() => {
+                    // Undo a prior "not yet" from this same visit to the step,
+                    // otherwise startedAt would still resolve to 'today' while
+                    // the user is now filling in a start date on the 'when' step.
+                    setStartedToday(false);
+                    setStep('when');
+                  }}
                   className="surface-interactive w-full px-4 py-3.5 text-start"
                 >
                   <p className="font-display text-[0.9375rem] font-semibold text-foreground">
@@ -229,7 +257,7 @@ export function QadhaSetupFlow({ onApply, onManual }: Props) {
                 <button
                   type="button"
                   onClick={() => {
-                    setStartedAt('today');
+                    setStartedToday(true);
                     setStep('result');
                   }}
                   className="surface-interactive w-full px-4 py-3.5 text-start"
@@ -249,8 +277,10 @@ export function QadhaSetupFlow({ onApply, onManual }: Props) {
             <>
               <Question title={t('qadhaSetup.whenQ')} hint={t('qadhaSetup.whenHint')} />
               <MonthYearPicker
-                value={startedAt === 'today' ? null : startedAt}
-                onChange={setStartedAt}
+                month={startedMonth}
+                year={startedYear}
+                onMonthChange={setStartedMonth}
+                onYearChange={setStartedYear}
                 {...pickerProps}
               />
               <Button

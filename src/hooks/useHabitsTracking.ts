@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getDateString } from '@/lib/date';
+import { safeReadJSON } from '@/lib/storage';
 import type {
   Habit,
   HabitCategory,
@@ -168,16 +169,14 @@ export function useHabitsTracking(selectedDate?: Date) {
   const dateKey = getDateString(currentDate);
 
   // Completion history
-  const [history, setHistory] = useState<HabitsHistory>(() => {
-    const stored = localStorage.getItem(HABITS_KEY);
-    return stored ? JSON.parse(stored) : {};
-  });
+  const [history, setHistory] = useState<HabitsHistory>(() =>
+    safeReadJSON(HABITS_KEY, {} as HabitsHistory),
+  );
 
   // Paused habits (persisted separately, not date-dependent)
-  const [pausedHabits, setPausedHabits] = useState<Set<string>>(() => {
-    const stored = localStorage.getItem(PAUSED_KEY);
-    return stored ? new Set(JSON.parse(stored)) : new Set();
-  });
+  const [pausedHabits, setPausedHabits] = useState<Set<string>>(
+    () => new Set(safeReadJSON<string[]>(PAUSED_KEY, [])),
+  );
 
   // Selected level
   const [level, setLevel] = useState<HabitLevel>(() => {

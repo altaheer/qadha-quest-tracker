@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { getDateString } from '@/lib/date';
+import { safeReadJSON } from '@/lib/storage';
 import type { DailyPrayers, PrayerHistory, HabitsHistory, PrayerCounts as QadhaCounts, PrayerStatus } from '@/types';
 
 interface QadhaHistory {
@@ -27,20 +28,20 @@ const getPrayerDisplayName = (prayer: keyof DailyPrayers): string => {
 };
 
 export function useInsightsData() {
-  const prayerHistory: PrayerHistory = useMemo(() => {
-    const stored = localStorage.getItem(PRAYER_HISTORY_KEY);
-    return stored ? JSON.parse(stored) : {};
-  }, []);
+  const prayerHistory: PrayerHistory = useMemo(
+    () => safeReadJSON(PRAYER_HISTORY_KEY, {} as PrayerHistory),
+    [],
+  );
 
-  const habitsHistory: HabitsHistory = useMemo(() => {
-    const stored = localStorage.getItem(HABITS_KEY);
-    return stored ? JSON.parse(stored) : {};
-  }, []);
+  const habitsHistory: HabitsHistory = useMemo(
+    () => safeReadJSON(HABITS_KEY, {} as HabitsHistory),
+    [],
+  );
 
-  const qadhaCounts: QadhaCounts = useMemo(() => {
-    const stored = localStorage.getItem(QADHA_KEY);
-    return stored ? JSON.parse(stored) : { fajr: 0, dhuhr: 0, asr: 0, maghrib: 0, isha: 0 };
-  }, []);
+  const qadhaCounts: QadhaCounts = useMemo(
+    () => safeReadJSON(QADHA_KEY, { fajr: 0, dhuhr: 0, asr: 0, maghrib: 0, isha: 0 }),
+    [],
+  );
 
   // Current streak: consecutive days with all prayers on time
   const currentStreak = useMemo(() => {

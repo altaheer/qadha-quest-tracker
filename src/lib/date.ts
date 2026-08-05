@@ -5,9 +5,14 @@
  */
 
 export const getDateString = (date: Date): string => {
-  // Preserve previous behavior (ISO yyyy-mm-dd in UTC) for backward
-  // compatibility with already-stored localStorage history keys.
-  return date.toISOString().split('T')[0];
+  // Local components, not toISOString() — that returns UTC, which east of
+  // Greenwich mislabels anything prayed between local midnight and the UTC
+  // offset as the previous day. See migrateHistoryKeysToLocalDates() for the
+  // one-time fix-up of dates written by the old UTC-based version.
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
 };
 
 export const getTodayString = (): string => getDateString(new Date());

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getDateString } from '@/lib/date';
+import { safeReadJSON } from '@/lib/storage';
 import type { NafilahDifficulty, NafilahPrayer, DailyNafilah } from '@/types';
 
 export type { NafilahDifficulty, NafilahPrayer, DailyNafilah };
@@ -82,10 +83,9 @@ export function useNafilahTracking(selectedDate?: Date) {
   const currentDate = selectedDate || new Date();
   const dateKey = getDateString(currentDate);
 
-  const [history, setHistory] = useState<DailyNafilah>(() => {
-    const stored = localStorage.getItem(NAFILAH_KEY);
-    return stored ? JSON.parse(stored) : {};
-  });
+  const [history, setHistory] = useState<DailyNafilah>(() =>
+    safeReadJSON(NAFILAH_KEY, {} as DailyNafilah),
+  );
 
   useEffect(() => {
     localStorage.setItem(NAFILAH_KEY, JSON.stringify(history));

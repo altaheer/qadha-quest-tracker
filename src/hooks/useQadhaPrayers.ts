@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { safeReadJSON } from '@/lib/storage';
 import type { PrayerCounts } from '@/types';
 
 export type { PrayerCounts };
@@ -15,23 +16,21 @@ const defaultCounts: PrayerCounts = {
 };
 
 export function useQadhaPrayers() {
-  const [counts, setCounts] = useState<PrayerCounts>(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : defaultCounts;
-  });
+  const [counts, setCounts] = useState<PrayerCounts>(() =>
+    safeReadJSON(STORAGE_KEY, defaultCounts),
+  );
 
   const [dailyGoal, setDailyGoal] = useState<number>(() => {
     const stored = localStorage.getItem(GOAL_STORAGE_KEY);
-    return stored ? parseInt(stored, 10) : 5;
+    const parsed = stored ? parseInt(stored, 10) : NaN;
+    return isNaN(parsed) ? 5 : parsed;
   });
 
   // Listen for updates from usePrayerTracking
   useEffect(() => {
     const handleQadhaUpdate = () => {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        setCounts(JSON.parse(stored));
-      }
+      if (localStorage.getItem(STORAGE_KEY) === null) return;
+      setCounts(safeReadJSON(STORAGE_KEY, defaultCounts));
     };
 
     window.addEventListener('qadha-updated', handleQadhaUpdate);

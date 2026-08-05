@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Layout } from "@/components/Layout";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Onboarding, hasCompletedOnboarding } from "@/components/Onboarding";
 import Home from "./pages/Home";
 import Prayers from "./pages/Prayers";
@@ -68,18 +69,20 @@ const App = () => {
   const [showOnboarding, setShowOnboarding] = useState(!hasCompletedOnboarding());
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          {showOnboarding && <Onboarding onComplete={() => setShowOnboarding(false)} />}
-          <Layout>
-            <AnimatedRoutes />
-          </Layout>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            {showOnboarding && <Onboarding onComplete={() => setShowOnboarding(false)} />}
+            <Layout>
+              <AnimatedRoutes />
+            </Layout>
+          </BrowserRouter>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 };
 

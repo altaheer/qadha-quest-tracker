@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getDateString } from '@/lib/date';
+import { safeReadJSON } from '@/lib/storage';
 import {
   gregorianToHijri,
   daysUntilHijriDate,
@@ -41,16 +42,14 @@ export function useTimeBoundHabits(selectedDate?: Date) {
   const dayOfWeek = getDayOfWeek(currentDate);
 
   // Completion history
-  const [history, setHistory] = useState<Record<string, Record<string, boolean>>>(() => {
-    const stored = localStorage.getItem(TIMEBOUND_KEY);
-    return stored ? JSON.parse(stored) : {};
-  });
+  const [history, setHistory] = useState<Record<string, Record<string, boolean>>>(() =>
+    safeReadJSON(TIMEBOUND_KEY, {}),
+  );
 
   // Paused events
-  const [pausedEvents, setPausedEvents] = useState<Set<string>>(() => {
-    const stored = localStorage.getItem(TIMEBOUND_PAUSED_KEY);
-    return stored ? new Set(JSON.parse(stored)) : new Set();
-  });
+  const [pausedEvents, setPausedEvents] = useState<Set<string>>(
+    () => new Set(safeReadJSON<string[]>(TIMEBOUND_PAUSED_KEY, [])),
+  );
 
   // Persist history
   useEffect(() => {
