@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { getDateString } from '@/lib/date';
 import { addDays, isFuture, isToday as isTodayFn } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DailyPrayerCard } from '@/components/DailyPrayerCard';
@@ -29,7 +31,30 @@ const prayerInfo: { key: keyof DailyPrayers; nameKey: any; arabicName: string }[
 
 export default function Prayers() {
   const { t } = useTranslation();
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const raw = searchParams.get('date');
+    if (raw && /^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+      const d = new Date(raw + 'T12:00:00');
+      if (!Number.isNaN(d.getTime()) && !((d.getTime() > Date.now()) && getDateString(d) !== getDateString(new Date()))) {
+        return d;
+      }
+      if (!Number.isNaN(d.getTime())) return d;
+    }
+    return new Date();
+  });
+
+  // Keep URL in sync when navigating days so calendar deep-links stay honest.
+  useEffect(() => {
+    const key = getDateString(selectedDate);
+    const current = searchParams.get('date');
+    if (current === key) return;
+    const next = new URLSearchParams(searchParams);
+    const todayKey = getDateString(new Date());
+    if (key === todayKey) next.delete('date');
+    else next.set('date', key);
+    setSearchParams(next, { replace: true });
+  }, [selectedDate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const {
     prayers,
@@ -123,16 +148,16 @@ export default function Prayers() {
         {combo >= 10 && (
           <motion.div
             initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0, scale: comboFlash ? [1, 1.04, 1] : 1 }}
+            animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.3 }}
             className={cn(
               'mb-4 flex items-center justify-between rounded-xl border px-3.5 py-3 transition-colors duration-500',
-              comboFlash ? 'border-primary/40 bg-primary/[0.1]' : 'border-accent/25 bg-accent/[0.07]'
+              comboFlash ? 'border-border bg-muted/60' : 'border-border/70 bg-muted/40'
             )}
           >
             <div className="flex items-center gap-2.5">
-              <Zap className={cn('h-4 w-4', comboFlash ? 'text-primary' : 'text-accent')} strokeWidth={2} />
+              <Zap className={cn('h-4 w-4', 'text-muted-foreground')} strokeWidth={2} />
               <div>
                 <p className="text-[0.8125rem] font-semibold text-foreground">{getComboLabel(combo)}</p>
                 <p className="text-xs text-muted-foreground">{combo} {t('prayers.comboLabel')}</p>
@@ -140,15 +165,15 @@ export default function Prayers() {
             </div>
             <motion.div
               key={combo}
-              initial={{ scale: 0.8, opacity: 0.6 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: 'spring', stiffness: 320, damping: 18 }}
+              initial={{ opacity: 0.5 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2 }}
               className={cn(
-                'rounded-lg px-2.5 py-1 text-[0.8125rem] font-semibold tabular-nums',
-                comboFlash ? 'bg-primary/20 text-primary' : 'bg-accent/15 text-accent'
+                'rounded-md px-2 py-0.5 text-[0.75rem] font-medium tabular-nums',
+                comboFlash ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'
               )}
             >
-              {comboMultiplier.toFixed(1)}x
+              {comboMultiplier.toFixed(1)}×
             </motion.div>
           </motion.div>
         )}
@@ -181,7 +206,7 @@ export default function Prayers() {
             sunnahItems={sunnah[prayer.key as keyof PrayerSunnah]}
             onMarkStatus={(status) => markPrayer(prayer.key, status)}
             onToggleSunnah={(sunnahId) => toggleSunnah(prayer.key as keyof PrayerSunnah, sunnahId)}
-            delay={index * 50}
+            delay={index * 25}
           />
         ))}
       </div>

@@ -11,6 +11,9 @@ export const APP_STORAGE_KEYS = [
   'qadha-prayer-counts',
   'qadha-daily-goal',
   'qadha-history',
+  // Sawm qadha
+  'sawm-qadha-count',
+  'sawm-qadha-daily-goal',
   // Habits
   'habits-tracking',
   'habits-paused',

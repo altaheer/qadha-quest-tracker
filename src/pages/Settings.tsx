@@ -4,19 +4,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { useDataBackup } from '@/hooks/useDataBackup';
-import { ChevronRight, Download, Upload, Database, HelpCircle, Shield, RotateCcw, Palette, Clock, Trash2 } from 'lucide-react';
+import { ChevronRight, Download, Upload, Database, HelpCircle, Shield, RotateCcw, Palette, Clock, Trash2, Bell } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { LanguageSelector } from '@/components/LanguageSelector';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useTranslation } from '@/lib/i18n';
 import { useUserPrefs } from '@/hooks/useUserPrefs';
+import { useLocalNotifications } from '@/hooks/useLocalNotifications';
 import { resetOnboarding } from '@/components/Onboarding';
 import { Page, PageHeader } from '@/components/common';
 
 export default function Settings() {
   const { t } = useTranslation();
   const { showArabic, setShowArabic, autoMarkMissed, setAutoMarkMissed, autoMarkMissedTime, setAutoMarkMissedTime } = useUserPrefs();
+  const { supported: notificationsSupported, permission: notificationPermission, requestPermission } = useLocalNotifications();
   const { exportData, importData, clearData } = useDataBackup();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -141,6 +143,38 @@ export default function Settings() {
                 className="w-[7.5rem] shrink-0"
               />
             </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/50">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Bell className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="text-lg">{t('settings.notifications')}</CardTitle>
+                <CardDescription>{t('settings.notificationsDesc')}</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {!notificationsSupported || notificationPermission === 'unsupported' ? (
+              <p className="text-sm text-muted-foreground">{t('settings.notificationsUnsupported')}</p>
+            ) : notificationPermission === 'granted' ? (
+              <p className="text-sm text-muted-foreground">{t('settings.notificationsEnabled')}</p>
+            ) : notificationPermission === 'denied' ? (
+              <p className="text-sm text-muted-foreground">{t('settings.notificationsDenied')}</p>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => void requestPermission()}
+              >
+                {t('settings.notificationsEnable')}
+              </Button>
+            )}
           </CardContent>
         </Card>
 

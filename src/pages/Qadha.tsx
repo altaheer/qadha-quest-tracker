@@ -8,6 +8,8 @@ import { useTranslation } from '@/lib/i18n';
 import { localeFor } from '@/lib/date';
 import { PageHint } from '@/components/PageHint';
 import { EmptyState, Page, PageHeader, Panel, SectionLabel, Stat } from '@/components/common';
+import { AnimatedNumber } from '@/components/AnimatedNumber';
+import { useSawmQadha } from '@/hooks/useSawmQadha';
 
 const PRAYERS: { key: keyof PrayerCounts; nameKey: string; arabicName: string }[] = [
   { key: 'fajr', nameKey: 'prayerNames.fajr', arabicName: 'الفجر' },
@@ -34,6 +36,7 @@ export default function Qadha() {
     totalPrayers,
     calculateDaysToComplete,
   } = useQadhaPrayers();
+  const sawm = useSawmQadha();
 
   const daysToComplete = calculateDaysToComplete();
 
@@ -70,7 +73,7 @@ export default function Qadha() {
             <Stat
               size="hero"
               tone="primary"
-              value={totalPrayers.toLocaleString(localeFor(lang))}
+              value={<AnimatedNumber value={totalPrayers} display={totalPrayers.toLocaleString(localeFor(lang))} />}
               label={t('qadha.totalRemaining')}
             />
           </div>
@@ -138,6 +141,85 @@ export default function Qadha() {
       <div className="pt-4">
         <QadhaSetupDialog />
       </div>
+
+
+      <SectionLabel>{t('sawm.title')}</SectionLabel>
+      <Panel className="animate-rise">
+        <div className="px-5 pb-5 pt-6">
+          <Stat
+            size="lg"
+            tone={sawm.count === 0 ? 'muted' : 'primary'}
+            value={<AnimatedNumber value={sawm.count} display={sawm.count.toLocaleString(localeFor(lang))} />}
+            label={t('sawm.remaining')}
+          />
+          <p className="mt-2 text-[0.8125rem] text-muted-foreground">{t('sawm.subtitle')}</p>
+        </div>
+        <div className="flex items-center gap-4 border-t border-border/70 px-5 py-4">
+          <div className="min-w-0 flex-1">
+            <p className="text-[0.8125rem] font-medium text-foreground">{t('sawm.dailyGoal')}</p>
+            <p className="mt-0.5 truncate text-[0.8125rem] text-muted-foreground">
+              {sawm.dailyGoal > 0 && sawm.count > 0
+                ? `${t('sawm.atThisPace')} · ${sawm.daysToComplete === Infinity ? '—' : sawm.daysToComplete} ${t('sawm.daysLeft')}`
+                : t('sawm.emptyDesc')}
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-1">
+            <button
+              type="button"
+              onClick={() => sawm.setDailyGoal(sawm.dailyGoal - 1)}
+              disabled={sawm.dailyGoal <= 0}
+              aria-label={t('sawm.decrease')}
+              className="flex h-9 w-9 items-center justify-center rounded-full text-primary transition-colors duration-base ease-brand hover:bg-primary/[0.09] disabled:opacity-25"
+            >
+              <Minus className="h-4 w-4" strokeWidth={2.25} />
+            </button>
+            <span className="w-10 text-center font-display text-xl font-semibold tabular-nums text-foreground">
+              {sawm.dailyGoal}
+            </span>
+            <button
+              type="button"
+              onClick={() => sawm.setDailyGoal(sawm.dailyGoal + 1)}
+              disabled={sawm.dailyGoal >= 30}
+              aria-label={t('sawm.increase')}
+              className="flex h-9 w-9 items-center justify-center rounded-full text-primary transition-colors duration-base ease-brand hover:bg-primary/[0.09] disabled:opacity-25"
+            >
+              <Plus className="h-4 w-4" strokeWidth={2.25} />
+            </button>
+          </div>
+        </div>
+        <div className="flex items-center justify-center gap-3 border-t border-border/70 px-5 py-4">
+          <button
+            type="button"
+            onClick={() => sawm.decrement()}
+            disabled={sawm.count <= 0}
+            aria-label={t('sawm.decrease')}
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:bg-muted disabled:opacity-30"
+          >
+            <Minus className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => sawm.increment()}
+            aria-label={t('sawm.increase')}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            <Plus className="h-4 w-4" />
+          </button>
+        </div>
+        {sawm.count > 0 && (
+          <div className="flex justify-center border-t border-border/70 px-5 py-3">
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm(t('sawm.resetConfirm'))) sawm.reset();
+              }}
+              className="text-[0.8125rem] text-muted-foreground transition-colors hover:text-destructive"
+            >
+              {t('sawm.reset')}
+            </button>
+          </div>
+        )}
+      </Panel>
 
       {totalPrayers > 0 && (
         <div className="flex justify-center pt-8">

@@ -84,7 +84,7 @@ export function DailyPrayerCard({
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.42, delay: delay / 1000, ease: [0.32, 0.72, 0, 1] }}
+      transition={{ duration: 0.28, delay: Math.min(delay, 120) / 1000, ease: [0.32, 0.72, 0, 1] }}
       className="surface px-4 py-3.5"
     >
       <div className="mb-3 flex items-center gap-3">
@@ -119,7 +119,7 @@ export function DailyPrayerCard({
           )}
           {points > 0 && (
             <span
-              className="text-[0.8125rem] font-semibold tabular-nums text-primary"
+              className="text-[0.75rem] font-medium tabular-nums text-muted-foreground/70"
               title={comboMultiplier > 1 ? `× ${comboMultiplier.toFixed(1)}` : undefined}
             >
               +{points}
