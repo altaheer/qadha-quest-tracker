@@ -83,7 +83,7 @@ export default function Qadha() {
               <p className="text-[0.8125rem] font-medium text-foreground">{t('qadha.dailyGoal')}</p>
               <p className="mt-0.5 truncate text-[0.8125rem] text-muted-foreground">
                 {completionLabel
-                  ? `${t('qadha.atThisPace')} · ${completionLabel}`
+                  ? `${t('qadha.atThisPace')} · ${daysToComplete.toLocaleString(localeFor(lang))} ${t('qadha.daysToComplete').toLowerCase()} · ${completionLabel}`
                   : t('qadha.noGoal')}
               </p>
             </div>
