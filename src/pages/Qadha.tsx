@@ -46,10 +46,23 @@ export default function Qadha() {
     const date = new Date();
     date.setDate(date.getDate() + daysToComplete);
     return new Intl.DateTimeFormat(localeFor(lang), {
-      month: 'long',
+      day: 'numeric',
+      month: 'short',
       year: 'numeric',
     }).format(date);
   }, [daysToComplete, lang]);
+
+  const sawmCompletionLabel = useMemo(() => {
+    const days = sawm.daysToComplete;
+    if (!isFinite(days) || days <= 0 || sawm.count <= 0 || sawm.dailyGoal <= 0) return null;
+    const date = new Date();
+    date.setDate(date.getDate() + days);
+    return new Intl.DateTimeFormat(localeFor(lang), {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    }).format(date);
+  }, [sawm.daysToComplete, sawm.count, sawm.dailyGoal, lang]);
 
   const adjustGoal = (delta: number) =>
     setDailyGoal(Math.min(GOAL_MAX, Math.max(GOAL_MIN, dailyGoal + delta)));
@@ -81,9 +94,9 @@ export default function Qadha() {
           <div className="flex items-center gap-4 border-t border-border/70 px-5 py-4">
             <div className="min-w-0 flex-1">
               <p className="text-[0.8125rem] font-medium text-foreground">{t('qadha.dailyGoal')}</p>
-              <p className="mt-0.5 truncate text-[0.8125rem] text-muted-foreground">
+              <p className="mt-0.5 text-[0.8125rem] text-muted-foreground">
                 {completionLabel
-                  ? `${t('qadha.atThisPace')} · ${daysToComplete.toLocaleString(localeFor(lang))} ${t('qadha.daysToComplete').toLowerCase()} · ${completionLabel}`
+                  ? `${t('qadha.atThisPace')} · ${completionLabel}`
                   : t('qadha.noGoal')}
               </p>
             </div>
@@ -157,9 +170,9 @@ export default function Qadha() {
         <div className="flex items-center gap-4 border-t border-border/70 px-5 py-4">
           <div className="min-w-0 flex-1">
             <p className="text-[0.8125rem] font-medium text-foreground">{t('sawm.dailyGoal')}</p>
-            <p className="mt-0.5 truncate text-[0.8125rem] text-muted-foreground">
-              {sawm.dailyGoal > 0 && sawm.count > 0
-                ? `${t('sawm.atThisPace')} · ${sawm.daysToComplete === Infinity ? '—' : sawm.daysToComplete} ${t('sawm.daysLeft')}`
+            <p className="mt-0.5 text-[0.8125rem] text-muted-foreground">
+              {sawmCompletionLabel
+                ? `${t('sawm.atThisPace')} · ${sawmCompletionLabel}`
                 : t('sawm.emptyDesc')}
             </p>
           </div>
