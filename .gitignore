@@ -25,3 +25,15 @@ dist-ssr
 .env
 .env.*
 !.env.example
+
+# Capacitor / Android
+android/app/build/
+android/.gradle/
+android/build/
+android/local.properties
+android/captures/
+android/*.keystore
+android/*.jks
+*.keystore
+*.jks
+!android/app/debug.keystore
