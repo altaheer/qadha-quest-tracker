@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { PrayerCounts } from '@/types';
+import { daysToClearDebt } from '@/lib/qadhaEstimate';
 
 export type { PrayerCounts };
 
@@ -25,12 +26,25 @@ export function useQadhaPrayers() {
     return stored ? parseInt(stored, 10) : 5;
   });
 
-  // Listen for updates from usePrayerTracking
+  // Keep multiple hook instances (page + setup dialog) and other writers in sync.
   useEffect(() => {
     const handleQadhaUpdate = () => {
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        setCounts(JSON.parse(stored));
+      if (!stored) return;
+      setCounts((prev) => {
+        try {
+          if (JSON.stringify(prev) === stored) return prev;
+          return JSON.parse(stored) as PrayerCounts;
+        } catch {
+          return prev;
+        }
+      });
+      const goalStored = localStorage.getItem(GOAL_STORAGE_KEY);
+      if (goalStored !== null) {
+        const n = parseInt(goalStored, 10);
+        if (!Number.isNaN(n)) {
+          setDailyGoal((prev) => (prev === n ? prev : n));
+        }
       }
     };
 
@@ -39,11 +53,19 @@ export function useQadhaPrayers() {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(counts));
+    const serialized = JSON.stringify(counts);
+    if (localStorage.getItem(STORAGE_KEY) !== serialized) {
+      localStorage.setItem(STORAGE_KEY, serialized);
+      window.dispatchEvent(new Event('qadha-updated'));
+    }
   }, [counts]);
 
   useEffect(() => {
-    localStorage.setItem(GOAL_STORAGE_KEY, dailyGoal.toString());
+    const serialized = dailyGoal.toString();
+    if (localStorage.getItem(GOAL_STORAGE_KEY) !== serialized) {
+      localStorage.setItem(GOAL_STORAGE_KEY, serialized);
+      window.dispatchEvent(new Event('qadha-updated'));
+    }
   }, [dailyGoal]);
 
   const increment = useCallback((prayer: keyof PrayerCounts) => {
@@ -80,8 +102,7 @@ export function useQadhaPrayers() {
   const totalPrayers = Object.values(counts).reduce((sum, count) => sum + count, 0);
 
   const calculateDaysToComplete = useCallback(() => {
-    if (dailyGoal <= 0) return Infinity;
-    return Math.ceil(totalPrayers / dailyGoal);
+    return daysToClearDebt(totalPrayers, dailyGoal);
   }, [totalPrayers, dailyGoal]);
 
   return {

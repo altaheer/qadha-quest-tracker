@@ -4,6 +4,9 @@ import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { DateHeader } from '@/components/DateHeader';
 import { BottomNav } from '@/components/BottomNav';
+import { QuickActionsFAB } from '@/components/QuickActionsFAB';
+import { useLocation } from 'react-router-dom';
+import { useLocalNotifications } from '@/hooks/useLocalNotifications';
 
 interface LayoutProps {
   children: ReactNode;
@@ -15,6 +18,11 @@ interface LayoutProps {
  * everything actionable lives in the page or the nav.
  */
 export function Layout({ children }: LayoutProps) {
+  const { pathname } = useLocation();
+  const hideFab = pathname.startsWith('/settings') || pathname.startsWith('/guide');
+  // Keep the local reminder scheduler alive while the shell is mounted.
+  useLocalNotifications();
+
   return (
     <SidebarProvider defaultOpen={false}>
       <div className="flex min-h-screen w-full bg-background">
@@ -41,6 +49,7 @@ export function Layout({ children }: LayoutProps) {
         </div>
 
         <BottomNav />
+        {!hideFab && <QuickActionsFAB />}
       </div>
     </SidebarProvider>
   );

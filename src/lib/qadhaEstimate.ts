@@ -84,3 +84,14 @@ export function estimateQadha(input: QadhaEstimateInput): QadhaEstimateResult {
     totalPrayers: perPrayer * 5,
   };
 }
+
+/**
+ * Days needed to clear a qadha backlog at a steady daily pace.
+ * Used by the Qadha page "at this pace" estimate so the UI can stay in sync
+ * with goal / count changes.
+ */
+export function daysToClearDebt(totalPrayers: number, dailyGoal: number): number {
+  if (dailyGoal <= 0 || totalPrayers <= 0) return Infinity;
+  return Math.ceil(totalPrayers / dailyGoal);
+}
+
