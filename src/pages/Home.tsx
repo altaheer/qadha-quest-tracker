@@ -8,6 +8,7 @@ import { useTranslation } from '@/lib/i18n';
 import { getDateString, localeFor } from '@/lib/date';
 import { PageHint } from '@/components/PageHint';
 import { cn } from '@/lib/utils';
+import { AnimatedNumber } from '@/components/AnimatedNumber';
 import {
   Chip,
   Meter,
@@ -182,7 +183,7 @@ export default function Home() {
             className="flex-1"
             size="lg"
             tone={data.qadhaRemaining === 0 ? 'muted' : 'primary'}
-            value={data.qadhaRemaining.toLocaleString(localeFor(lang))}
+            value={<AnimatedNumber value={data.qadhaRemaining} display={data.qadhaRemaining.toLocaleString(localeFor(lang))} />}
             label={t('qadha.totalRemaining')}
           />
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/[0.08] text-primary">

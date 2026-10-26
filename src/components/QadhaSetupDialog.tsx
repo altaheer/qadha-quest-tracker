@@ -28,6 +28,14 @@ export function QadhaSetupDialog() {
 
   const handleApply = (perPrayer: number) => {
     PRAYERS.forEach((p) => setCount(p, perPrayer));
+    // Ensure siblings pick up the batch even if effects coalesce oddly.
+    try {
+      const next = Object.fromEntries(PRAYERS.map((p) => [p, perPrayer]));
+      localStorage.setItem('qadha-prayer-counts', JSON.stringify(next));
+      window.dispatchEvent(new Event('qadha-updated'));
+    } catch {
+      /* ignore quota / private mode */
+    }
     setOpen(false);
   };
 

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import * as Icons from 'lucide-react';
 import { Lock } from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
-import confetti from 'canvas-confetti';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { haptics } from '@/lib/haptics';
 import { useAchievements } from '@/hooks/useAchievements';
 import {
   achievements,
@@ -44,18 +44,12 @@ export function AchievementsSection() {
     }
   }, [active, queue]);
 
+  const reduceMotion = useReducedMotion();
+
   useEffect(() => {
     if (!active) return;
-    confetti({
-      particleCount: 70,
-      spread: 80,
-      startVelocity: 35,
-      gravity: 0.9,
-      scalar: 0.9,
-      origin: { y: 0.55 },
-      ticks: 140,
-    });
-    const id = window.setTimeout(() => setActive(null), 3200);
+    haptics.medium();
+    const id = window.setTimeout(() => setActive(null), 2600);
     return () => window.clearTimeout(id);
   }, [active]);
 
@@ -126,15 +120,16 @@ export function AchievementsSection() {
             onClick={() => setActive(null)}
           >
             <motion.div
-              initial={{ scale: 0.85, opacity: 0, y: 12 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
+              initial={{ scale: 0.96, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 220, damping: 22 }}
-              className="relative flex flex-col items-center gap-4 px-7 py-8 rounded-3xl bg-card/95 border border-primary/30 shadow-2xl max-w-sm"
+              transition={{ duration: reduceMotion ? 0.01 : 0.32, ease: [0.32, 0.72, 0, 1] }}
+              className="relative flex flex-col items-center gap-4 px-7 py-8 rounded-3xl bg-card/95 border border-primary/30 shadow-elevated max-w-sm"
             >
               <motion.div
-                animate={{ rotate: [0, 10, -8, 0], scale: [1, 1.12, 1] }}
-                transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+                initial={reduceMotion ? false : { scale: 0.96, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: reduceMotion ? 0.01 : 0.3, ease: [0.32, 0.72, 0, 1] }}
                 className="p-4 rounded-full bg-primary/15 text-primary"
               >
                 <IconByName name={active.icon} className="h-10 w-10" />

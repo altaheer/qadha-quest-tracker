@@ -3,13 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Check, Minus, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { estimateQadha, type YearMonth } from '@/lib/qadhaEstimate';
 import { useTranslation } from '@/lib/i18n';
 import { localeFor } from '@/lib/date';
@@ -52,9 +45,13 @@ function Question({ title, hint }: { title: string; hint?: string }) {
 }
 
 /**
- * Kept at module scope rather than nested in the flow: a component defined
- * inside another is a fresh type on every render, which would tear down and
- * rebuild both dropdowns each time a value changed.
+ * Native <select> on purpose: Radix Select portals at z-50 (under the onboarding
+ * overlay at z-[200]), and its popper viewport is only trigger-tall — both break
+ * month/year picking on phones. Kept at module scope so React does not remount
+ * the selects on every parent render.
+ *
+ * Month and year are tracked separately so Next stays disabled until both are set
+ * (no silent fallback year/month).
  */
 function MonthYearPicker({
   value,
@@ -63,54 +60,66 @@ function MonthYearPicker({
   years,
   monthLabel,
   yearLabel,
-  fallbackYear,
 }: {
   value: YearMonth | null;
-  onChange: (v: YearMonth) => void;
+  onChange: (v: YearMonth | null) => void;
   months: string[];
   years: number[];
   monthLabel: string;
   yearLabel: string;
-  fallbackYear: number;
 }) {
+  const selectClass =
+    'flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-base text-foreground ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
+
+  // Local drafts so choosing month before year (or vice versa) does not snap
+  // the other field back to "—". Parent only receives a value once both are set.
+  const [draftMonth, setDraftMonth] = useState<string>(value ? String(value.month) : '');
+  const [draftYear, setDraftYear] = useState<string>(value ? String(value.year) : '');
+
+  const emit = (monthStr: string, yearStr: string) => {
+    setDraftMonth(monthStr);
+    setDraftYear(yearStr);
+    if (monthStr === '' || yearStr === '') {
+      onChange(null);
+      return;
+    }
+    onChange({ month: Number(monthStr), year: Number(yearStr) });
+  };
+
   return (
     <div className="grid grid-cols-2 gap-2.5">
       <div className="space-y-1.5">
         <label className="px-1 text-xs font-medium text-muted-foreground">{monthLabel}</label>
-        <Select
-          value={value ? String(value.month) : undefined}
-          onValueChange={(m) => onChange({ month: Number(m), year: value?.year ?? fallbackYear })}
+        <select
+          className={selectClass}
+          value={draftMonth}
+          aria-label={monthLabel}
+          onChange={(e) => emit(e.target.value, draftYear)}
         >
-          <SelectTrigger className="h-11">
-            <SelectValue placeholder="—" />
-          </SelectTrigger>
-          <SelectContent>
-            {months.map((name, m) => (
-              <SelectItem key={m} value={String(m)}>
-                {name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          <option value="">{'—'}</option>
+          {months.map((name, m) => (
+            <option key={m} value={String(m)}>
+              {name}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="space-y-1.5">
         <label className="px-1 text-xs font-medium text-muted-foreground">{yearLabel}</label>
-        <Select
-          value={value ? String(value.year) : undefined}
-          onValueChange={(y) => onChange({ month: value?.month ?? 0, year: Number(y) })}
+        <select
+          className={selectClass}
+          value={draftYear}
+          aria-label={yearLabel}
+          onChange={(e) => emit(draftMonth, e.target.value)}
         >
-          <SelectTrigger className="h-11">
-            <SelectValue placeholder="—" />
-          </SelectTrigger>
-          <SelectContent>
-            {years.map((y) => (
-              <SelectItem key={y} value={String(y)}>
-                {y}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          <option value="">{'—'}</option>
+          {years.map((y) => (
+            <option key={y} value={String(y)}>
+              {y}
+            </option>
+          ))}
+        </select>
       </div>
     </div>
   );
@@ -163,7 +172,6 @@ export function QadhaSetupFlow({ onApply, onManual }: Props) {
     years,
     monthLabel: t('qadhaSetup.month'),
     yearLabel: t('qadhaSetup.year'),
-    fallbackYear: thisYear - 20,
   };
 
   const pubertyComplete = puberty !== null;
