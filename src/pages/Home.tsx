@@ -1,3 +1,4 @@
+import { ProgressQuest } from '@/components/ProgressQuest';
 import { useMemo } from 'react';
 import { BookOpen, Check, Moon, RotateCcw, Target } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -169,6 +170,7 @@ export default function Home() {
 
   return (
     <Page className="space-y-3">
+      <ProgressQuest />
       <p className="pb-1 text-sm text-muted-foreground">{t('home.subtitle')}</p>
 
       <PageHint id="home" />

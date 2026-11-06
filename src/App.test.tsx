@@ -17,7 +17,7 @@ it('updates the home summary after marking Fajr with the quick action', async ()
   render(<App />);
   fireEvent.click(screen.getByRole('button', { name: 'Quick actions' }));
   fireEvent.click(await screen.findByRole('button', { name: 'Mark Fajr' }));
-  await waitFor(() => expect(screen.getByText('1/5')).toBeInTheDocument());
+  await waitFor(() => expect(screen.getAllByText('1/5')).toHaveLength(2));
   expect(JSON.parse(localStorage.getItem('prayer-history')!)[getDateString(new Date())].prayers.fajr.status).toBe('ontime');
 });
 

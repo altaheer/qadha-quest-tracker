@@ -25,6 +25,7 @@ const schemas: Record<string, z.ZodType> = {
   'notifications-enabled': z.boolean(),
   'qadha-prayer-counts': z.partialRecord(prayerNames, count),
   'qadha-daily-goal': count,
+  'qadha-completions': z.array(z.object({ id: z.string(), prayer: prayerNames, date, createdAt: count, undone: z.boolean() })),
   'qadha-history': z.array(z.object({ date, total: count })),
   'sawm-qadha-count': count,
   'sawm-qadha-daily-goal': count,

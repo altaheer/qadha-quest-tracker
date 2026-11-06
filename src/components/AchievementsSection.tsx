@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import * as Icons from 'lucide-react';
+import { Award, BedDouble, BookMarked, BookOpen, Blocks as Brick, Brush, CalendarCheck, CalendarDays, Check, CheckCheck, Download, Flame, Footprints, HandHeart, Heart, Home, Languages, Layers, Leaf, Moon, Mountain, RotateCcw, Scale, Sparkles, Star, Sun, Sunrise, TrendingUp, Trophy, Upload, Users, Zap, type LucideIcon } from 'lucide-react';
+const achievementIcons: Record<string, LucideIcon> = { Award, BedDouble, BookMarked, BookOpen, Brick, Brush, CalendarCheck, CalendarDays, Check, CheckCheck, Download, Flame, Footprints, HandHeart, Heart, Home, Languages, Layers, Leaf, Moon, Mountain, RotateCcw, Scale, Sparkles, Star, Sun, Sunrise, TrendingUp, Trophy, Upload, Users, Zap };
 import { Lock } from 'lucide-react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { haptics } from '@/lib/haptics';
@@ -13,7 +14,7 @@ import {
 import { useTranslation } from '@/lib/i18n';
 
 function IconByName({ name, className }: { name: string; className?: string }) {
-  const Cmp = (Icons as unknown as Record<string, Icons.LucideIcon>)[name] || Icons.Sparkles;
+  const Cmp = achievementIcons[name] || Sparkles;
   return <Cmp className={className} />;
 }
 
