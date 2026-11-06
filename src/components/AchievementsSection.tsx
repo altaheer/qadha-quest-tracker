@@ -13,7 +13,7 @@ import {
 import { useTranslation } from '@/lib/i18n';
 
 function IconByName({ name, className }: { name: string; className?: string }) {
-  const Cmp = (Icons as any)[name] || Icons.Sparkles;
+  const Cmp = (Icons as unknown as Record<string, Icons.LucideIcon>)[name] || Icons.Sparkles;
   return <Cmp className={className} />;
 }
 

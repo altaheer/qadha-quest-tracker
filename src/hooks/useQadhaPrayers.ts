@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback } from 'react';
+import { useStoredState } from '@/lib/localStore';
 import type { PrayerCounts } from '@/types';
 import { daysToClearDebt } from '@/lib/qadhaEstimate';
 
@@ -16,88 +17,40 @@ const defaultCounts: PrayerCounts = {
 };
 
 export function useQadhaPrayers() {
-  const [counts, setCounts] = useState<PrayerCounts>(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : defaultCounts;
-  });
-
-  const [dailyGoal, setDailyGoal] = useState<number>(() => {
-    const stored = localStorage.getItem(GOAL_STORAGE_KEY);
-    return stored ? parseInt(stored, 10) : 5;
-  });
-
-  // Keep multiple hook instances (page + setup dialog) and other writers in sync.
-  useEffect(() => {
-    const handleQadhaUpdate = () => {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (!stored) return;
-      setCounts((prev) => {
-        try {
-          if (JSON.stringify(prev) === stored) return prev;
-          return JSON.parse(stored) as PrayerCounts;
-        } catch {
-          return prev;
-        }
-      });
-      const goalStored = localStorage.getItem(GOAL_STORAGE_KEY);
-      if (goalStored !== null) {
-        const n = parseInt(goalStored, 10);
-        if (!Number.isNaN(n)) {
-          setDailyGoal((prev) => (prev === n ? prev : n));
-        }
-      }
-    };
-
-    window.addEventListener('qadha-updated', handleQadhaUpdate);
-    return () => window.removeEventListener('qadha-updated', handleQadhaUpdate);
-  }, []);
-
-  useEffect(() => {
-    const serialized = JSON.stringify(counts);
-    if (localStorage.getItem(STORAGE_KEY) !== serialized) {
-      localStorage.setItem(STORAGE_KEY, serialized);
-      window.dispatchEvent(new Event('qadha-updated'));
-    }
-  }, [counts]);
-
-  useEffect(() => {
-    const serialized = dailyGoal.toString();
-    if (localStorage.getItem(GOAL_STORAGE_KEY) !== serialized) {
-      localStorage.setItem(GOAL_STORAGE_KEY, serialized);
-      window.dispatchEvent(new Event('qadha-updated'));
-    }
-  }, [dailyGoal]);
+  const [storedCounts, setCounts] = useStoredState<PrayerCounts>(STORAGE_KEY, defaultCounts);
+  const counts = { ...defaultCounts, ...storedCounts };
+  const [dailyGoal, setDailyGoal] = useStoredState<number>(GOAL_STORAGE_KEY, 5);
 
   const increment = useCallback((prayer: keyof PrayerCounts) => {
     setCounts(prev => {
-      const next = prev[prayer] + 1;
+      const next = (prev[prayer] || 0) + 1;
       return { ...prev, [prayer]: next };
     });
-  }, []);
+  }, [setCounts]);
 
   const decrement = useCallback((prayer: keyof PrayerCounts) => {
     setCounts(prev => {
-      const next = Math.max(0, prev[prayer] - 1);
+      const next = Math.max(0, (prev[prayer] || 0) - 1);
       return { ...prev, [prayer]: next };
     });
-  }, []);
+  }, [setCounts]);
 
   const setCount = useCallback((prayer: keyof PrayerCounts, count: number) => {
     setCounts(prev => {
-      const next = Math.max(0, count);
+      const next = Math.max(0, Math.floor(Number.isFinite(count) ? count : 0));
       return { ...prev, [prayer]: next };
     });
-  }, []);
+  }, [setCounts]);
 
   const reset = useCallback((prayer: keyof PrayerCounts) => {
     setCounts(prev => {
       return { ...prev, [prayer]: 0 };
     });
-  }, []);
+  }, [setCounts]);
 
   const resetAll = useCallback(() => {
     setCounts(defaultCounts);
-  }, []);
+  }, [setCounts]);
 
   const totalPrayers = Object.values(counts).reduce((sum, count) => sum + count, 0);
 

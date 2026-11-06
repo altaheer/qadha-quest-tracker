@@ -1,3 +1,4 @@
+import type { TKey } from '@/lib/i18n';
 import { useCallback, useEffect, useState } from 'react';
 import { getDateString } from '@/lib/date';
 import { habitCategories } from '@/hooks/useHabitsTracking';
@@ -71,7 +72,7 @@ export function getActionBasePoints(m: Pick<Mission, 'actionType' | 'actionId' |
   return 5;
 }
 
-function getVerbKey(m: Pick<Mission, 'actionType' | 'actionId'>): string {
+function getVerbKey(m: Pick<Mission, 'actionType' | 'actionId'>): TKey {
   if (m.actionType === 'prayer' || m.actionType === 'nafilah') return 'missions.verbPray';
   if (m.actionType === 'habit') {
     const id = m.actionId;
@@ -86,14 +87,14 @@ function getVerbKey(m: Pick<Mission, 'actionType' | 'actionId'>): string {
  *  "Akşam namazını cemaatle kılmaya" (verb after for TR). */
 export function getActionLabel(
   m: Pick<Mission, 'actionType' | 'actionId' | 'qualifier'>,
-  t: (k: any) => string,
+  t: (k: TKey) => string,
   tHabit: (id: string) => string,
   lang: 'en' | 'sv' | 'tr' | 'ar',
 ): string {
   let phrase: string;
   if (m.actionType === 'prayer') {
     const qual = m.qualifier === 'jamaah' ? t('missions.inJamaah') : t('missions.onTime');
-    const name = m.actionId === 'all' ? t('missions.allFive') : t(`prayerNames.${m.actionId}`);
+    const name = m.actionId === 'all' ? t('missions.allFive') : t(`prayerNames.${m.actionId}` as TKey);
     phrase = `${name} ${qual}`;
   } else if (m.actionType === 'habit') {
     phrase = tHabit(m.actionId);

@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getDateString } from '@/lib/date';
+import { useLocalDay } from '@/hooks/useLocalDay';
+import type { TKey } from '@/lib/i18n';
 import { addDays, isFuture, isToday as isTodayFn } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DailyPrayerCard } from '@/components/DailyPrayerCard';
@@ -21,7 +23,7 @@ import { Meter, Page, PageHeader } from '@/components/common';
 
 const COMBO_THRESHOLDS = [10, 30, 50, 100];
 
-const prayerInfo: { key: keyof DailyPrayers; nameKey: any; arabicName: string }[] = [
+const prayerInfo: { key: keyof DailyPrayers; nameKey: TKey; arabicName: string }[] = [
   { key: 'fajr', nameKey: 'prayerNames.fajr', arabicName: 'الفجر' },
   { key: 'dhuhr', nameKey: 'prayerNames.dhuhr', arabicName: 'الظهر' },
   { key: 'asr', nameKey: 'prayerNames.asr', arabicName: 'العصر' },
@@ -39,10 +41,18 @@ export default function Prayers() {
       if (!Number.isNaN(d.getTime()) && !((d.getTime() > Date.now()) && getDateString(d) !== getDateString(new Date()))) {
         return d;
       }
-      if (!Number.isNaN(d.getTime())) return d;
     }
     return new Date();
   });
+
+  const todayKey = useLocalDay();
+  const previousToday = useRef(todayKey);
+  useEffect(() => {
+    if (getDateString(selectedDate) === previousToday.current && previousToday.current !== todayKey) {
+      setSelectedDate(new Date());
+    }
+    previousToday.current = todayKey;
+  }, [todayKey, selectedDate]);
 
   // Keep URL in sync when navigating days so calendar deep-links stay honest.
   useEffect(() => {
@@ -113,7 +123,7 @@ export default function Prayers() {
     },
   });
 
-  const noneMarked = Object.values(prayers).every((p: any) => p.status === 'pending');
+  const noneMarked = Object.values(prayers).every((p) => p.status === 'pending');
 
   return (
     <Page>

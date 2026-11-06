@@ -15,12 +15,12 @@ export function hasSeenTooltip(id: string) {
 export function markTooltipSeen(id: string) {
   const seen = getSeen();
   seen[id] = true;
-  try { localStorage.setItem(KEY, JSON.stringify(seen)); } catch {}
+  try { localStorage.setItem(KEY, JSON.stringify(seen)); } catch { /* Keep existing state if browser storage is unavailable. */ }
 }
 
 /** Forgets every dismissed hint, so each screen introduces itself once more. */
 export function resetTooltips() {
-  try { localStorage.removeItem(KEY); } catch {}
+  try { localStorage.removeItem(KEY); } catch { /* Keep existing state if browser storage is unavailable. */ }
 }
 
 interface Props {

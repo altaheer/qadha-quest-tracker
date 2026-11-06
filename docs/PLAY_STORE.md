@@ -173,3 +173,22 @@ Befintliga PWA-ikoner i `public/` (`pwa-192.png`, `pwa-512.png`) är en start, m
 - Keystore borttappad → svårt att uppdatera appen (Play App Signing mildrar, men upload-nyckeln måste kunnas återställas via Play-process)
 
 Frågor om repot: se GitHub-användaren **altaheer** och branchen/PR för Play Store-prep.
+
+
+## Verifiering av registreringsfixarna (november 2026)
+
+- Installera beroenden med `npm ci` (Node 22 eller senare).
+- Kör `npm test`, `npm run lint`, `npx tsc -p tsconfig.app.json --noEmit` och `npm run build`.
+- Kör `npm run cap:sync` för att kopiera det nya webbbygget och registrera plugins.
+- Androidbygget kräver JDK 21 och Android SDK 36. Kör sedan `npm run build:android`.
+- Denna arbetsmiljö kunde inte hämta Gradle från services.gradle.org, och hade endast JDK 17. APK och fysisk enhet är därför ännu inte verifierade.
+
+Kontrollera på en Android-telefon innan release:
+
+1. Markera Fajr med snabbknappen, öppna Böner och kontrollera samma status. Växla mellan markeringarna och starta om appen.
+2. Låt en registrerad dag med omarkerade böner passera dygnsgränsen. Qadha ska öka en gång, även efter omstart.
+3. Aktivera aviseringar i Inställningar och kontrollera en påminnelse medan appen är stängd. Android kan senarelägga leveransen eftersom appen inte begär exakt-alarmbehörighet. Planeringen omfattar cirka 30 dagar och förnyas vid öppning/återgång till appen. En fullständigt registrerad dag tas bort ur planeringen.
+4. Exportera en backup via Androids delningsmeny till en plats du själv väljer. Importera den och kontrollera böner, qadha, vanor och inställningar.
+5. Prova en ogiltig backup: befintliga uppgifter ska vara kvar.
+
+Nya dagsnycklar använder telefonens lokala datum. Tidigare sparade dagsnycklar flyttas inte, eftersom deras ursprungliga tidszon inte går att avgöra säkert. Befintliga felaktiga qadha-saldon repareras inte automatiskt; justera dem manuellt vid behov.

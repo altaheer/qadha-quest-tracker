@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { gregorianToHijri, hijriMonths } from '@/lib/hijri';
 import { getDateString } from '@/lib/date';
+import { useStoredState } from '@/lib/localStore';
+import { useLocalDay } from '@/hooks/useLocalDay';
 import {
   format,
   startOfMonth,
@@ -25,23 +27,20 @@ import type { DailyPrayers, PrayerStatus } from '@/types';
 
 const localeMap: Record<string, Locale> = { en: enUS, sv, tr, ar: arSA };
 
+const EMPTY_PRAYERS = {};
+const EMPTY_HABITS = {};
+const EMPTY_PAUSED: string[] = [];
+
 const PRAYER_KEYS: (keyof DailyPrayers)[] = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
 
 type DayTone = 'done' | 'missed' | 'mixed' | 'none';
 
-function readJSON<T>(key: string, fallback: T): T {
-  try {
-    const v = localStorage.getItem(key);
-    return v ? (JSON.parse(v) as T) : fallback;
-  } catch {
-    return fallback;
-  }
-}
 
-function cellTone(status: PrayerStatus | undefined, isPast: boolean): 'done' | 'missed' | 'none' {
+
+function cellTone(status: PrayerStatus | undefined): 'done' | 'missed' | 'none' {
   if (status === 'ontime' || status === 'jamaah' || status === 'late') return 'done';
   if (status === 'missed') return 'missed';
-  if (isPast) return 'missed';
+
   return 'none';
 }
 
@@ -59,7 +58,7 @@ function summarizeDay(
   for (const k of PRAYER_KEYS) {
     const s = prayers?.[k]?.status;
     statuses[k] = s || 'pending';
-    const tone = cellTone(s, isPast);
+    const tone = cellTone(s);
     if (tone === 'done') done++;
     else if (tone === 'missed') missed++;
   }
@@ -77,20 +76,11 @@ export default function Calendar() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
 
-  // Recompute when the visible month changes (cheap; reads localStorage).
-  const prayerHistory = useMemo(
-    () => readJSON<Record<string, { prayers?: DailyPrayers }>>('prayer-history', {}),
-    [currentMonth],
-  );
-  const habitsHistory = useMemo(
-    () => readJSON<Record<string, Record<string, boolean>>>('habits-tracking', {}),
-    [currentMonth],
-  );
-  const pausedHabits = useMemo(() => {
-    return new Set(readJSON<string[]>('habits-paused', []));
-  }, [currentMonth]);
-
-  const todayKey = getDateString(new Date());
+  const [prayerHistory] = useStoredState<Record<string, { prayers?: DailyPrayers }>>('prayer-history', EMPTY_PRAYERS);
+  const [habitsHistory] = useStoredState<Record<string, Record<string, boolean>>>('habits-tracking', EMPTY_HABITS);
+  const [paused] = useStoredState<string[]>('habits-paused', EMPTY_PAUSED);
+  const pausedHabits = useMemo(() => new Set(paused), [paused]);
+  const todayKey = useLocalDay();
 
   const weekDays = (() => {
     const base = startOfWeek(new Date(), { weekStartsOn: 1 });
@@ -264,7 +254,7 @@ export default function Calendar() {
                 {PRAYER_KEYS.map((k) => {
                   const s = selectedDetail.prayer.statuses[k];
                   const done = s === 'ontime' || s === 'jamaah' || s === 'late';
-                  const missed = s === 'missed' || (selectedKey < todayKey && s === 'pending');
+                  const missed = s === 'missed';
                   return (
                     <span
                       key={k}

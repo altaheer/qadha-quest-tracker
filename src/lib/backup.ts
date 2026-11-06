@@ -1,3 +1,6 @@
+import { writeStorage } from './localStore';
+import { migrateLegacyPrayers, validBackupEntry } from './backupValidation';
+
 // All personal data lives on this device only. A backup file is therefore the
 // user's single safety net — it must capture every key the app owns, not a
 // subset. Keep APP_STORAGE_KEYS in sync whenever a new key is introduced.
@@ -33,6 +36,7 @@ export const APP_STORAGE_KEYS = [
   'app-language',
   'onboarding-complete',
   'seen-tooltips',
+  'notifications-enabled',
 ] as const;
 
 export const BACKUP_VERSION = 2;
@@ -87,7 +91,8 @@ export function backupFilename(date = new Date()): string {
 export type RestoreResult =
   | { status: 'restored'; exportedAt: string | null; restored: number }
   | { status: 'unreadable' }
-  | { status: 'invalid' };
+  | { status: 'invalid' }
+  | { status: 'storage-error' };
 
 /**
  * Normalises a parsed backup of any known version into a flat key/value map.
@@ -97,24 +102,29 @@ function toEntries(parsed: unknown): Record<string, string> | null {
   if (typeof parsed !== 'object' || parsed === null) return null;
 
   const v2 = parsed as Partial<BackupFile>;
-  if (v2.entries && typeof v2.entries === 'object') {
+  if (v2.app === 'qadha-tracker' && v2.version === BACKUP_VERSION && v2.entries && typeof v2.entries === 'object' && !Array.isArray(v2.entries)) {
     const out: Record<string, string> = {};
     for (const [key, value] of Object.entries(v2.entries)) {
       // Ignore anything that is not a key this app owns, so a tampered or
       // unrelated file cannot write arbitrary entries into localStorage.
       if (!(APP_STORAGE_KEYS as readonly string[]).includes(key)) continue;
-      if (typeof value === 'string') out[key] = value;
+      if (typeof value !== 'string' || !validBackupEntry(key, value)) return null;
+      out[key] = value;
     }
     return out;
   }
 
   const v1 = parsed as Partial<BackupFileV1>;
-  if (v1.data && typeof v1.data === 'object') {
+  if (v1.version === 1 && v1.data && typeof v1.data === 'object' && !Array.isArray(v1.data)) {
     const out: Record<string, string> = {};
     for (const [field, value] of Object.entries(v1.data)) {
       const key = V1_FIELD_TO_KEY[field];
       if (!key || value === undefined || value === null) continue;
-      out[key] = typeof value === 'string' ? value : JSON.stringify(value);
+      let raw = typeof value === 'string' ? value : JSON.stringify(value);
+      try { if (key === 'prayer-history') raw = migrateLegacyPrayers(raw); }
+      catch { return null; }
+      if (!validBackupEntry(key, raw)) return null;
+      out[key] = raw;
     }
     return out;
   }
@@ -137,8 +147,11 @@ export function restoreBackup(fileContents: string): RestoreResult {
 
   // Replace rather than merge: a restore should reproduce the backed-up state,
   // not blend it with whatever is currently on the device.
-  for (const key of APP_STORAGE_KEYS) localStorage.removeItem(key);
-  for (const [key, value] of Object.entries(entries)) localStorage.setItem(key, value);
+  try {
+    writeStorage({ ...Object.fromEntries(APP_STORAGE_KEYS.map(key => [key, null])), ...entries });
+  } catch {
+    return { status: 'storage-error' };
+  }
 
   const exportedAt =
     typeof (parsed as { exportedAt?: unknown }).exportedAt === 'string'
@@ -150,5 +163,5 @@ export function restoreBackup(fileContents: string): RestoreResult {
 
 /** Erases every trace of the user's data from this device. */
 export function clearAllData(): void {
-  for (const key of APP_STORAGE_KEYS) localStorage.removeItem(key);
+  writeStorage(Object.fromEntries(APP_STORAGE_KEYS.map(key => [key, null])));
 }

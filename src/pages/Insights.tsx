@@ -5,7 +5,6 @@ import { PrayerPunctuality } from '@/components/insights/PrayerPunctuality';
 import { ImanHeatmap } from '@/components/insights/ImanHeatmap';
 import { PrayerBalanceChart } from '@/components/insights/PrayerBalanceChart';
 import { QadhaBurndown } from '@/components/insights/QadhaBurndown';
-import { SpiritualWheel } from '@/components/insights/SpiritualWheel';
 import { AchievementsSection } from '@/components/AchievementsSection';
 import { OneTimeTooltip } from '@/components/OneTimeTooltip';
 import { useMissions } from '@/hooks/useMissions';
@@ -20,7 +19,7 @@ export default function Insights() {
   const { totalCompletedBonus, completed } = useMissions();
 
 
-  const hasData = data.currentStreak > 0 || data.weeklyData.some((d: any) => (d.points ?? d.value ?? 0) > 0);
+  const hasData = data.currentStreak > 0 || data.weeklyData.some((d) => d.hasData);
 
   return (
     <Page className="space-y-5">
@@ -30,7 +29,7 @@ export default function Insights() {
 
       {!hasData && <EmptyState icon={BarChart3} title={t('insights.empty')} />}
 
-      <HighlightCards streak={data.currentStreak} bestDay={data.bestDay} quranPages={0} />
+      <HighlightCards streak={data.currentStreak} bestDay={data.bestDay} />
 
       {completed.length > 0 && (
         <div className="rounded-2xl border border-gold/40 bg-gradient-to-br from-gold/10 to-amber-100/10 p-4 flex items-center gap-3">
@@ -78,11 +77,6 @@ export default function Insights() {
           <QadhaBurndown totalQadha={data.totalQadha} projection={data.qadhaProjection} />
         </section>
       )}
-
-      <section>
-        <h2 className="font-display text-lg font-semibold text-foreground mb-3">{t('insights.wheel')}</h2>
-        <SpiritualWheel data={data.spiritualWheel} />
-      </section>
 
       <AchievementsSection />
     </Page>

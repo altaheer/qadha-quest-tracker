@@ -1,3 +1,4 @@
+import type { TKey } from '@/lib/i18n';
 import { useEffect, useMemo, useState } from 'react';
 import { Target, Sparkles, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -124,7 +125,7 @@ export default function MissionsPage() {
               <optgroup label={t('nav.prayers')}>
                 {PRAYERS.map((p) => (
                   <option key={p} value={`prayer:${p}`}>
-                    {t(`prayerNames.${p}` as any)}
+                    {t(`prayerNames.${p}` as TKey)}
                   </option>
                 ))}
               </optgroup>

@@ -29,7 +29,7 @@ const subscribe = (cb: () => void) => { listeners.add(cb); return () => listener
 const getSnapshot = () => state;
 
 function persist() {
-  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {}
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch { /* Keep existing state if browser storage is unavailable. */ }
 }
 
 function systemPrefersDark() {

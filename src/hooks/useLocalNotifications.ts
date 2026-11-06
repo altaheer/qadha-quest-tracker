@@ -1,126 +1,101 @@
-import { useCallback, useEffect, useState } from 'react';
-import { useUserPrefs } from '@/hooks/useUserPrefs';
-import { getDateString } from '@/lib/date';
-import type { DailyPrayers, PrayerStatus } from '@/types';
+import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
+import { Capacitor } from '@capacitor/core';
+import { LocalNotifications } from '@capacitor/local-notifications';
+import { useUserPrefs } from './useUserPrefs';
+import { useStoredState, readStored } from '@/lib/localStore';
+import { useLocalDay } from './useLocalDay';
+import { useTranslation } from '@/lib/i18n';
+import { pendingPrayers, reminderBody, reminderPlan } from '@/lib/reminders';
+import type { PrayerHistory } from '@/types';
 
-const LAST_SHOWN_KEY = 'notifications-last-pending-shown';
+const EMPTY_HISTORY: PrayerHistory = {};
+const PERMISSION_CHANGED = 'notification-permission-changed';
+type Permission = NotificationPermission | 'unsupported';
+const native = () => Capacitor.isNativePlatform();
+const webSupported = () => typeof window !== 'undefined' && 'Notification' in window;
+// Serialize native cancel/schedule calls when settings change rapidly.
+let nativeQueue: Promise<unknown> = Promise.resolve();
+let schedulingError = false;
+const errorListeners = new Set<() => void>();
+const subscribeError = (listener: () => void) => { errorListeners.add(listener); return () => errorListeners.delete(listener); };
+const setError = (value: boolean) => { schedulingError = value; errorListeners.forEach(listener => listener()); };
 
-const PRAYER_KEYS: (keyof DailyPrayers)[] = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+export function useLocalNotifications(scheduleReminders = false) {
+  const { autoMarkMissedTime } = useUserPrefs();
+  const { lang } = useTranslation();
+  const today = useLocalDay();
+  const [history] = useStoredState('prayer-history', EMPTY_HISTORY);
+  const [enabled, setEnabled] = useStoredState('notifications-enabled', false);
+  const [permission, setPermission] = useState<Permission>('unsupported');
+  const error = useSyncExternalStore(subscribeError, () => schedulingError, () => false);
+  const [resume, setResume] = useState(0);
 
-function supportsNotifications(): boolean {
-  return typeof window !== 'undefined' && 'Notification' in window;
-}
-
-function readPrayerHistory(): Record<string, { prayers?: DailyPrayers }> {
-  try {
-    const raw = localStorage.getItem('prayer-history');
-    return raw ? JSON.parse(raw) : {};
-  } catch {
-    return {};
-  }
-}
-
-function pendingCountFor(dateKey: string): number {
-  const day = readPrayerHistory()[dateKey];
-  if (!day?.prayers) return 5;
-  return PRAYER_KEYS.filter((k) => {
-    const s = day.prayers?.[k]?.status as PrayerStatus | undefined;
-    return !s || s === 'pending';
-  }).length;
-}
-
-function msUntilTime(hhmm: string): number {
-  const [hh, mm] = hhmm.split(':').map((n) => parseInt(n, 10));
-  const now = new Date();
-  const target = new Date();
-  target.setHours(hh || 0, mm || 0, 0, 0);
-  // Reminder ~30 minutes before the day-reset cutoff.
-  target.setMinutes(target.getMinutes() - 30);
-  if (target.getTime() <= now.getTime()) {
-    target.setDate(target.getDate() + 1);
-  }
-  return target.getTime() - now.getTime();
-}
-
-/**
- * Local-only reminder: when notification permission is granted and auto-mark
- * missed is enabled, nudge once near the day-reset time if prayers are pending.
- * No server, no location.
- */
-export function useLocalNotifications() {
-  const { autoMarkMissed, autoMarkMissedTime } = useUserPrefs();
-  const [permission, setPermission] = useState<NotificationPermission | 'unsupported'>(() => {
-    if (!supportsNotifications()) return 'unsupported';
-    return Notification.permission;
-  });
-
-  const refresh = useCallback(() => {
-    if (!supportsNotifications()) {
-      setPermission('unsupported');
-      return;
-    }
-    setPermission(Notification.permission);
-  }, []);
-
-  const requestPermission = useCallback(async () => {
-    if (!supportsNotifications()) {
-      setPermission('unsupported');
-      return 'unsupported' as const;
-    }
+  const refresh = useCallback(async () => {
     try {
-      const result = await Notification.requestPermission();
-      setPermission(result);
-      return result;
-    } catch {
-      setPermission('denied');
-      return 'denied' as const;
-    }
+      if (native()) {
+        const { display } = await LocalNotifications.checkPermissions();
+        setPermission(display === 'granted' || display === 'denied' ? display : 'default');
+      } else setPermission(webSupported() ? Notification.permission : 'unsupported');
+      setResume(value => value + 1);
+    } catch { setPermission('unsupported'); }
   }, []);
 
   useEffect(() => {
-    if (!supportsNotifications()) return;
-    if (Notification.permission !== 'granted') return;
-    if (!autoMarkMissed) return;
-
-    let timer: number | undefined;
-    let cancelled = false;
-
-    const schedule = () => {
-      const delay = Math.max(5_000, msUntilTime(autoMarkMissedTime || '00:00'));
-      timer = window.setTimeout(() => {
-        if (cancelled) return;
-        const today = getDateString(new Date());
-        const pending = pendingCountFor(today);
-        const last = localStorage.getItem(LAST_SHOWN_KEY);
-        if (pending > 0 && last !== today) {
-          try {
-            new Notification('Ibadah', {
-              body:
-                pending === 1
-                  ? '1 prayer still unmarked today.'
-                  : `${pending} prayers still unmarked today.`,
-              tag: 'ibadah-pending-prayers',
-            });
-            localStorage.setItem(LAST_SHOWN_KEY, today);
-          } catch {
-            // Some browsers need a service worker when the tab is backgrounded.
-          }
-        }
-        schedule();
-      }, delay);
-    };
-
-    schedule();
+    void refresh();
+    window.addEventListener('focus', refresh);
+    window.addEventListener(PERMISSION_CHANGED, refresh);
+    document.addEventListener('visibilitychange', refresh);
     return () => {
-      cancelled = true;
-      if (timer) window.clearTimeout(timer);
+      window.removeEventListener('focus', refresh);
+      window.removeEventListener(PERMISSION_CHANGED, refresh);
+      document.removeEventListener('visibilitychange', refresh);
     };
-  }, [autoMarkMissed, autoMarkMissedTime, permission]);
+  }, [refresh]);
 
-  return {
-    supported: permission !== 'unsupported',
-    permission,
-    requestPermission,
-    refresh,
-  };
+  const requestPermission = useCallback(async () => {
+    try {
+      const result = native() ? (await LocalNotifications.requestPermissions()).display
+        : webSupported() ? await Notification.requestPermission() : 'unsupported';
+      const value: Permission = result === 'granted' || result === 'denied' || result === 'unsupported' ? result : 'default';
+      setPermission(value);
+      if (value === 'granted') setEnabled(true);
+      window.dispatchEvent(new Event(PERMISSION_CHANGED));
+      return value;
+    } catch { setError(true); return 'unsupported' as const; }
+  }, [setEnabled]);
+
+  useEffect(() => {
+    if (!scheduleReminders) return;
+    let cancelled = false;
+    let timer: number | undefined;
+    const plan = enabled && permission === 'granted' ? reminderPlan(history, autoMarkMissedTime) : [];
+    setError(false);
+    if (native()) {
+      nativeQueue = nativeQueue.catch(() => undefined).then(async () => {
+        if (cancelled) return;
+        await LocalNotifications.cancel({ notifications: Array.from({ length: 31 }, (_, i) => ({ id: 5100 + i })) });
+        if (!plan.length || cancelled) return;
+        await LocalNotifications.createChannel({ id: 'prayer-reminders', name: 'Ibadah', importance: 3 });
+        await LocalNotifications.schedule({ notifications: plan.map(item => ({
+          id: item.id, title: 'Ibadah', body: reminderBody[lang], channelId: 'prayer-reminders',
+          smallIcon: 'ic_stat_prayer', schedule: { at: item.at }, extra: { prayerDay: item.day },
+        })) });
+      }).catch(() => { if (!cancelled) setError(true); });
+    } else if (plan[0]) {
+      const next = plan[0];
+      timer = window.setTimeout(async () => {
+        if (cancelled || pendingPrayers(readStored('prayer-history', EMPTY_HISTORY), next.day) === 0) return;
+        try {
+          const registration = await navigator.serviceWorker?.getRegistration();
+          if (registration) await registration.showNotification('Ibadah', { body: reminderBody[lang], tag: next.day });
+          else new Notification('Ibadah', { body: reminderBody[lang], tag: next.day });
+        } catch { if (!cancelled) setError(true); }
+        // Refresh the next web reminder even if the app stays open overnight.
+        if (!cancelled) setResume(value => value + 1);
+      }, Math.max(0, +next.at - Date.now()));
+    }
+    return () => { cancelled = true; if (timer) window.clearTimeout(timer); };
+  }, [scheduleReminders, enabled, permission, history, autoMarkMissedTime, lang, today, resume]);
+
+  return { supported: permission !== 'unsupported', permission, requestPermission, refresh, enabled, setEnabled, error, native: native() };
 }

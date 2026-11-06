@@ -18,14 +18,18 @@ import { Page, PageHeader } from '@/components/common';
 export default function Settings() {
   const { t } = useTranslation();
   const { showArabic, setShowArabic, autoMarkMissed, setAutoMarkMissed, autoMarkMissedTime, setAutoMarkMissedTime } = useUserPrefs();
-  const { supported: notificationsSupported, permission: notificationPermission, requestPermission } = useLocalNotifications();
+  const { supported: notificationsSupported, permission: notificationPermission, requestPermission, enabled: notificationsEnabled, setEnabled: setNotificationsEnabled, native: nativeNotifications, error: notificationError } = useLocalNotifications();
   const { exportData, importData, clearData } = useDataBackup();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleExport = () => {
-    exportData();
-    toast({ title: t('common.done'), description: t('settings.export') });
+  const handleExport = async () => {
+    try {
+      await exportData();
+      toast({ title: t('common.done'), description: t('settings.export') });
+    } catch {
+      toast({ title: t('common.cancel'), description: t('settings.exportFailed'), variant: 'destructive' });
+    }
   };
 
   const handleImportClick = () => fileInputRef.current?.click();
@@ -44,7 +48,8 @@ export default function Settings() {
     toast({
       title: t('common.cancel'),
       description:
-        result.status === 'unreadable' ? t('settings.restoreFailed') : t('settings.restoreInvalid'),
+        result.status === 'unreadable' || result.status === 'storage-error'
+          ? t('settings.restoreFailed') : t('settings.restoreInvalid'),
       variant: 'destructive',
     });
   };
@@ -154,15 +159,19 @@ export default function Settings() {
               </div>
               <div>
                 <CardTitle className="text-lg">{t('settings.notifications')}</CardTitle>
-                <CardDescription>{t('settings.notificationsDesc')}</CardDescription>
+                <CardDescription>{t(nativeNotifications ? 'settings.notificationsNativeDesc' : 'settings.notificationsDesc')}</CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
+            {notificationError && <p role="alert" className="text-sm text-destructive">{t('settings.notificationsFailed')}</p>}
             {!notificationsSupported || notificationPermission === 'unsupported' ? (
               <p className="text-sm text-muted-foreground">{t('settings.notificationsUnsupported')}</p>
             ) : notificationPermission === 'granted' ? (
-              <p className="text-sm text-muted-foreground">{t('settings.notificationsEnabled')}</p>
+              <div className="flex items-center justify-between gap-4">
+                <p className="text-sm text-muted-foreground">{t('settings.notificationsEnabled')}</p>
+                <Switch aria-label={t('settings.notifications')} checked={notificationsEnabled} onCheckedChange={setNotificationsEnabled} />
+              </div>
             ) : notificationPermission === 'denied' ? (
               <p className="text-sm text-muted-foreground">{t('settings.notificationsDenied')}</p>
             ) : (

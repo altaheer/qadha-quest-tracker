@@ -31,8 +31,7 @@ const DEFAULT_MENSTRUAL_DAYS = 7;
 const MIN_MENSTRUAL_DAYS = 1;
 const MAX_MENSTRUAL_DAYS = 15;
 
-/** Nobody reaches puberty before this, and it bounds the year list sensibly. */
-const EARLIEST_AGE = 8;
+/** Support recent puberty and recent starts as well as older estimates. */
 const OLDEST_PLAUSIBLE_AGE = 100;
 
 function Question({ title, hint }: { title: string; hint?: string }) {
@@ -146,8 +145,8 @@ export function QadhaSetupFlow({ onApply, onManual }: Props) {
   const years = useMemo(
     () =>
       Array.from(
-        { length: OLDEST_PLAUSIBLE_AGE - EARLIEST_AGE + 1 },
-        (_, i) => thisYear - EARLIEST_AGE - i,
+        { length: OLDEST_PLAUSIBLE_AGE + 1 },
+        (_, i) => thisYear - i,
       ),
     [thisYear],
   );
@@ -175,7 +174,11 @@ export function QadhaSetupFlow({ onApply, onManual }: Props) {
   };
 
   const pubertyComplete = puberty !== null;
-  const whenComplete = startedAt !== null && startedAt !== 'today';
+  const whenComplete = startedAt !== null && startedAt !== 'today' && puberty !== null
+    && (startedAt.year * 12 + startedAt.month >= puberty.year * 12 + puberty.month)
+    && (startedAt.year * 12 + startedAt.month <= thisYear * 12 + new Date().getMonth());
+  const pubertyInPast = puberty !== null
+    && puberty.year * 12 + puberty.month <= thisYear * 12 + new Date().getMonth();
 
   return (
     <div>
@@ -205,7 +208,7 @@ export function QadhaSetupFlow({ onApply, onManual }: Props) {
               <Button
                 size="lg"
                 className="mt-6 w-full"
-                disabled={!pubertyComplete}
+                disabled={!pubertyComplete || !pubertyInPast}
                 onClick={() => setStep('started')}
               >
                 {t('common.next')}

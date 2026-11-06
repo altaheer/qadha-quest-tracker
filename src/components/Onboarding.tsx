@@ -22,7 +22,7 @@ export function hasCompletedOnboarding() {
 }
 
 export function resetOnboarding() {
-  try { localStorage.removeItem(ONBOARDING_KEY); } catch {}
+  try { localStorage.removeItem(ONBOARDING_KEY); } catch { /* Keep existing state if browser storage is unavailable. */ }
 }
 
 interface Props {
@@ -82,9 +82,9 @@ export function Onboarding({ onComplete }: Props) {
     try {
       localStorage.setItem('qadha-prayer-counts', JSON.stringify(parsed));
       window.dispatchEvent(new Event('qadha-updated'));
-    } catch {}
+    } catch { /* Keep existing state if browser storage is unavailable. */ }
     applyLevel(level);
-    try { localStorage.setItem(ONBOARDING_KEY, '1'); } catch {}
+    try { localStorage.setItem(ONBOARDING_KEY, '1'); } catch { /* Keep existing state if browser storage is unavailable. */ }
     onComplete();
   };
 

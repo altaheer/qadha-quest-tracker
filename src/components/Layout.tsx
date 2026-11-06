@@ -21,7 +21,7 @@ export function Layout({ children }: LayoutProps) {
   const { pathname } = useLocation();
   const hideFab = pathname.startsWith('/settings') || pathname.startsWith('/guide');
   // Keep the local reminder scheduler alive while the shell is mounted.
-  useLocalNotifications();
+  useLocalNotifications(true);
 
   return (
     <SidebarProvider defaultOpen={false}>

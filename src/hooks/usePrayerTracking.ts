@@ -1,4 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
+import { useStoredState, readStored, writeStorage } from '@/lib/localStore';
+import { defaultDailyPrayers, createDefaultSunnah } from '@/lib/prayerData';
+import { calculateCombo, calculatePrayerStreaks, isPrayed } from '@/lib/prayerStats';
+import { useLocalDay } from '@/hooks/useLocalDay';
 import { getDateString } from '@/lib/date';
 import type {
   PrayerStatus,
@@ -24,78 +28,8 @@ export type {
 };
 
 const HISTORY_KEY = 'prayer-history';
-const STREAKS_KEY = 'prayer-streaks';
 const QADHA_KEY = 'qadha-prayer-counts';
-const COMBO_KEY = 'prayer-combo';
-
-const defaultPrayerEntry: PrayerEntry = { status: 'pending' };
-
-const defaultDailyPrayers: DailyPrayers = {
-  fajr: { ...defaultPrayerEntry },
-  dhuhr: { ...defaultPrayerEntry },
-  asr: { ...defaultPrayerEntry },
-  maghrib: { ...defaultPrayerEntry },
-  isha: { ...defaultPrayerEntry },
-};
-
-const defaultStreak: PrayerStreak = { current: 0, best: 0 };
-
-const defaultStreaks: PrayerStreaks = {
-  fajr: { ...defaultStreak },
-  dhuhr: { ...defaultStreak },
-  asr: { ...defaultStreak },
-  maghrib: { ...defaultStreak },
-  isha: { ...defaultStreak },
-};
-
-const createDefaultSunnah = (): PrayerSunnah => ({
-  fajr: [
-    { id: 'fajr-siwak', name: 'Siwāk', arabicName: 'السواك', completed: false },
-    { id: 'fajr-adhan', name: 'Answer Adhān', arabicName: 'إجابة الأذان', completed: false },
-    { id: 'fajr-sunnah', name: '2 Rak\'at Sunnah', arabicName: 'ركعتا الفجر', completed: false },
-    { id: 'fajr-tasbih', name: '33× Subhanallah · Alhamdulillah · Allahu Akbar', arabicName: 'التسبيح بعد الصلاة', completed: false },
-    { id: 'fajr-kursi', name: 'Āyat al-Kursī', arabicName: 'آية الكرسي', completed: false },
-    { id: 'fajr-tahlil10', name: '10× La ilaha illa Allah', arabicName: 'التهليل عشرًا', completed: false },
-    { id: 'fajr-ajirni7', name: '7× Allahumma ajirni min an-nar', arabicName: 'اللهم أجرني من النار', completed: false },
-    { id: 'fajr-dua', name: 'Du\'ā\' after prayer', arabicName: 'الدعاء بعد الصلاة', completed: false },
-  ],
-  dhuhr: [
-    { id: 'dhuhr-siwak', name: 'Siwāk', arabicName: 'السواك', completed: false },
-    { id: 'dhuhr-adhan', name: 'Answer Adhān', arabicName: 'إجابة الأذان', completed: false },
-    { id: 'dhuhr-sunnah-before', name: '2-4 Rak\'at before', arabicName: 'ركعات قبلية', completed: false },
-    { id: 'dhuhr-sunnah-after', name: '2-4 Rak\'at after', arabicName: 'ركعات بعدية', completed: false },
-    { id: 'dhuhr-tasbih', name: '33× Subhanallah · Alhamdulillah · Allahu Akbar', arabicName: 'التسبيح بعد الصلاة', completed: false },
-    { id: 'dhuhr-kursi', name: 'Āyat al-Kursī', arabicName: 'آية الكرسي', completed: false },
-    { id: 'dhuhr-dua', name: 'Du\'ā\' after prayer', arabicName: 'الدعاء بعد الصلاة', completed: false },
-  ],
-  asr: [
-    { id: 'asr-siwak', name: 'Siwāk', arabicName: 'السواك', completed: false },
-    { id: 'asr-adhan', name: 'Answer Adhān', arabicName: 'إجابة الأذان', completed: false },
-    { id: 'asr-sunnah-before', name: '4 Rak\'at before Asr', arabicName: 'أربع ركعات قبل العصر', completed: false },
-    { id: 'asr-tasbih', name: '33× Subhanallah · Alhamdulillah · Allahu Akbar', arabicName: 'التسبيح بعد الصلاة', completed: false },
-    { id: 'asr-kursi', name: 'Āyat al-Kursī', arabicName: 'آية الكرسي', completed: false },
-    { id: 'asr-dua', name: 'Du\'ā\' after prayer', arabicName: 'الدعاء بعد الصلاة', completed: false },
-  ],
-  maghrib: [
-    { id: 'maghrib-siwak', name: 'Siwāk', arabicName: 'السواك', completed: false },
-    { id: 'maghrib-adhan', name: 'Answer Adhān', arabicName: 'إجابة الأذان', completed: false },
-    { id: 'maghrib-sunnah', name: '2 Rak\'at Sunnah', arabicName: 'ركعتان بعدية', completed: false },
-    { id: 'maghrib-tasbih', name: '33× Subhanallah · Alhamdulillah · Allahu Akbar', arabicName: 'التسبيح بعد الصلاة', completed: false },
-    { id: 'maghrib-kursi', name: 'Āyat al-Kursī', arabicName: 'آية الكرسي', completed: false },
-    { id: 'maghrib-tahlil10', name: '10× La ilaha illa Allah', arabicName: 'التهليل عشرًا', completed: false },
-    { id: 'maghrib-ajirni7', name: '7× Allahumma inni as\'aluka al-jannah', arabicName: 'اللهم إني أسألك الجنة', completed: false },
-    { id: 'maghrib-dua', name: 'Du\'ā\' after prayer', arabicName: 'الدعاء بعد الصلاة', completed: false },
-  ],
-  isha: [
-    { id: 'isha-siwak', name: 'Siwāk', arabicName: 'السواک', completed: false },
-    { id: 'isha-adhan', name: 'Answer Adhān', arabicName: 'إجابة الأذان', completed: false },
-    { id: 'isha-sunnah', name: '2 Rak\'at Sunnah', arabicName: 'ركعتان بعدية', completed: false },
-    { id: 'isha-witr', name: 'Witr prayer', arabicName: 'صلاة الوتر', completed: false },
-    { id: 'isha-tasbih', name: '33× Subhanallah · Alhamdulillah · Allahu Akbar', arabicName: 'التسبيح بعد الصلاة', completed: false },
-    { id: 'isha-kursi', name: 'Āyat al-Kursī', arabicName: 'آية الكرسي', completed: false },
-    { id: 'isha-dua', name: 'Du\'ā\' after prayer', arabicName: 'الدعاء بعد الصلاة', completed: false },
-  ],
-});
+const EMPTY_HISTORY: PrayerHistory = {};
 
 // Combo multiplier: +0.1x per 10 consecutive ontime/jamaah prayers
 export function getComboMultiplier(combo: number): number {
@@ -114,107 +48,51 @@ export function getComboLabel(combo: number): string | null {
 }
 
 
-// Recalculate combo from full history: count consecutive good prayers
-// going backwards chronologically from today.
-// We iterate day by day (newest first), and within each day isha→fajr (reverse prayer order).
-// Only ontime/jamaah count. Late/missed/pending all break the combo.
-function recalcComboFromHistory(hist: PrayerHistory): number {
-  const prayerKeys: (keyof DailyPrayers)[] = ['isha', 'maghrib', 'asr', 'dhuhr', 'fajr'];
-  
-  // All dates sorted newest first
-  const dates = Object.keys(hist).sort().reverse();
-  
-  let combo = 0;
-  
-  for (const date of dates) {
-    const day = hist[date]?.prayers;
-    if (!day) break; // no data = break
-    
-    let dayHasAnyData = false;
-    for (const p of prayerKeys) {
-      const status = day[p]?.status;
-      if (!status || status === 'pending') continue; // skip untracked within a day
-      dayHasAnyData = true;
-      if (status === 'ontime' || status === 'jamaah') {
-        combo++;
-      } else {
-        // late or missed breaks the combo
-        return combo;
-      }
-    }
-    
-    // If a day exists in history but has zero tracked prayers, stop
-    if (!dayHasAnyData) break;
-  }
-  
-  return combo;
-}
-
 export function usePrayerTracking(selectedDate?: Date) {
+  useLocalDay();
   const today = new Date();
   const currentDate = selectedDate || today;
   const dateKey = getDateString(currentDate);
   const isToday = dateKey === getDateString(today);
 
-  const [history, setHistory] = useState<PrayerHistory>(() => {
-    const stored = localStorage.getItem(HISTORY_KEY);
-    return stored ? JSON.parse(stored) : {};
-  });
-
-  const [streaks, setStreaks] = useState<PrayerStreaks>(() => {
-    const stored = localStorage.getItem(STREAKS_KEY);
-    return stored ? JSON.parse(stored) : defaultStreaks;
-  });
-
-  const combo = recalcComboFromHistory(history);
-
+  const [history] = useStoredState<PrayerHistory>(HISTORY_KEY, EMPTY_HISTORY);
+  const combo = calculateCombo(history);
+  const streaks = calculatePrayerStreaks(history);
   const prayers = history[dateKey]?.prayers || defaultDailyPrayers;
   const sunnah = history[dateKey]?.sunnah || createDefaultSunnah();
 
-  useEffect(() => {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
-  }, [history]);
-
-  // Rehydrate from localStorage when useCloudSync patches it in the background
-  useEffect(() => {
-    const rehydrate = () => {
-      try {
-        const raw = localStorage.getItem(HISTORY_KEY);
-        if (raw) setHistory(JSON.parse(raw));
-      } catch {}
-    };
-    const onStorage = (e: StorageEvent) => { if (e.key === HISTORY_KEY) rehydrate(); };
-    window.addEventListener('prayer-history-updated', rehydrate);
-    window.addEventListener('storage', onStorage);
-    return () => {
-      window.removeEventListener('prayer-history-updated', rehydrate);
-      window.removeEventListener('storage', onStorage);
-    };
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem(STREAKS_KEY, JSON.stringify(streaks));
-  }, [streaks]);
-
-  const updateQadhaCount = useCallback((prayer: keyof DailyPrayers, delta: number) => {
-    const stored = localStorage.getItem(QADHA_KEY);
-    const qadhaCounts = stored ? JSON.parse(stored) : { fajr: 0, dhuhr: 0, asr: 0, maghrib: 0, isha: 0 };
-    qadhaCounts[prayer] = Math.max(0, qadhaCounts[prayer] + delta);
-    localStorage.setItem(QADHA_KEY, JSON.stringify(qadhaCounts));
-    window.dispatchEvent(new Event('qadha-updated'));
+  // Commit history and debt together. Multiple mounted consumers always read
+  // the last committed history, so an overdue prayer is counted exactly once.
+  const commitHistory = useCallback((update: (previous: PrayerHistory) => {
+    history: PrayerHistory;
+    deltas: Partial<Record<keyof DailyPrayers, number>>;
+  }) => {
+    const previous = readStored<PrayerHistory>(HISTORY_KEY, EMPTY_HISTORY);
+    const result = update(previous);
+    if (result.history === previous) return;
+    const counts = { fajr: 0, dhuhr: 0, asr: 0, maghrib: 0, isha: 0,
+      ...readStored<Record<string, number>>(QADHA_KEY, {}) };
+    for (const prayer of Object.keys(result.deltas) as (keyof DailyPrayers)[]) {
+      counts[prayer] = Math.max(0, counts[prayer] + (result.deltas[prayer] || 0));
+    }
+    writeStorage({
+      [HISTORY_KEY]: JSON.stringify(result.history),
+      [QADHA_KEY]: JSON.stringify(counts),
+    });
   }, []);
 
   // Auto-mark pending past prayers as missed once the day's cutoff has passed.
   useEffect(() => {
     const sweep = () => {
       let prefs: { autoMarkMissed?: boolean; autoMarkMissedTime?: string } = {};
-      try { prefs = JSON.parse(localStorage.getItem('app-prefs') || '{}'); } catch {}
+      try { prefs = JSON.parse(localStorage.getItem('app-prefs') || '{}'); } catch { /* Keep existing state if browser storage is unavailable. */ }
       if (prefs.autoMarkMissed === false) return;
       const [hh, mm] = (prefs.autoMarkMissedTime || '00:00').split(':').map((n) => parseInt(n, 10));
       const cutoffMin = (isNaN(hh) ? 0 : hh) * 60 + (isNaN(mm) ? 0 : mm);
       const now = new Date();
 
-      setHistory((prev) => {
+      commitHistory((prev) => {
+        const deltas: Partial<Record<keyof DailyPrayers, number>> = {};
         let changed = false;
         const next = { ...prev };
         for (const key of Object.keys(prev)) {
@@ -229,7 +107,7 @@ export function usePrayerTracking(selectedDate?: Date) {
           (['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'] as const).forEach((p) => {
             if (newPrayers[p]?.status === 'pending') {
               newPrayers[p] = { status: 'missed', timestamp: closeAt.getTime() };
-              updateQadhaCount(p, 1);
+              deltas[p] = (deltas[p] || 0) + 1;
               dayChanged = true;
             }
           });
@@ -238,95 +116,42 @@ export function usePrayerTracking(selectedDate?: Date) {
             changed = true;
           }
         }
-        return changed ? next : prev;
+        return { history: changed ? next : prev, deltas };
       });
     };
     sweep();
     const id = window.setInterval(sweep, 60_000);
     return () => window.clearInterval(id);
-  }, [updateQadhaCount]);
+  }, [commitHistory]);
 
   const markPrayer = useCallback((prayer: keyof DailyPrayers, status: PrayerStatus) => {
-    const previousStatus = history[dateKey]?.prayers?.[prayer]?.status || 'pending';
-    
-    // Toggle: if clicking same status, revert to pending
-    const newStatus: PrayerStatus = previousStatus === status ? 'pending' : status;
-
-    setHistory(prev => {
+    commitHistory(prev => {
       const existingDay = prev[dateKey] || { prayers: { ...defaultDailyPrayers }, sunnah: createDefaultSunnah() };
+      const previousStatus = existingDay.prayers[prayer].status;
+      const newStatus: PrayerStatus = previousStatus === status ? 'pending' : status;
       return {
-        ...prev,
-        [dateKey]: {
+        history: { ...prev, [dateKey]: {
           ...existingDay,
-          prayers: {
-            ...existingDay.prayers,
-            [prayer]: { status: newStatus, timestamp: Date.now() }
-          }
-        }
+          prayers: { ...existingDay.prayers, [prayer]: { status: newStatus, timestamp: Date.now() } },
+        } },
+        deltas: { [prayer]: Number(newStatus === 'missed') - Number(previousStatus === 'missed') },
       };
     });
-
-    // Handle Qadha
-    if (newStatus === 'missed' && previousStatus !== 'missed') {
-      updateQadhaCount(prayer, 1);
-    } else if (previousStatus === 'missed' && newStatus !== 'missed') {
-      updateQadhaCount(prayer, -1);
-    }
-
-    // Combo is now derived from history automatically
-    const wasGood = previousStatus === 'ontime' || previousStatus === 'jamaah';
-
-    // Update per-prayer streaks only for today
-    if (isToday) {
-      if ((newStatus === 'ontime' || newStatus === 'jamaah') && !wasGood) {
-        setStreaks(prev => {
-          const current = prev[prayer].current + 1;
-          return {
-            ...prev,
-            [prayer]: {
-              current,
-              best: Math.max(current, prev[prayer].best),
-            }
-          };
-        });
-      } else if (newStatus === 'missed') {
-        setStreaks(prev => ({
-          ...prev,
-          [prayer]: {
-            ...prev[prayer],
-            current: 0,
-          }
-        }));
-      } else if (wasGood && newStatus === 'pending') {
-        // Reverting a good prayer
-        setStreaks(prev => ({
-          ...prev,
-          [prayer]: {
-            ...prev[prayer],
-            current: Math.max(0, prev[prayer].current - 1),
-          }
-        }));
-      }
-    }
-  }, [dateKey, history, isToday, updateQadhaCount]);
+  }, [dateKey, commitHistory]);
 
   const toggleSunnah = useCallback((prayer: keyof PrayerSunnah, sunnahId: string) => {
-    setHistory(prev => {
+    commitHistory(prev => {
       const existingDay = prev[dateKey] || { prayers: { ...defaultDailyPrayers }, sunnah: createDefaultSunnah() };
       return {
-        ...prev,
-        [dateKey]: {
+        history: { ...prev, [dateKey]: {
           ...existingDay,
-          sunnah: {
-            ...existingDay.sunnah,
-            [prayer]: existingDay.sunnah[prayer].map(item =>
-              item.id === sunnahId ? { ...item, completed: !item.completed } : item
-            )
-          }
-        }
+          sunnah: { ...existingDay.sunnah, [prayer]: existingDay.sunnah[prayer].map(item =>
+            item.id === sunnahId ? { ...item, completed: !item.completed } : item) },
+        } },
+        deltas: {},
       };
     });
-  }, [dateKey]);
+  }, [dateKey, commitHistory]);
 
   const comboMultiplier = getComboMultiplier(combo);
 
@@ -348,7 +173,7 @@ export function usePrayerTracking(selectedDate?: Date) {
 
   const getCompletedCount = useCallback(() => {
     const prayerKeys: (keyof DailyPrayers)[] = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
-    return prayerKeys.filter(p => prayers[p].status !== 'pending').length;
+    return prayerKeys.filter(p => isPrayed(prayers[p].status)).length;
   }, [prayers]);
 
   return {
