@@ -4,26 +4,32 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { useDataBackup } from '@/hooks/useDataBackup';
-import { ChevronRight, Download, Upload, Database, HelpCircle, Shield, RotateCcw, Palette, Clock, Trash2 } from 'lucide-react';
+import { ChevronRight, Download, Upload, Database, HelpCircle, Shield, RotateCcw, Palette, Clock, Trash2, Bell } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { LanguageSelector } from '@/components/LanguageSelector';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useTranslation } from '@/lib/i18n';
 import { useUserPrefs } from '@/hooks/useUserPrefs';
+import { useLocalNotifications } from '@/hooks/useLocalNotifications';
 import { resetOnboarding } from '@/components/Onboarding';
 import { Page, PageHeader } from '@/components/common';
 
 export default function Settings() {
   const { t } = useTranslation();
   const { showArabic, setShowArabic, autoMarkMissed, setAutoMarkMissed, autoMarkMissedTime, setAutoMarkMissedTime } = useUserPrefs();
+  const { supported: notificationsSupported, permission: notificationPermission, requestPermission, enabled: notificationsEnabled, setEnabled: setNotificationsEnabled, native: nativeNotifications, error: notificationError } = useLocalNotifications();
   const { exportData, importData, clearData } = useDataBackup();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleExport = () => {
-    exportData();
-    toast({ title: t('common.done'), description: t('settings.export') });
+  const handleExport = async () => {
+    try {
+      await exportData();
+      toast({ title: t('common.done'), description: t('settings.export') });
+    } catch {
+      toast({ title: t('common.cancel'), description: t('settings.exportFailed'), variant: 'destructive' });
+    }
   };
 
   const handleImportClick = () => fileInputRef.current?.click();
@@ -42,7 +48,8 @@ export default function Settings() {
     toast({
       title: t('common.cancel'),
       description:
-        result.status === 'unreadable' ? t('settings.restoreFailed') : t('settings.restoreInvalid'),
+        result.status === 'unreadable' || result.status === 'storage-error'
+          ? t('settings.restoreFailed') : t('settings.restoreInvalid'),
       variant: 'destructive',
     });
   };
@@ -141,6 +148,42 @@ export default function Settings() {
                 className="w-[7.5rem] shrink-0"
               />
             </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/50">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <Bell className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="text-lg">{t('settings.notifications')}</CardTitle>
+                <CardDescription>{t(nativeNotifications ? 'settings.notificationsNativeDesc' : 'settings.notificationsDesc')}</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {notificationError && <p role="alert" className="text-sm text-destructive">{t('settings.notificationsFailed')}</p>}
+            {!notificationsSupported || notificationPermission === 'unsupported' ? (
+              <p className="text-sm text-muted-foreground">{t('settings.notificationsUnsupported')}</p>
+            ) : notificationPermission === 'granted' ? (
+              <div className="flex items-center justify-between gap-4">
+                <p className="text-sm text-muted-foreground">{t('settings.notificationsEnabled')}</p>
+                <Switch aria-label={t('settings.notifications')} checked={notificationsEnabled} onCheckedChange={setNotificationsEnabled} />
+              </div>
+            ) : notificationPermission === 'denied' ? (
+              <p className="text-sm text-muted-foreground">{t('settings.notificationsDenied')}</p>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => void requestPermission()}
+              >
+                {t('settings.notificationsEnable')}
+              </Button>
+            )}
           </CardContent>
         </Card>
 

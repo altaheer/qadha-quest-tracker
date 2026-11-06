@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { estimateQadha } from './qadhaEstimate';
+import { estimateQadha, daysToClearDebt } from './qadhaEstimate';
 
 /** Both endpoints anchor to the 15th, so spans are whole months apart. */
 const MARCH_2015 = { year: 2015, month: 2 };
@@ -85,5 +85,22 @@ describe('estimateQadha', () => {
       });
       expect(totalPrayers).toBe(perPrayer * 5);
     }
+  });
+});
+
+describe('daysToClearDebt', () => {
+  it('ceil-divides the backlog by the daily goal', () => {
+    expect(daysToClearDebt(100, 5)).toBe(20);
+    expect(daysToClearDebt(101, 5)).toBe(21);
+  });
+
+  it('recalculates when the goal changes', () => {
+    expect(daysToClearDebt(3650, 5)).toBe(730);
+    expect(daysToClearDebt(3650, 10)).toBe(365);
+  });
+
+  it('is Infinity when there is no pace or nothing left', () => {
+    expect(daysToClearDebt(100, 0)).toBe(Infinity);
+    expect(daysToClearDebt(0, 5)).toBe(Infinity);
   });
 });

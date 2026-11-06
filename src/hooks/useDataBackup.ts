@@ -1,4 +1,7 @@
 import { useCallback } from 'react';
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 import {
   backupFilename,
   clearAllData,
@@ -10,8 +13,14 @@ import {
 export type { RestoreResult };
 
 export function useDataBackup() {
-  const exportData = useCallback(() => {
-    const blob = new Blob([JSON.stringify(createBackup(), null, 2)], {
+  const exportData = useCallback(async () => {
+    const contents = JSON.stringify(createBackup(), null, 2);
+    if (Capacitor.isNativePlatform()) {
+      const file = await Filesystem.writeFile({ path: backupFilename(), data: contents, directory: Directory.Cache, encoding: Encoding.UTF8 });
+      await Share.share({ title: 'Ibadah', files: [file.uri] });
+      return;
+    }
+    const blob = new Blob([contents], {
       type: 'application/json',
     });
     const url = URL.createObjectURL(blob);

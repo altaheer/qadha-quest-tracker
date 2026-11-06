@@ -1,5 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback } from 'react';
+import { useStoredState } from '@/lib/localStore';
 import type { PrayerCounts } from '@/types';
+import { daysToClearDebt } from '@/lib/qadhaEstimate';
 
 export type { PrayerCounts };
 
@@ -15,73 +17,45 @@ const defaultCounts: PrayerCounts = {
 };
 
 export function useQadhaPrayers() {
-  const [counts, setCounts] = useState<PrayerCounts>(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : defaultCounts;
-  });
-
-  const [dailyGoal, setDailyGoal] = useState<number>(() => {
-    const stored = localStorage.getItem(GOAL_STORAGE_KEY);
-    return stored ? parseInt(stored, 10) : 5;
-  });
-
-  // Listen for updates from usePrayerTracking
-  useEffect(() => {
-    const handleQadhaUpdate = () => {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        setCounts(JSON.parse(stored));
-      }
-    };
-
-    window.addEventListener('qadha-updated', handleQadhaUpdate);
-    return () => window.removeEventListener('qadha-updated', handleQadhaUpdate);
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(counts));
-  }, [counts]);
-
-  useEffect(() => {
-    localStorage.setItem(GOAL_STORAGE_KEY, dailyGoal.toString());
-  }, [dailyGoal]);
+  const [storedCounts, setCounts] = useStoredState<PrayerCounts>(STORAGE_KEY, defaultCounts);
+  const counts = { ...defaultCounts, ...storedCounts };
+  const [dailyGoal, setDailyGoal] = useStoredState<number>(GOAL_STORAGE_KEY, 5);
 
   const increment = useCallback((prayer: keyof PrayerCounts) => {
     setCounts(prev => {
-      const next = prev[prayer] + 1;
+      const next = (prev[prayer] || 0) + 1;
       return { ...prev, [prayer]: next };
     });
-  }, []);
+  }, [setCounts]);
 
   const decrement = useCallback((prayer: keyof PrayerCounts) => {
     setCounts(prev => {
-      const next = Math.max(0, prev[prayer] - 1);
+      const next = Math.max(0, (prev[prayer] || 0) - 1);
       return { ...prev, [prayer]: next };
     });
-  }, []);
+  }, [setCounts]);
 
   const setCount = useCallback((prayer: keyof PrayerCounts, count: number) => {
     setCounts(prev => {
-      const next = Math.max(0, count);
+      const next = Math.max(0, Math.floor(Number.isFinite(count) ? count : 0));
       return { ...prev, [prayer]: next };
     });
-  }, []);
+  }, [setCounts]);
 
   const reset = useCallback((prayer: keyof PrayerCounts) => {
     setCounts(prev => {
       return { ...prev, [prayer]: 0 };
     });
-  }, []);
+  }, [setCounts]);
 
   const resetAll = useCallback(() => {
     setCounts(defaultCounts);
-  }, []);
+  }, [setCounts]);
 
   const totalPrayers = Object.values(counts).reduce((sum, count) => sum + count, 0);
 
   const calculateDaysToComplete = useCallback(() => {
-    if (dailyGoal <= 0) return Infinity;
-    return Math.ceil(totalPrayers / dailyGoal);
+    return daysToClearDebt(totalPrayers, dailyGoal);
   }, [totalPrayers, dailyGoal]);
 
   return {

@@ -1,13 +1,18 @@
 import { useMemo } from 'react';
 import { BookOpen, Check, Moon, RotateCcw, Target } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { usePrayerTracking, type DailyPrayers } from '@/hooks/usePrayerTracking';
+import type { DailyPrayers } from '@/types';
+import { usePrayerTracking } from '@/hooks/usePrayerTracking';
+import { useQadhaPrayers } from '@/hooks/useQadhaPrayers';
+import { useStoredState } from '@/lib/localStore';
+import { useLocalDay } from '@/hooks/useLocalDay';
 import { useHabitsTracking, habitCategories, levelHabits } from '@/hooks/useHabitsTracking';
 import { useMissions, computeProgress, getActionLabel } from '@/hooks/useMissions';
 import { useTranslation } from '@/lib/i18n';
 import { getDateString, localeFor } from '@/lib/date';
 import { PageHint } from '@/components/PageHint';
 import { cn } from '@/lib/utils';
+import { AnimatedNumber } from '@/components/AnimatedNumber';
 import {
   Chip,
   Meter,
@@ -22,22 +27,17 @@ import type { PrayerHistory, HabitsHistory, PrayerCounts, PrayerStatus } from '@
 
 const PRAYER_KEYS: (keyof DailyPrayers)[] = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
 const DAYS_SHOWN = 5;
+const EMPTY_HISTORY: PrayerHistory = {};
+const EMPTY_HABITS: HabitsHistory = {};
 
-function readJSON<T>(key: string, fallback: T): T {
-  try {
-    const v = localStorage.getItem(key);
-    return v ? JSON.parse(v) : fallback;
-  } catch {
-    return fallback;
-  }
-}
+
 
 type PrayerCellState = 'done' | 'missed' | 'none';
 
-function prayerCellState(s: PrayerStatus | undefined, isPast: boolean): PrayerCellState {
+function prayerCellState(s: PrayerStatus | undefined): PrayerCellState {
   if (s === 'ontime' || s === 'jamaah' || s === 'late') return 'done';
   if (s === 'missed') return 'missed';
-  if (isPast) return 'missed';
+
   return 'none';
 }
 
@@ -62,7 +62,7 @@ function PrayerGrid({
       <span aria-hidden />
       {days.map((dk) => {
         const isToday = dk === todayKey;
-        const weekday = new Date(dk).toLocaleDateString(localeFor(lang), { weekday: 'short' });
+        const weekday = new Date(`${dk}T12:00:00`).toLocaleDateString(localeFor(lang), { weekday: 'short' });
         return (
           <span
             key={dk}
@@ -104,20 +104,18 @@ function PrayerGrid({
 
 export default function Home() {
   const { t, tHabit, lang } = useTranslation();
-  const { prayers } = usePrayerTracking();
+  usePrayerTracking();
+  const today = useLocalDay();
+  const [prayerHistory] = useStoredState('prayer-history', EMPTY_HISTORY);
+  const [habitsHistory] = useStoredState('habits-tracking', EMPTY_HABITS);
+  const { counts: qadhaCounts } = useQadhaPrayers();
   const { getActiveCount, getCompletedCount, pausedHabits, level } = useHabitsTracking();
   const { missions } = useMissions();
 
   const prayerLabels = PRAYER_KEYS.map((p) => t(`prayerNames.${p}` as never));
 
   const data = useMemo(() => {
-    const prayerHistory = readJSON<PrayerHistory>('prayer-history', {});
-    const habitsHistory = readJSON<HabitsHistory>('habits-tracking', {});
-    const qadhaCounts = readJSON<PrayerCounts>('qadha-prayer-counts', {
-      fajr: 0, dhuhr: 0, asr: 0, maghrib: 0, isha: 0,
-    });
-
-    const todayKey = getDateString(new Date());
+    const todayKey = today;
     // Oldest → newest, so today sits on the right edge where the eye ends up.
     const days: string[] = [];
     for (let i = DAYS_SHOWN - 1; i >= 0; i--) {
@@ -141,7 +139,7 @@ export default function Home() {
     const prayerGrid: Record<string, PrayerCellState[]> = {};
     days.forEach((dk) => {
       const day = prayerHistory[dk];
-      prayerGrid[dk] = PRAYER_KEYS.map((p) => prayerCellState(day?.prayers[p]?.status, dk < todayKey));
+      prayerGrid[dk] = PRAYER_KEYS.map((p) => prayerCellState(day?.prayers[p]?.status));
     });
 
     const allIds = habitCategories.flatMap((c) => c.habits.map((h) => h.id));
@@ -162,12 +160,12 @@ export default function Home() {
     const qadhaRemaining = Object.values(qadhaCounts).reduce((a, b) => a + (b || 0), 0);
 
     return { days, prayersDoneToday, pendingPrayersToday, prayerGrid, habitGrid, qadhaRemaining };
-  }, [prayers, pausedHabits, level]);
+  }, [prayerHistory, habitsHistory, qadhaCounts, pausedHabits, level, today]);
 
   const habitsDone = getCompletedCount();
   const habitsTotal = getActiveCount();
   const habitsRemaining = Math.max(0, habitsTotal - habitsDone);
-  const dayComplete = data.pendingPrayersToday.length === 0 && habitsRemaining === 0;
+  const dayComplete = data.prayersDoneToday === 5 && habitsRemaining === 0;
 
   return (
     <Page className="space-y-3">
@@ -182,7 +180,7 @@ export default function Home() {
             className="flex-1"
             size="lg"
             tone={data.qadhaRemaining === 0 ? 'muted' : 'primary'}
-            value={data.qadhaRemaining.toLocaleString(localeFor(lang))}
+            value={<AnimatedNumber value={data.qadhaRemaining} display={data.qadhaRemaining.toLocaleString(localeFor(lang))} />}
             label={t('qadha.totalRemaining')}
           />
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/[0.08] text-primary">
@@ -241,7 +239,7 @@ export default function Home() {
             {data.days.map((dk) => {
               const { done, total } = data.habitGrid[dk];
               const ratio = total > 0 ? done / total : 0;
-              const weekday = new Date(dk).toLocaleDateString(localeFor(lang), { weekday: 'short' });
+              const weekday = new Date(`${dk}T12:00:00`).toLocaleDateString(localeFor(lang), { weekday: 'short' });
               return (
                 <div key={dk} className="flex flex-col items-center gap-1">
                   <span className="text-[0.6875rem] leading-none text-muted-foreground/70">

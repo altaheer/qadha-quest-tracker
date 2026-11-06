@@ -5,9 +5,7 @@
  */
 
 export const getDateString = (date: Date): string => {
-  // Preserve previous behavior (ISO yyyy-mm-dd in UTC) for backward
-  // compatibility with already-stored localStorage history keys.
-  return date.toISOString().split('T')[0];
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 };
 
 export const getTodayString = (): string => getDateString(new Date());

@@ -1,5 +1,4 @@
 import { TrendingDown, Calendar } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
 import { useTranslation } from '@/lib/i18n';
 import { localeFor } from '@/lib/date';
 
@@ -47,13 +46,6 @@ export function QadhaBurndown({ totalQadha, projection }: QadhaBurndownProps) {
             </span>
           </div>
           
-          <div className="space-y-1">
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>{t('insightsLabels.progress')}</span>
-              <span>0 / {totalQadha}</span>
-            </div>
-            <Progress value={0} className="h-2" />
-          </div>
         </div>
       )}
       

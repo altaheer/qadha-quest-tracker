@@ -7,6 +7,8 @@ import {
   createBackup,
   restoreBackup,
 } from './backup';
+import { defaultDailyPrayers, createDefaultSunnah } from './prayerData';
+import { vi } from 'vitest';
 
 beforeEach(() => localStorage.clear());
 
@@ -47,7 +49,8 @@ describe('createBackup', () => {
 
 describe('restoreBackup', () => {
   it('round-trips a full export back into localStorage', () => {
-    localStorage.setItem('prayer-history', '{"2026-01-01":{"fajr":"ontime"}}');
+    const prayerHistory = JSON.stringify({ '2026-01-01': { prayers: defaultDailyPrayers, sunnah: createDefaultSunnah() } });
+    localStorage.setItem('prayer-history', prayerHistory);
     localStorage.setItem('qadha-prayer-counts', '{"fajr":40,"isha":12}');
     localStorage.setItem('habits-level', 'medium');
     const exported = JSON.stringify(createBackup());
@@ -56,7 +59,7 @@ describe('restoreBackup', () => {
     const result = restoreBackup(exported);
 
     expect(result.status).toBe('restored');
-    expect(localStorage.getItem('prayer-history')).toBe('{"2026-01-01":{"fajr":"ontime"}}');
+    expect(localStorage.getItem('prayer-history')).toBe(prayerHistory);
     expect(localStorage.getItem('qadha-prayer-counts')).toBe('{"fajr":40,"isha":12}');
     expect(localStorage.getItem('habits-level')).toBe('medium');
   });
@@ -89,7 +92,7 @@ describe('restoreBackup', () => {
     const result = restoreBackup(v1);
 
     expect(result).toMatchObject({ status: 'restored', exportedAt: '2026-07-01T10:00:00.000Z' });
-    expect(localStorage.getItem('prayer-history')).toBe('{"2026-06-30":{"fajr":"ontime"}}');
+    expect(JSON.parse(localStorage.getItem('prayer-history')!)['2026-06-30'].prayers.fajr.status).toBe('ontime');
     expect(localStorage.getItem('qadha-prayer-counts')).toBe('{"fajr":7}');
     // v1 stored these as bare strings; they must not gain JSON quotes.
     expect(localStorage.getItem('qadha-daily-goal')).toBe('5');
@@ -142,5 +145,37 @@ describe('backupFilename', () => {
     expect(backupFilename(new Date('2026-03-09T22:15:00Z'))).toBe(
       'qadha-tracker-backup-2026-03-09.json',
     );
+  });
+});
+
+
+describe('backup validation and rollback', () => {
+  it.each([
+    { app: 'another-app', version: 2, entries: { 'habits-level': 'easy' } },
+    { app: 'qadha-tracker', version: 99, entries: { 'habits-level': 'easy' } },
+    { app: 'qadha-tracker', version: 2, entries: { 'prayer-history': 'not-json' } },
+    { app: 'qadha-tracker', version: 2, entries: { 'prayer-history': '{"2026-11-06":{}}' } },
+    { app: 'qadha-tracker', version: 2, entries: { 'qadha-prayer-counts': '{"fajr":-1}' } },
+    { app: 'qadha-tracker', version: 2, entries: { 'qadha-daily-goal': 'NaN' } },
+    { app: 'qadha-tracker', version: 2, entries: { 'habits-tracking': '[]' } },
+  ])('rejects invalid content before replacing any data', backup => {
+    localStorage.setItem('qadha-prayer-counts', '{"fajr":40}');
+    expect(restoreBackup(JSON.stringify(backup)).status).toBe('invalid');
+    expect(localStorage.getItem('qadha-prayer-counts')).toBe('{"fajr":40}');
+  });
+  it('rolls back all keys if storage fails partway through restore', () => {
+    localStorage.setItem('qadha-prayer-counts', '{"fajr":40}');
+    localStorage.setItem('habits-level', 'medium');
+    const original = Storage.prototype.setItem;
+    let failed = false;
+    const spy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(function (key, value) {
+      if (key === 'habits-level' && !failed) { failed = true; throw new Error('quota'); }
+      original.call(this, key, value);
+    });
+    try {
+      expect(restoreBackup(JSON.stringify({ app: 'qadha-tracker', version: 2, entries: { 'habits-level': 'easy' } })).status).toBe('storage-error');
+      expect(localStorage.getItem('qadha-prayer-counts')).toBe('{"fajr":40}');
+      expect(localStorage.getItem('habits-level')).toBe('medium');
+    } finally { spy.mockRestore(); }
   });
 });
