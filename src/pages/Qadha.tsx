@@ -1,3 +1,4 @@
+import { QadhaVictory } from '@/components/QadhaVictory';
 import { useMemo } from 'react';
 import { Minus, Plus, Sparkles } from 'lucide-react';
 import { QadhaSetupDialog } from '@/components/QadhaSetupDialog';
@@ -76,6 +77,7 @@ export default function Qadha() {
       <PageHeader title={t('qadha.title')} subtitle={t('qadha.subtitle')} />
 
       <PageHint id="qadha" />
+      <QadhaVictory />
 
       {totalPrayers === 0 ? (
         <EmptyState icon={Sparkles} title={t('qadha.empty')} description={t('qadha.emptyDesc')} />

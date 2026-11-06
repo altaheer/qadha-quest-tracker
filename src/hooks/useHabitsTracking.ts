@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { notifyStorage } from '@/lib/localStore';
 import { getDateString } from '@/lib/date';
 import type {
   Habit,
@@ -188,6 +189,7 @@ export function useHabitsTracking(selectedDate?: Date) {
   // Persist history
   useEffect(() => {
     localStorage.setItem(HABITS_KEY, JSON.stringify(history));
+    notifyStorage();
   }, [history]);
 
   // Persist paused habits

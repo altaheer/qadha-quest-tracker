@@ -1,3 +1,4 @@
+import { ProgressReward } from '@/components/ProgressQuest';
 import { ReactNode } from 'react';
 import { Menu } from 'lucide-react';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
@@ -48,6 +49,7 @@ export function Layout({ children }: LayoutProps) {
           <main className="bottom-nav-offset flex-1 overflow-auto md:pb-0">{children}</main>
         </div>
 
+        <ProgressReward />
         <BottomNav />
         {!hideFab && <QuickActionsFAB />}
       </div>
